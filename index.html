@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RaylsLabs</title>
+  <title>RaylsLabs - Interactive Web3 Landing</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <link rel="icon" href="https://pbs.twimg.com/profile_images/1704682473271492466/7TrG4K-0_400x400.jpg">
   <style>
     /* Gradient text animation */
@@ -20,55 +21,141 @@
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-    /* Smooth scroll */
-    html {
-      scroll-behavior: smooth;
+
+    /* Particles background */
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      top: 0;
+      left: 0;
     }
+
+    /* Smooth scroll */
+    html { scroll-behavior: smooth; }
   </style>
 </head>
-<body class="bg-black text-white font-sans">
+<body class="bg-black text-white font-sans relative">
+
+  <!-- Particles.js -->
+  <canvas id="particles-js"></canvas>
+  <script>
+    // Simple particle animation
+    const canvas = document.getElementById('particles-js');
+    const ctx = canvas.getContext('2d');
+    let particlesArray;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', function(){
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      init();
+    });
+
+    class Particle {
+      constructor(){
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 3 + 1;
+        this.speedX = Math.random() * 1 - 0.5;
+        this.speedY = Math.random() * 1 - 0.5;
+      }
+      update(){
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if(this.x > canvas.width) this.x = 0;
+        if(this.x < 0) this.x = canvas.width;
+        if(this.y > canvas.height) this.y = 0;
+        if(this.y < 0) this.y = canvas.height;
+      }
+      draw(){
+        ctx.fillStyle = 'rgba(159,122,234,0.7)';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    function init(){
+      particlesArray = [];
+      for(let i=0; i<100; i++){
+        particlesArray.push(new Particle());
+      }
+    }
+
+    function animate(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      particlesArray.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+
+    init();
+    animate();
+  </script>
 
   <!-- Hero Section -->
-  <section class="min-h-screen flex flex-col justify-center items-center text-center px-4 bg-gradient-to-b from-black via-gray-900 to-purple-900 relative overflow-hidden">
+  <section class="min-h-screen flex flex-col justify-center items-center text-center px-4 relative z-10">
     <img src="https://pbs.twimg.com/profile_images/1704682473271492466/7TrG4K-0_400x400.jpg" alt="RaylsLabs Logo" class="w-32 h-32 rounded-full mb-6 shadow-lg animate-bounce">
     <h1 class="text-6xl font-bold mb-4 gradient-text">RaylsLabs</h1>
-    <p class="text-xl max-w-2xl mb-8">Empowering Web3 innovation with AI-powered tools, cross-chain solutions, and community-driven development.</p>
-    <a href="#about" class="px-8 py-3 bg-purple-600 hover:bg-purple-500 rounded-full text-lg font-semibold transition transform hover:scale-105">Learn More</a>
-    <!-- Floating gradient circles -->
-    <div class="absolute top-10 left-10 w-32 h-32 bg-purple-600 opacity-20 rounded-full animate-ping"></div>
-    <div class="absolute bottom-10 right-10 w-40 h-40 bg-pink-500 opacity-20 rounded-full animate-pulse"></div>
+    <p class="text-xl max-w-2xl mb-8">Empowering Web3 innovation with AI tools, cross-chain solutions, and community-driven development.</p>
+    <a href="#features" class="px-8 py-3 bg-purple-600 hover:bg-purple-500 rounded-full text-lg font-semibold transition transform hover:scale-105">Explore Features</a>
   </section>
 
   <!-- About Section -->
-  <section id="about" class="py-20 px-6 bg-gray-900 text-center">
+  <section id="about" class="py-20 px-6 bg-gray-900 text-center relative z-10">
     <h2 class="text-4xl font-bold mb-6 text-purple-400 gradient-text">About RaylsLabs</h2>
     <p class="max-w-3xl mx-auto text-lg leading-relaxed mb-6">
-      RaylsLabs is a pioneering Web3 platform creating innovative tools for blockchain developers and enthusiasts. Our mission is to simplify complex blockchain experiences and make decentralized tech accessible to everyone.
+      RaylsLabs is a Web3 innovation hub creating AI-powered blockchain tools and cross-chain integrations for developers and enthusiasts. Our goal is to make decentralized technology accessible for everyone.
     </p>
     <a href="#features" class="px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-full text-lg font-semibold transition transform hover:scale-105">Explore Features</a>
   </section>
 
   <!-- Features / Vision Section -->
-  <section id="features" class="py-20 px-6 bg-black text-center">
+  <section id="features" class="py-20 px-6 bg-black text-center relative z-10">
     <h2 class="text-4xl font-bold mb-12 text-purple-400 gradient-text">Our Vision & Features</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
       <div class="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 hover:shadow-2xl transition transform">
         <h3 class="text-2xl font-semibold mb-4 text-purple-300">AI-Powered Tools</h3>
-        <p>Cutting-edge AI tools for automated smart contract operations and blockchain analytics.</p>
+        <p>Automated smart contract operations, analytics, and blockchain intelligence.</p>
       </div>
       <div class="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 hover:shadow-2xl transition transform">
         <h3 class="text-2xl font-semibold mb-4 text-purple-300">Cross-Chain Integration</h3>
-        <p>Manage assets across multiple blockchains with seamless security and speed.</p>
+        <p>Seamless asset management across multiple blockchains securely.</p>
       </div>
       <div class="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 hover:shadow-2xl transition transform">
         <h3 class="text-2xl font-semibold mb-4 text-purple-300">Community First</h3>
-        <p>Transparency, collaboration, and innovation form the core of our growth with the community.</p>
+        <p>Transparency and collaboration with our community form our core.</p>
       </div>
     </div>
   </section>
 
+  <!-- Live $RLS Token Price Section -->
+  <section id="token" class="py-20 px-6 bg-gray-900 text-center relative z-10">
+    <h2 class="text-4xl font-bold mb-12 text-purple-400 gradient-text">Live $RLS Token Price</h2>
+    <p id="tokenPrice" class="text-3xl mb-6">Loading...</p>
+    <button onclick="getTokenPrice()" class="px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-full text-lg font-semibold transition transform hover:scale-105">Refresh Price</button>
+    <script>
+      async function getTokenPrice(){
+        try {
+          const res = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=rayls&vs_currencies=usd');
+          const price = res.data.rayls.usd;
+          document.getElementById('tokenPrice').innerText = `$${price}`;
+        } catch(e){
+          document.getElementById('tokenPrice').innerText = 'Failed to fetch price';
+        }
+      }
+      getTokenPrice();
+    </script>
+  </section>
+
   <!-- Recent Tweets Section -->
-  <section id="tweets" class="py-20 px-6 bg-gray-900 text-center">
+  <section id="tweets" class="py-20 px-6 bg-black text-center relative z-10">
     <h2 class="text-4xl font-bold mb-12 text-purple-400 gradient-text">Recent Tweets</h2>
     <div class="max-w-2xl mx-auto">
       <blockquote class="twitter-tweet">
@@ -79,7 +166,7 @@
   </section>
 
   <!-- Footer -->
-  <footer class="py-10 bg-black text-center text-gray-400">
+  <footer class="py-10 bg-gray-900 text-center text-gray-400 relative z-10">
     <p>&copy; 2025 RaylsLabs. All rights reserved.</p>
     <div class="mt-4 flex justify-center space-x-4">
       <a href="https://twitter.com/RaylsLabs" target="_blank" class="hover:text-purple-400 transition hover:animate-pulse">Twitter</a>
