@@ -1,178 +1,573 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RaylsLabs - Interactive Web3 Landing</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <link rel="icon" href="https://pbs.twimg.com/profile_images/1704682473271492466/7TrG4K-0_400x400.jpg">
-  <style>
-    /* Gradient text animation */
-    .gradient-text {
-      background: linear-gradient(270deg, #9f7aea, #d53f8c, #805ad5);
-      background-size: 600% 600%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: gradientAnim 8s ease infinite;
-    }
-    @keyframes gradientAnim {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    /* Particles background */
-    #particles-js {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      top: 0;
-      left: 0;
-    }
-
-    /* Smooth scroll */
-    html { scroll-behavior: smooth; }
-  </style>
-</head>
-<body class="bg-black text-white font-sans relative">
-
-  <!-- Particles.js -->
-  <canvas id="particles-js"></canvas>
-  <script>
-    // Simple particle animation
-    const canvas = document.getElementById('particles-js');
-    const ctx = canvas.getContext('2d');
-    let particlesArray;
-
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    window.addEventListener('resize', function(){
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      init();
-    });
-
-    class Particle {
-      constructor(){
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 3 + 1;
-        this.speedX = Math.random() * 1 - 0.5;
-        this.speedY = Math.random() * 1 - 0.5;
-      }
-      update(){
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if(this.x > canvas.width) this.x = 0;
-        if(this.x < 0) this.x = canvas.width;
-        if(this.y > canvas.height) this.y = 0;
-        if(this.y < 0) this.y = canvas.height;
-      }
-      draw(){
-        ctx.fillStyle = 'rgba(159,122,234,0.7)';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
-        ctx.fill();
-      }
-    }
-
-    function init(){
-      particlesArray = [];
-      for(let i=0; i<100; i++){
-        particlesArray.push(new Particle());
-      }
-    }
-
-    function animate(){
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      particlesArray.forEach(p => {
-        p.update();
-        p.draw();
-      });
-      requestAnimationFrame(animate);
-    }
-
-    init();
-    animate();
-  </script>
-
-  <!-- Hero Section -->
-  <section class="min-h-screen flex flex-col justify-center items-center text-center px-4 relative z-10">
-    <img src="https://pbs.twimg.com/profile_images/1704682473271492466/7TrG4K-0_400x400.jpg" alt="RaylsLabs Logo" class="w-32 h-32 rounded-full mb-6 shadow-lg animate-bounce">
-    <h1 class="text-6xl font-bold mb-4 gradient-text">RaylsLabs</h1>
-    <p class="text-xl max-w-2xl mb-8">Empowering Web3 innovation with AI tools, cross-chain solutions, and community-driven development.</p>
-    <a href="#features" class="px-8 py-3 bg-purple-600 hover:bg-purple-500 rounded-full text-lg font-semibold transition transform hover:scale-105">Explore Features</a>
-  </section>
-
-  <!-- About Section -->
-  <section id="about" class="py-20 px-6 bg-gray-900 text-center relative z-10">
-    <h2 class="text-4xl font-bold mb-6 text-purple-400 gradient-text">About RaylsLabs</h2>
-    <p class="max-w-3xl mx-auto text-lg leading-relaxed mb-6">
-      RaylsLabs is a Web3 innovation hub creating AI-powered blockchain tools and cross-chain integrations for developers and enthusiasts. Our goal is to make decentralized technology accessible for everyone.
-    </p>
-    <a href="#features" class="px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-full text-lg font-semibold transition transform hover:scale-105">Explore Features</a>
-  </section>
-
-  <!-- Features / Vision Section -->
-  <section id="features" class="py-20 px-6 bg-black text-center relative z-10">
-    <h2 class="text-4xl font-bold mb-12 text-purple-400 gradient-text">Our Vision & Features</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
-      <div class="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 hover:shadow-2xl transition transform">
-        <h3 class="text-2xl font-semibold mb-4 text-purple-300">AI-Powered Tools</h3>
-        <p>Automated smart contract operations, analytics, and blockchain intelligence.</p>
-      </div>
-      <div class="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 hover:shadow-2xl transition transform">
-        <h3 class="text-2xl font-semibold mb-4 text-purple-300">Cross-Chain Integration</h3>
-        <p>Seamless asset management across multiple blockchains securely.</p>
-      </div>
-      <div class="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 hover:shadow-2xl transition transform">
-        <h3 class="text-2xl font-semibold mb-4 text-purple-300">Community First</h3>
-        <p>Transparency and collaboration with our community form our core.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Live $RLS Token Price Section -->
-  <section id="token" class="py-20 px-6 bg-gray-900 text-center relative z-10">
-    <h2 class="text-4xl font-bold mb-12 text-purple-400 gradient-text">Live $RLS Token Price</h2>
-    <p id="tokenPrice" class="text-3xl mb-6">Loading...</p>
-    <button onclick="getTokenPrice()" class="px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-full text-lg font-semibold transition transform hover:scale-105">Refresh Price</button>
-    <script>
-      async function getTokenPrice(){
-        try {
-          const res = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=rayls&vs_currencies=usd');
-          const price = res.data.rayls.usd;
-          document.getElementById('tokenPrice').innerText = `$${price}`;
-        } catch(e){
-          document.getElementById('tokenPrice').innerText = 'Failed to fetch price';
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RaylsLabs Gaming - Web3 Game Studio</title>
+    <link rel="icon" href="https://pbs.twimg.com/media/G4Z0UjbWcAA3LR3.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #9f7aea;
+            --secondary: #d53f8c;
+            --accent: #805ad5;
+            --dark: #0f0f23;
+            --darker: #070711;
         }
-      }
-      getTokenPrice();
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--darker);
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, h4, .logo-text {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 5s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .hero-bg {
+            background: radial-gradient(circle at top right, rgba(159, 122, 234, 0.15), transparent 50%),
+                        radial-gradient(circle at bottom left, rgba(213, 63, 140, 0.1), transparent 50%),
+                        linear-gradient(to bottom, var(--darker), var(--dark));
+        }
+        
+        .game-card {
+            background: rgba(15, 15, 35, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(159, 122, 234, 0.2);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(159, 122, 234, 0.3);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(159, 122, 234, 0.4);
+        }
+        
+        .section-title {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        
+        .floating {
+            animation: floating 6s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .pulse-glow {
+            animation: pulseGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 10px rgba(159, 122, 234, 0.5); }
+            to { box-shadow: 0 0 20px rgba(159, 122, 234, 0.8); }
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(159, 122, 234, 0.3);
+            animation: floatParticle 15s infinite linear;
+        }
+        
+        @keyframes floatParticle {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+        }
+        
+        .nav-glass {
+            background: rgba(15, 15, 35, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(159, 122, 234, 0.1);
+        }
+        
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(159, 122, 234, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            border: 1px solid rgba(159, 122, 234, 0.3);
+        }
+        
+        .roadmap-item {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .roadmap-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+        
+        .roadmap-item::after {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 20px;
+            width: 1px;
+            height: calc(100% + 25px);
+            background: rgba(159, 122, 234, 0.3);
+        }
+        
+        .roadmap-item:last-child::after {
+            display: none;
+        }
+        
+        .stats-card {
+            background: rgba(15, 15, 35, 0.6);
+            border: 1px solid rgba(159, 122, 234, 0.2);
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body class="relative">
+    <!-- Animated Background Particles -->
+    <div id="particles-container"></div>
+    
+    <!-- Navigation -->
+    <nav class="nav-glass fixed w-full z-50 py-4 px-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <img src="https://pbs.twimg.com/media/G4Z0UjbWcAA3LR3.png" alt="RaylsLabs Logo" class="w-12 h-12 rounded-lg">
+                <span class="logo-text text-2xl font-bold gradient-text">RaylsLabs Gaming</span>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#home" class="hover:text-purple-400 transition-colors font-medium">Home</a>
+                <a href="#games" class="hover:text-purple-400 transition-colors font-medium">Games</a>
+                <a href="#features" class="hover:text-purple-400 transition-colors font-medium">Features</a>
+                <a href="#roadmap" class="hover:text-purple-400 transition-colors font-medium">Roadmap</a>
+                <a href="#community" class="hover:text-purple-400 transition-colors font-medium">Community</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="px-6 py-2 rounded-full bg-transparent border border-purple-500 hover:bg-purple-500 transition-colors">Login</button>
+                <button class="btn-primary px-6 py-2 rounded-full font-medium">Sign Up</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-bg min-h-screen flex items-center pt-20 px-6">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="text-center lg:text-left">
+                <h1 class="text-5xl md:text-7xl font-bold mb-6">The Future of <span class="gradient-text">Web3 Gaming</span> Is Here</h1>
+                <p class="text-xl mb-10 text-gray-300 max-w-2xl">RaylsLabs Gaming combines cutting-edge blockchain technology with immersive gameplay experiences. Play, earn, and own your in-game assets like never before.</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <button class="btn-primary px-8 py-4 rounded-full text-lg font-semibold">Explore Games</button>
+                    <button class="px-8 py-4 rounded-full text-lg font-semibold border border-purple-500 hover:bg-purple-500 transition-colors">Watch Trailer</button>
+                </div>
+            </div>
+            <div class="relative">
+                <div class="floating">
+                    <img src="https://pbs.twimg.com/media/G4Z0UjbWcAA3LR3.png" alt="RaylsLabs Gaming" class="w-full max-w-md mx-auto rounded-2xl pulse-glow">
+                </div>
+                <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-500 rounded-full filter blur-3xl opacity-20"></div>
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-pink-500 rounded-full filter blur-3xl opacity-20"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Games Section -->
+    <section id="games" class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4 section-title">Featured Games</h2>
+            <p class="text-xl text-center text-gray-400 mb-16 max-w-3xl mx-auto">Discover our collection of innovative Web3 games that redefine player ownership and rewards.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Game 1 -->
+                <div class="game-card rounded-2xl p-6">
+                    <div class="rounded-xl overflow-hidden mb-6 h-48 bg-gradient-to-br from-purple-900 to-pink-800 flex items-center justify-center">
+                        <span class="text-2xl font-bold">CRYPTO LEGENDS</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Crypto Legends</h3>
+                    <p class="text-gray-400 mb-6">Strategic card battler where each card is a unique NFT. Build your deck, battle opponents, and earn rewards.</p>
+                    <div class="flex justify-between items-center">
+                        <span class="px-3 py-1 bg-purple-900 rounded-full text-sm">NFT Battler</span>
+                        <button class="btn-primary px-4 py-2 rounded-full text-sm">Play Now</button>
+                    </div>
+                </div>
+                
+                <!-- Game 2 -->
+                <div class="game-card rounded-2xl p-6">
+                    <div class="rounded-xl overflow-hidden mb-6 h-48 bg-gradient-to-br from-blue-900 to-purple-800 flex items-center justify-center">
+                        <span class="text-2xl font-bold">METAVERSE RACERS</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Metaverse Racers</h3>
+                    <p class="text-gray-400 mb-6">High-speed racing game where you own your vehicles as NFTs. Upgrade, customize, and compete in tournaments.</p>
+                    <div class="flex justify-between items-center">
+                        <span class="px-3 py-1 bg-blue-900 rounded-full text-sm">Racing</span>
+                        <button class="btn-primary px-4 py-2 rounded-full text-sm">Play Now</button>
+                    </div>
+                </div>
+                
+                <!-- Game 3 -->
+                <div class="game-card rounded-2xl p-6">
+                    <div class="rounded-xl overflow-hidden mb-6 h-48 bg-gradient-to-br from-green-900 to-blue-800 flex items-center justify-center">
+                        <span class="text-2xl font-bold">BLOCKCHAIN REALMS</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Blockchain Realms</h3>
+                    <p class="text-gray-400 mb-6">Open-world RPG where land, items, and characters are player-owned NFTs. Explore, craft, and conquer.</p>
+                    <div class="flex justify-between items-center">
+                        <span class="px-3 py-1 bg-green-900 rounded-full text-sm">MMORPG</span>
+                        <button class="btn-primary px-4 py-2 rounded-full text-sm">Play Now</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <button class="px-8 py-3 rounded-full border border-purple-500 hover:bg-purple-500 transition-colors font-medium">View All Games</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-6 bg-dark">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4 section-title">Why Choose RaylsLabs Gaming?</h2>
+            <p class="text-xl text-center text-gray-400 mb-16 max-w-3xl mx-auto">We're revolutionizing gaming with blockchain technology and player-centric design.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">True Ownership</h3>
+                    <p class="text-gray-400">Your in-game assets are NFTs that you truly own. Trade, sell, or use them across multiple games in our ecosystem.</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Play & Earn</h3>
+                    <p class="text-gray-400">Earn cryptocurrency and valuable NFTs through gameplay. Your skills and time investment are directly rewarded.</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Vibrant Community</h3>
+                    <p class="text-gray-400">Join a passionate community of gamers, developers, and collectors. Participate in governance and shape our future.</p>
+                </div>
+            </div>
+            
+            <div class="mt-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="text-3xl font-bold mb-6">Powered by Cutting-Edge Technology</h3>
+                    <p class="text-gray-400 mb-6">Our games are built on a custom blockchain solution that ensures fast transactions, low fees, and seamless gameplay integration.</p>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400 mr-2 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Cross-chain compatibility for maximum flexibility</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400 mr-2 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Environmentally friendly proof-of-stake consensus</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400 mr-2 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Secure smart contracts audited by leading firms</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-gradient-to-br from-purple-900 to-pink-800 rounded-2xl p-8 h-80 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-5xl font-bold mb-2">100K+</div>
+                        <div class="text-xl">Active Players</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap Section -->
+    <section id="roadmap" class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4 section-title">Development Roadmap</h2>
+            <p class="text-xl text-center text-gray-400 mb-16 max-w-3xl mx-auto">Our journey to redefine Web3 gaming through innovation and community collaboration.</p>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="roadmap-item">
+                    <div class="bg-dark border border-purple-500 rounded-2xl p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-2xl font-bold">Q1 2024 - Foundation</h3>
+                            <span class="px-3 py-1 bg-purple-900 rounded-full text-sm">Completed</span>
+                        </div>
+                        <ul class="text-gray-400 space-y-2">
+                            <li>• Core blockchain infrastructure development</li>
+                            <li>• First game prototype: Crypto Legends</li>
+                            <li>• Community building and early testing</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="roadmap-item">
+                    <div class="bg-dark border border-purple-500 rounded-2xl p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-2xl font-bold">Q2 2024 - Expansion</h3>
+                            <span class="px-3 py-1 bg-purple-900 rounded-full text-sm">In Progress</span>
+                        </div>
+                        <ul class="text-gray-400 space-y-2">
+                            <li>• Launch of Metaverse Racers alpha</li>
+                            <li>• NFT marketplace integration</li>
+                            <li>• Mobile app development</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="roadmap-item">
+                    <div class="bg-dark border border-purple-500 rounded-2xl p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-2xl font-bold">Q3 2024 - Ecosystem Growth</h3>
+                            <span class="px-3 py-1 bg-purple-900 rounded-full text-sm">Upcoming</span>
+                        </div>
+                        <ul class="text-gray-400 space-y-2">
+                            <li>• Blockchain Realms beta release</li>
+                            <li>• Cross-chain interoperability</li>
+                            <li>• Governance token launch</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="roadmap-item">
+                    <div class="bg-dark border border-purple-500 rounded-2xl p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-2xl font-bold">Q4 2024 & Beyond - Metaverse</h3>
+                            <span class="px-3 py-1 bg-purple-900 rounded-full text-sm">Future</span>
+                        </div>
+                        <ul class="text-gray-400 space-y-2">
+                            <li>• Full metaverse integration</li>
+                            <li>• VR/AR compatibility</li>
+                            <li>• Developer SDK release</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Section -->
+    <section id="community" class="py-20 px-6 bg-dark">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4 section-title">Join Our Community</h2>
+            <p class="text-xl text-center text-gray-400 mb-16 max-w-3xl mx-auto">Connect with fellow gamers, get the latest updates, and help shape our gaming ecosystem.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
+                <div class="stats-card">
+                    <div class="text-4xl font-bold gradient-text mb-2">50K+</div>
+                    <div class="text-gray-400">Discord Members</div>
+                </div>
+                <div class="stats-card">
+                    <div class="text-4xl font-bold gradient-text mb-2">25K+</div>
+                    <div class="text-gray-400">Twitter Followers</div>
+                </div>
+                <div class="stats-card">
+                    <div class="text-4xl font-bold gradient-text mb-2">10K+</div>
+                    <div class="text-gray-400">Monthly Players</div>
+                </div>
+                <div class="stats-card">
+                    <div class="text-4xl font-bold gradient-text mb-2">5</div>
+                    <div class="text-gray-400">Games in Development</div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <h3 class="text-2xl font-bold mb-6">Stay Updated</h3>
+                <div class="max-w-md mx-auto flex">
+                    <input type="email" placeholder="Enter your email" class="flex-grow px-4 py-3 rounded-l-full bg-gray-800 border border-r-0 border-gray-700 focus:outline-none focus:border-purple-500">
+                    <button class="btn-primary px-6 py-3 rounded-r-full font-medium">Subscribe</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-6 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-6">
+                        <img src="https://pbs.twimg.com/media/G4Z0UjbWcAA3LR3.png" alt="RaylsLabs Logo" class="w-10 h-10 rounded-lg">
+                        <span class="logo-text text-xl font-bold gradient-text">RaylsLabs Gaming</span>
+                    </div>
+                    <p class="text-gray-400 mb-6">Building the future of Web3 gaming with innovative technology and player-centric design.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-purple-400 transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-purple-400 transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-purple-400 transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-6">Games</h4>
+                    <ul class="space-y-3 text-gray-400">
+                        <li><a href="#" class="hover:text-purple-400 transition-colors">Crypto Legends</a></li>
+                        <li><a href="#" class="hover:text-purple-400 transition-colors">Metaverse Racers</a></li>
+                        <li><a href="#" class="hover:text-purple-400 transition-colors">Blockchain Realms</a></li>
+                        <li><a href="#" class="hover:text-purple-400 transition-colors">Upcoming Games</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-6">Resources</h4>
+                    <ul class="space-y-3 text-gray-400">
+                        <li><a href="#" class="hover:text-purple-400 transition-colors">Documentation</a></li>
+                        <li><a href="#" class="hover:text-purple-400 transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-purple-400 transition-colors">FAQ</a></li>
+                        <li><a href="#" class="hover:text-purple-400 transition-colors">Support</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-6">Company</h4>
+                    <ul class="space-y-3 text-gray-400">
+                        <li><a href="#" class="hover:text-purple-400 transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-purple-400 transition-colors">Careers</a></li>
+                        <li><a href="#" class="hover:text-purple-400 transition-colors">Partners</a></li>
+                        <li><a href="#" class="hover:text-purple-400 transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-gray-800 text-center text-gray-500">
+                <p>&copy; 2024 RaylsLabs Gaming. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Create animated background particles
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random size
+                const size = Math.random() * 5 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Random position
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.top = `${Math.random() * 100}vh`;
+                
+                // Random animation delay
+                particle.style.animationDelay = `${Math.random() * 15}s`;
+                
+                container.appendChild(particle);
+            }
+        }
+        
+        // Initialize particles when page loads
+        document.addEventListener('DOMContentLoaded', createParticles);
+        
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
     </script>
-  </section>
-
-  <!-- Recent Tweets Section -->
-  <section id="tweets" class="py-20 px-6 bg-black text-center relative z-10">
-    <h2 class="text-4xl font-bold mb-12 text-purple-400 gradient-text">Recent Tweets</h2>
-    <div class="max-w-2xl mx-auto">
-      <blockquote class="twitter-tweet">
-        <a href="https://twitter.com/RaylsLabs"></a>
-      </blockquote>
-      <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="py-10 bg-gray-900 text-center text-gray-400 relative z-10">
-    <p>&copy; 2025 RaylsLabs. All rights reserved.</p>
-    <div class="mt-4 flex justify-center space-x-4">
-      <a href="https://twitter.com/RaylsLabs" target="_blank" class="hover:text-purple-400 transition hover:animate-pulse">Twitter</a>
-      <a href="#" class="hover:text-purple-400 transition hover:animate-pulse">GitHub</a>
-      <a href="#" class="hover:text-purple-400 transition hover:animate-pulse">Contact</a>
-    </div>
-  </footer>
 </body>
 </html>
