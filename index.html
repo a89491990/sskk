@@ -1,170 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RaylsLabs | Bridging TradFi & DeFi</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RaylsLabs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="https://pbs.twimg.com/profile_images/1704682473271492466/7TrG4K-0_400x400.jpg">
   <style>
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: radial-gradient(circle at center, #0a0a12, #000);
-      color: white;
-      overflow-x: hidden;
+    /* Gradient text animation */
+    .gradient-text {
+      background: linear-gradient(270deg, #9f7aea, #d53f8c, #805ad5);
+      background-size: 600% 600%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientAnim 8s ease infinite;
     }
-
-    header {
-      text-align: center;
-      padding: 80px 20px 40px;
+    @keyframes gradientAnim {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
-
-    header img {
-      width: 280px;
-      max-width: 90%;
-      animation: float 3s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      margin-top: 20px;
-      letter-spacing: 1px;
-      color: #f2f2f2;
-      text-shadow: 0 0 15px rgba(200, 150, 255, 0.6);
-    }
-
-    section {
-      max-width: 1000px;
-      margin: 40px auto;
-      padding: 20px;
-      text-align: center;
-      line-height: 1.6;
-    }
-
-    .highlight {
-      color: #b388ff;
-      font-weight: 600;
-    }
-
-    .vision {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
-      padding: 40px 20px;
-      box-shadow: 0 0 25px rgba(190, 90, 255, 0.2);
-    }
-
-    .cta {
-      margin: 60px auto;
-      text-align: center;
-    }
-
-    .cta a {
-      background: linear-gradient(90deg, #9b6bff, #5a33ff);
-      color: white;
-      text-decoration: none;
-      padding: 15px 30px;
-      border-radius: 30px;
-      font-weight: bold;
-      transition: 0.3s;
-      box-shadow: 0 0 20px rgba(150, 80, 255, 0.5);
-    }
-
-    .cta a:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 25px rgba(200, 120, 255, 0.7);
-    }
-
-    .tweets {
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 20px;
-      padding: 40px 20px;
-      margin-top: 40px;
-      box-shadow: 0 0 25px rgba(180, 100, 255, 0.15);
-    }
-
-    .tweets h2 {
-      color: #c9a8ff;
-      margin-bottom: 25px;
-      text-shadow: 0 0 10px rgba(180, 100, 255, 0.5);
-    }
-
-    footer {
-      text-align: center;
-      padding: 30px;
-      color: #aaa;
-      font-size: 0.9rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    @media (max-width: 768px) {
-      h1 { font-size: 2rem; }
-      section { padding: 10px; }
+    /* Smooth scroll */
+    html {
+      scroll-behavior: smooth;
     }
   </style>
 </head>
-<body>
+<body class="bg-black text-white font-sans">
 
-  <header>
-    <img src="b0074477-bd07-42ee-9d95-b915f9b66ee5.png" alt="RaylsLabs Logo">
-    <h1>RaylsLabs: Bridging <span class="highlight">TradFi</span> & <span class="highlight">DeFi</span></h1>
-  </header>
+  <!-- Hero Section -->
+  <section class="min-h-screen flex flex-col justify-center items-center text-center px-4 bg-gradient-to-b from-black via-gray-900 to-purple-900 relative overflow-hidden">
+    <img src="https://pbs.twimg.com/profile_images/1704682473271492466/7TrG4K-0_400x400.jpg" alt="RaylsLabs Logo" class="w-32 h-32 rounded-full mb-6 shadow-lg animate-bounce">
+    <h1 class="text-6xl font-bold mb-4 gradient-text">RaylsLabs</h1>
+    <p class="text-xl max-w-2xl mb-8">Empowering Web3 innovation with AI-powered tools, cross-chain solutions, and community-driven development.</p>
+    <a href="#about" class="px-8 py-3 bg-purple-600 hover:bg-purple-500 rounded-full text-lg font-semibold transition transform hover:scale-105">Learn More</a>
+    <!-- Floating gradient circles -->
+    <div class="absolute top-10 left-10 w-32 h-32 bg-purple-600 opacity-20 rounded-full animate-ping"></div>
+    <div class="absolute bottom-10 right-10 w-40 h-40 bg-pink-500 opacity-20 rounded-full animate-pulse"></div>
+  </section>
 
-  <section>
-    <h2>About RaylsLabs</h2>
-    <p>
-      RaylsLabs is building the future of finance by seamlessly connecting <span class="highlight">traditional financial systems</span> 
-      with the power and transparency of <span class="highlight">decentralized finance (DeFi)</span>.  
-      Our mission is to unlock the next wave of global liquidity through secure, compliant, and interoperable infrastructure.
+  <!-- About Section -->
+  <section id="about" class="py-20 px-6 bg-gray-900 text-center">
+    <h2 class="text-4xl font-bold mb-6 text-purple-400 gradient-text">About RaylsLabs</h2>
+    <p class="max-w-3xl mx-auto text-lg leading-relaxed mb-6">
+      RaylsLabs is a pioneering Web3 platform creating innovative tools for blockchain developers and enthusiasts. Our mission is to simplify complex blockchain experiences and make decentralized tech accessible to everyone.
     </p>
+    <a href="#features" class="px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-full text-lg font-semibold transition transform hover:scale-105">Explore Features</a>
   </section>
 
-  <section class="vision">
-    <h2>Our Vision</h2>
-    <p>
-      We envision a world where <b>TradFi</b> institutions and <b>DeFi</b> ecosystems coexist — 
-      enabling users to move assets, data, and trust freely across systems.  
-      With RaylsLabs, the barriers between centralized and decentralized finance vanish, creating a truly unified financial layer for the world.
-    </p>
+  <!-- Features / Vision Section -->
+  <section id="features" class="py-20 px-6 bg-black text-center">
+    <h2 class="text-4xl font-bold mb-12 text-purple-400 gradient-text">Our Vision & Features</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+      <div class="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 hover:shadow-2xl transition transform">
+        <h3 class="text-2xl font-semibold mb-4 text-purple-300">AI-Powered Tools</h3>
+        <p>Cutting-edge AI tools for automated smart contract operations and blockchain analytics.</p>
+      </div>
+      <div class="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 hover:shadow-2xl transition transform">
+        <h3 class="text-2xl font-semibold mb-4 text-purple-300">Cross-Chain Integration</h3>
+        <p>Manage assets across multiple blockchains with seamless security and speed.</p>
+      </div>
+      <div class="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 hover:shadow-2xl transition transform">
+        <h3 class="text-2xl font-semibold mb-4 text-purple-300">Community First</h3>
+        <p>Transparency, collaboration, and innovation form the core of our growth with the community.</p>
+      </div>
+    </div>
   </section>
 
-  <div class="cta">
-    <a href="#">Join the Movement 🚀</a>
-  </div>
-
-  <section class="tweets">
-    <h2>Latest from Twitter 🐦</h2>
-
-    <!-- Embedded Tweets -->
-    <blockquote class="twitter-tweet">
-      <p lang="zxx" dir="ltr"><a href="https://t.co/qNWypWIoN4">pic.twitter.com/qNWypWIoN4</a></p>
-      &mdash; Rayls (@RaylsLabs) <a href="https://twitter.com/RaylsLabs/status/1983579125341401226?ref_src=twsrc%5Etfw">October 29, 2025</a>
-    </blockquote>
-
-    <blockquote class="twitter-tweet">
-      <p lang="zxx" dir="ltr"><a href="https://t.co/083Q0F7Xb2">https://t.co/083Q0F7Xb2</a></p>
-      &mdash; Rayls (@RaylsLabs) <a href="https://twitter.com/RaylsLabs/status/1983199776507343357?ref_src=twsrc%5Etfw">October 28, 2025</a>
-    </blockquote>
-
-    <blockquote class="twitter-tweet">
-      <p lang="en" dir="ltr">
-        Rayls is now LIVE on <a href="https://twitter.com/CoinMarketCap?ref_src=twsrc%5Etfw">@CoinMarketCap</a>. <br><br>
-        The world’s financial system is shifting: trillions are moving onchain, and banks, assets, and money itself are finding a new home.<br><br>
-        Join our CMC community, track <a href="https://twitter.com/search?q=%24RLS&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$RLS</a>, and follow every milestone.<br><br>
-        Enter now: <a href="https://t.co/h7n5zDBp5X">https://t.co/h7n5zDBp5X</a> <a href="https://t.co/BY7d2OZ9E1">pic.twitter.com/BY7d2OZ9E1</a>
-      </p>
-      &mdash; Rayls (@RaylsLabs) <a href="https://twitter.com/RaylsLabs/status/1982859303066521673?ref_src=twsrc%5Etfw">October 27, 2025</a>
-    </blockquote>
-
-    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+  <!-- Recent Tweets Section -->
+  <section id="tweets" class="py-20 px-6 bg-gray-900 text-center">
+    <h2 class="text-4xl font-bold mb-12 text-purple-400 gradient-text">Recent Tweets</h2>
+    <div class="max-w-2xl mx-auto">
+      <blockquote class="twitter-tweet">
+        <a href="https://twitter.com/RaylsLabs"></a>
+      </blockquote>
+      <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
   </section>
 
-  <footer>
-    © 2025 RaylsLabs | Built with sadi
+  <!-- Footer -->
+  <footer class="py-10 bg-black text-center text-gray-400">
+    <p>&copy; 2025 RaylsLabs. All rights reserved.</p>
+    <div class="mt-4 flex justify-center space-x-4">
+      <a href="https://twitter.com/RaylsLabs" target="_blank" class="hover:text-purple-400 transition hover:animate-pulse">Twitter</a>
+      <a href="#" class="hover:text-purple-400 transition hover:animate-pulse">GitHub</a>
+      <a href="#" class="hover:text-purple-400 transition hover:animate-pulse">Contact</a>
+    </div>
   </footer>
-
 </body>
 </html>
