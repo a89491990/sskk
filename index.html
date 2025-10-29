@@ -181,6 +181,106 @@
             transform: translateY(-5px);
             border-color: var(--primary);
         }
+        
+        /* Game Canvas Styles */
+        .game-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 20px rgba(159, 122, 234, 0.5);
+        }
+        
+        .game-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+        }
+        
+        .game-score {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--primary);
+        }
+        
+        .game-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .game-btn {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--primary);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .game-btn:hover {
+            background: var(--primary);
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid var(--primary);
+            z-index: 20;
+            display: none;
+        }
+        
+        .game-start {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid var(--primary);
+            z-index: 20;
+        }
+        
+        .mini-game {
+            height: 200px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .mini-game-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+        }
     </style>
 </head>
 <body class="relative">
@@ -197,9 +297,9 @@
             <div class="hidden md:flex space-x-8">
                 <a href="#home" class="hover:text-purple-400 transition-colors font-medium">Home</a>
                 <a href="#games" class="hover:text-purple-400 transition-colors font-medium">Games</a>
+                <a href="#live-games" class="hover:text-purple-400 transition-colors font-medium">Play Now</a>
                 <a href="#features" class="hover:text-purple-400 transition-colors font-medium">Features</a>
                 <a href="#roadmap" class="hover:text-purple-400 transition-colors font-medium">Roadmap</a>
-                <a href="#community" class="hover:text-purple-400 transition-colors font-medium">Community</a>
             </div>
             <div class="flex items-center space-x-4">
                 <button class="px-6 py-2 rounded-full bg-transparent border border-purple-500 hover:bg-purple-500 transition-colors">Login</button>
@@ -215,7 +315,7 @@
                 <h1 class="text-5xl md:text-7xl font-bold mb-6">The Future of <span class="gradient-text">Web3 Gaming</span> Is Here</h1>
                 <p class="text-xl mb-10 text-gray-300 max-w-2xl">RaylsLabs Gaming combines cutting-edge blockchain technology with immersive gameplay experiences. Play, earn, and own your in-game assets like never before.</p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                    <button class="btn-primary px-8 py-4 rounded-full text-lg font-semibold">Explore Games</button>
+                    <a href="#live-games" class="btn-primary px-8 py-4 rounded-full text-lg font-semibold text-center">Play Games Now</a>
                     <button class="px-8 py-4 rounded-full text-lg font-semibold border border-purple-500 hover:bg-purple-500 transition-colors">Watch Trailer</button>
                 </div>
             </div>
@@ -225,6 +325,78 @@
                 </div>
                 <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-500 rounded-full filter blur-3xl opacity-20"></div>
                 <div class="absolute -top-10 -right-10 w-40 h-40 bg-pink-500 rounded-full filter blur-3xl opacity-20"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Games Section -->
+    <section id="live-games" class="py-20 px-6 bg-dark">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4 section-title">Play Live Games</h2>
+            <p class="text-xl text-center text-gray-400 mb-16 max-w-3xl mx-auto">Experience our Web3 games right in your browser. No downloads required!</p>
+            
+            <!-- Main Game: Crypto Runner -->
+            <div class="mb-16">
+                <h3 class="text-3xl font-bold text-center mb-8 gradient-text">Crypto Runner</h3>
+                <div class="game-container">
+                    <canvas id="gameCanvas" width="800" height="400"></canvas>
+                    <div class="game-ui">
+                        <div class="game-score">Score: <span id="score">0</span></div>
+                        <div class="game-controls">
+                            <button id="pauseBtn" class="game-btn">Pause</button>
+                            <button id="restartBtn" class="game-btn">Restart</button>
+                        </div>
+                    </div>
+                    <div id="gameOver" class="game-over">
+                        <h3 class="text-2xl font-bold mb-4">Game Over!</h3>
+                        <p class="text-xl mb-2">Your Score: <span id="finalScore">0</span></p>
+                        <p class="text-lg mb-6">Collect $RLS tokens for extra points!</p>
+                        <button id="playAgainBtn" class="btn-primary px-6 py-3 rounded-full">Play Again</button>
+                    </div>
+                    <div id="gameStart" class="game-start">
+                        <h3 class="text-2xl font-bold mb-4">Crypto Runner</h3>
+                        <p class="text-lg mb-2">Use SPACE to jump and avoid obstacles</p>
+                        <p class="text-lg mb-6">Collect $RLS tokens for bonus points!</p>
+                        <button id="startBtn" class="btn-primary px-6 py-3 rounded-full">Start Game</button>
+                    </div>
+                </div>
+                <div class="mt-6 text-center text-gray-400">
+                    <p>Use <kbd class="px-2 py-1 bg-gray-800 rounded">SPACE</kbd> to jump and avoid obstacles. Collect $RLS tokens for extra points!</p>
+                </div>
+            </div>
+            
+            <!-- Mini Games Grid -->
+            <h3 class="text-3xl font-bold text-center mb-8 gradient-text">More Games</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="mini-game" onclick="openMiniGame('tokenTap')">
+                    <div class="w-full h-full flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="text-4xl mb-2">🪙</div>
+                            <div class="text-xl font-bold">Token Tap</div>
+                        </div>
+                    </div>
+                    <div class="mini-game-title">Click to Play</div>
+                </div>
+                
+                <div class="mini-game" onclick="openMiniGame('blockPuzzle')">
+                    <div class="w-full h-full flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="text-4xl mb-2">🧩</div>
+                            <div class="text-xl font-bold">Block Puzzle</div>
+                        </div>
+                    </div>
+                    <div class="mini-game-title">Click to Play</div>
+                </div>
+                
+                <div class="mini-game" onclick="openMiniGame('cryptoMatch')">
+                    <div class="w-full h-full flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="text-4xl mb-2">🔄</div>
+                            <div class="text-xl font-bold">Crypto Match</div>
+                        </div>
+                    </div>
+                    <div class="mini-game-title">Click to Play</div>
+                </div>
             </div>
         </div>
     </section>
@@ -271,13 +443,9 @@
                     <p class="text-gray-400 mb-6">Open-world RPG where land, items, and characters are player-owned NFTs. Explore, craft, and conquer.</p>
                     <div class="flex justify-between items-center">
                         <span class="px-3 py-1 bg-green-900 rounded-full text-sm">MMORPG</span>
-                        <button class="btn-primary px-4 py-2 rounded-full text-sm">Play Now</button>
+                        <button class="btn-primary px-4py-2 rounded-full text-sm">Play Now</button>
                     </div>
                 </div>
-            </div>
-            
-            <div class="text-center mt-12">
-                <button class="px-8 py-3 rounded-full border border-purple-500 hover:bg-purple-500 transition-colors font-medium">View All Games</button>
             </div>
         </div>
     </section>
@@ -319,140 +487,6 @@
                     <p class="text-gray-400">Join a passionate community of gamers, developers, and collectors. Participate in governance and shape our future.</p>
                 </div>
             </div>
-            
-            <div class="mt-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h3 class="text-3xl font-bold mb-6">Powered by Cutting-Edge Technology</h3>
-                    <p class="text-gray-400 mb-6">Our games are built on a custom blockchain solution that ensures fast transactions, low fees, and seamless gameplay integration.</p>
-                    <ul class="space-y-4">
-                        <li class="flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400 mr-2 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span>Cross-chain compatibility for maximum flexibility</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400 mr-2 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span>Environmentally friendly proof-of-stake consensus</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400 mr-2 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span>Secure smart contracts audited by leading firms</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="bg-gradient-to-br from-purple-900 to-pink-800 rounded-2xl p-8 h-80 flex items-center justify-center">
-                    <div class="text-center">
-                        <div class="text-5xl font-bold mb-2">100K+</div>
-                        <div class="text-xl">Active Players</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Roadmap Section -->
-    <section id="roadmap" class="py-20 px-6">
-        <div class="max-w-7xl mx-auto">
-            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4 section-title">Development Roadmap</h2>
-            <p class="text-xl text-center text-gray-400 mb-16 max-w-3xl mx-auto">Our journey to redefine Web3 gaming through innovation and community collaboration.</p>
-            
-            <div class="max-w-4xl mx-auto">
-                <div class="roadmap-item">
-                    <div class="bg-dark border border-purple-500 rounded-2xl p-6">
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-2xl font-bold">Q1 2024 - Foundation</h3>
-                            <span class="px-3 py-1 bg-purple-900 rounded-full text-sm">Completed</span>
-                        </div>
-                        <ul class="text-gray-400 space-y-2">
-                            <li>• Core blockchain infrastructure development</li>
-                            <li>• First game prototype: Crypto Legends</li>
-                            <li>• Community building and early testing</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="roadmap-item">
-                    <div class="bg-dark border border-purple-500 rounded-2xl p-6">
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-2xl font-bold">Q2 2024 - Expansion</h3>
-                            <span class="px-3 py-1 bg-purple-900 rounded-full text-sm">In Progress</span>
-                        </div>
-                        <ul class="text-gray-400 space-y-2">
-                            <li>• Launch of Metaverse Racers alpha</li>
-                            <li>• NFT marketplace integration</li>
-                            <li>• Mobile app development</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="roadmap-item">
-                    <div class="bg-dark border border-purple-500 rounded-2xl p-6">
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-2xl font-bold">Q3 2024 - Ecosystem Growth</h3>
-                            <span class="px-3 py-1 bg-purple-900 rounded-full text-sm">Upcoming</span>
-                        </div>
-                        <ul class="text-gray-400 space-y-2">
-                            <li>• Blockchain Realms beta release</li>
-                            <li>• Cross-chain interoperability</li>
-                            <li>• Governance token launch</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="roadmap-item">
-                    <div class="bg-dark border border-purple-500 rounded-2xl p-6">
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-2xl font-bold">Q4 2024 & Beyond - Metaverse</h3>
-                            <span class="px-3 py-1 bg-purple-900 rounded-full text-sm">Future</span>
-                        </div>
-                        <ul class="text-gray-400 space-y-2">
-                            <li>• Full metaverse integration</li>
-                            <li>• VR/AR compatibility</li>
-                            <li>• Developer SDK release</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Community Section -->
-    <section id="community" class="py-20 px-6 bg-dark">
-        <div class="max-w-7xl mx-auto">
-            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4 section-title">Join Our Community</h2>
-            <p class="text-xl text-center text-gray-400 mb-16 max-w-3xl mx-auto">Connect with fellow gamers, get the latest updates, and help shape our gaming ecosystem.</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
-                <div class="stats-card">
-                    <div class="text-4xl font-bold gradient-text mb-2">50K+</div>
-                    <div class="text-gray-400">Discord Members</div>
-                </div>
-                <div class="stats-card">
-                    <div class="text-4xl font-bold gradient-text mb-2">25K+</div>
-                    <div class="text-gray-400">Twitter Followers</div>
-                </div>
-                <div class="stats-card">
-                    <div class="text-4xl font-bold gradient-text mb-2">10K+</div>
-                    <div class="text-gray-400">Monthly Players</div>
-                </div>
-                <div class="stats-card">
-                    <div class="text-4xl font-bold gradient-text mb-2">5</div>
-                    <div class="text-gray-400">Games in Development</div>
-                </div>
-            </div>
-            
-            <div class="text-center">
-                <h3 class="text-2xl font-bold mb-6">Stay Updated</h3>
-                <div class="max-w-md mx-auto flex">
-                    <input type="email" placeholder="Enter your email" class="flex-grow px-4 py-3 rounded-l-full bg-gray-800 border border-r-0 border-gray-700 focus:outline-none focus:border-purple-500">
-                    <button class="btn-primary px-6 py-3 rounded-r-full font-medium">Subscribe</button>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -477,21 +511,16 @@
                                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                             </svg>
                         </a>
-                        <a href="#" class="text-gray-400 hover:text-purple-400 transition-colors">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
-                            </svg>
-                        </a>
                     </div>
                 </div>
                 
                 <div>
                     <h4 class="text-lg font-bold mb-6">Games</h4>
                     <ul class="space-y-3 text-gray-400">
+                        <li><a href="#live-games" class="hover:text-purple-400 transition-colors">Live Games</a></li>
                         <li><a href="#" class="hover:text-purple-400 transition-colors">Crypto Legends</a></li>
                         <li><a href="#" class="hover:text-purple-400 transition-colors">Metaverse Racers</a></li>
                         <li><a href="#" class="hover:text-purple-400 transition-colors">Blockchain Realms</a></li>
-                        <li><a href="#" class="hover:text-purple-400 transition-colors">Upcoming Games</a></li>
                     </ul>
                 </div>
                 
@@ -522,6 +551,7 @@
         </div>
     </footer>
 
+    <!-- Game Script -->
     <script>
         // Create animated background particles
         function createParticles() {
@@ -568,6 +598,262 @@
                 }
             });
         });
+
+        // Crypto Runner Game
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const finalScoreElement = document.getElementById('finalScore');
+        const gameOverElement = document.getElementById('gameOver');
+        const gameStartElement = document.getElementById('gameStart');
+        const startBtn = document.getElementById('startBtn');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const restartBtn = document.getElementById('restartBtn');
+
+        // Game variables
+        let score = 0;
+        let gameSpeed = 5;
+        let isGameOver = false;
+        let isPaused = false;
+        let animationId;
+
+        // Player
+        const player = {
+            x: 50,
+            y: canvas.height - 50,
+            width: 40,
+            height: 40,
+            dy: 0,
+            jumpPower: 12,
+            grounded: true,
+            color: '#9f7aea'
+        };
+
+        // Obstacles
+        let obstacles = [];
+        let tokens = [];
+
+        // Game functions
+        function drawPlayer() {
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // Draw player details
+            ctx.fillStyle = '#6B46C1';
+            ctx.fillRect(player.x + 5, player.y + 5, player.width - 10, player.height - 10);
+        }
+
+        function createObstacle() {
+            const width = 20;
+            const height = 30 + Math.random() * 30;
+            obstacles.push({
+                x: canvas.width,
+                y: canvas.height - height,
+                width: width,
+                height: height,
+                color: '#D53F8C'
+            });
+        }
+
+        function createToken() {
+            if (Math.random() < 0.02) { // 2% chance each frame
+                tokens.push({
+                    x: canvas.width,
+                    y: canvas.height - 100 - Math.random() * 100,
+                    width: 20,
+                    height: 20,
+                    color: '#F6E05E'
+                });
+            }
+        }
+
+        function drawObstacles() {
+            obstacles.forEach(obstacle => {
+                ctx.fillStyle = obstacle.color;
+                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            });
+        }
+
+        function drawTokens() {
+            tokens.forEach(token => {
+                ctx.fillStyle = token.color;
+                ctx.beginPath();
+                ctx.arc(token.x + token.width/2, token.y + token.height/2, token.width/2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw $ symbol
+                ctx.fillStyle = '#000';
+                ctx.font = '12px Arial';
+                ctx.fillText('$', token.x + 6, token.y + 13);
+            });
+        }
+
+        function updateObstacles() {
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].x -= gameSpeed;
+                
+                // Remove obstacles that are off screen
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
+                    score++;
+                    scoreElement.textContent = score;
+                }
+                
+                // Check collision
+                if (detectCollision(player, obstacles[i])) {
+                    gameOver();
+                }
+            }
+        }
+
+        function updateTokens() {
+            for (let i = tokens.length - 1; i >= 0; i--) {
+                tokens[i].x -= gameSpeed;
+                
+                // Remove tokens that are off screen
+                if (tokens[i].x + tokens[i].width < 0) {
+                    tokens.splice(i, 1);
+                }
+                
+                // Check collection
+                if (detectCollision(player, tokens[i])) {
+                    tokens.splice(i, 1);
+                    score += 5;
+                    scoreElement.textContent = score;
+                }
+            }
+        }
+
+        function detectCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+
+        function updatePlayer() {
+            // Apply gravity
+            if (!player.grounded) {
+                player.dy += 0.8;
+            }
+            
+            // Update position
+            player.y += player.dy;
+            
+            // Ground collision
+            if (player.y >= canvas.height - player.height) {
+                player.y = canvas.height - player.height;
+                player.dy = 0;
+                player.grounded = true;
+            }
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            finalScoreElement.textContent = score;
+            gameOverElement.style.display = 'block';
+            cancelAnimationFrame(animationId);
+        }
+
+        function resetGame() {
+            score = 0;
+            gameSpeed = 5;
+            isGameOver = false;
+            isPaused = false;
+            obstacles = [];
+            tokens = [];
+            player.y = canvas.height - 50;
+            player.dy = 0;
+            player.grounded = true;
+            scoreElement.textContent = score;
+            gameOverElement.style.display = 'none';
+            gameStartElement.style.display = 'none';
+            pauseBtn.textContent = 'Pause';
+        }
+
+        function gameLoop() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background
+            ctx.fillStyle = '#0f0f23';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw ground
+            ctx.fillStyle = '#2D3748';
+            ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
+            
+            // Update and draw game elements
+            updatePlayer();
+            drawPlayer();
+            
+            // Create new obstacles and tokens
+            if (Math.random() < 0.02) {
+                createObstacle();
+            }
+            createToken();
+            
+            updateObstacles();
+            drawObstacles();
+            
+            updateTokens();
+            drawTokens();
+            
+            // Increase game speed over time
+            if (score > 0 && score % 10 === 0) {
+                gameSpeed = 5 + Math.floor(score / 10);
+            }
+            
+            if (!isGameOver && !isPaused) {
+                animationId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            gameStartElement.style.display = 'none';
+            gameLoop();
+        });
+
+        playAgainBtn.addEventListener('click', () => {
+            resetGame();
+            gameLoop();
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            if (isPaused) {
+                isPaused = false;
+                pauseBtn.textContent = 'Pause';
+                gameLoop();
+            } else {
+                isPaused = true;
+                pauseBtn.textContent = 'Resume';
+                cancelAnimationFrame(animationId);
+            }
+        });
+
+        restartBtn.addEventListener('click', () => {
+            resetGame();
+            gameStartElement.style.display = 'block';
+        });
+
+        // Jump when spacebar is pressed
+        document.addEventListener('keydown', (e) => {
+            if ((e.code === 'Space' || e.key === ' ') && player.grounded && !isGameOver && !isPaused) {
+                player.dy = -player.jumpPower;
+                player.grounded = false;
+            }
+        });
+
+        // Mini game functions
+        function openMiniGame(gameName) {
+            alert(`Opening ${gameName}...\n\nThis would launch a separate mini-game in a real implementation.`);
+            // In a real implementation, this would open the selected mini-game
+        }
+
+        // Initialize game start screen
+        gameStartElement.style.display = 'block';
     </script>
 </body>
 </html>
