@@ -3,857 +3,767 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RaylsLabs Gaming - Web3 Game Studio</title>
-    <link rel="icon" href="https://pbs.twimg.com/media/G4Z0UjbWcAA3LR3.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>MovieHub - Ultimate Movie Experience</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #9f7aea;
-            --secondary: #d53f8c;
-            --accent: #805ad5;
-            --dark: #0f0f23;
-            --darker: #070711;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
+        :root {
+            --primary: #0f1014;
+            --secondary: #1a1c23;
+            --accent: #e50914;
+            --text: #ffffff;
+            --text-secondary: #b3b3b3;
+            --card-bg: #181a21;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --info: #3498db;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--darker);
-            color: white;
+            background-color: var(--primary);
+            color: var(--text);
             overflow-x: hidden;
         }
-        
-        h1, h2, h3, h4, .logo-text {
-            font-family: 'Orbitron', sans-serif;
+
+        /* Navigation */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: rgba(15, 16, 20, 0.95);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
-        
-        .gradient-text {
-            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientShift 5s ease infinite;
-        }
-        
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        .hero-bg {
-            background: radial-gradient(circle at top right, rgba(159, 122, 234, 0.15), transparent 50%),
-                        radial-gradient(circle at bottom left, rgba(213, 63, 140, 0.1), transparent 50%),
-                        linear-gradient(to bottom, var(--darker), var(--dark));
-        }
-        
-        .game-card {
-            background: rgba(15, 15, 35, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(159, 122, 234, 0.2);
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-        
-        .game-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 10px 30px rgba(159, 122, 234, 0.3);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(159, 122, 234, 0.4);
-        }
-        
-        .section-title {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 0;
-            width: 60%;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-        }
-        
-        .floating {
-            animation: floating 6s ease-in-out infinite;
-        }
-        
-        @keyframes floating {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-            100% { transform: translateY(0px); }
-        }
-        
-        .pulse-glow {
-            animation: pulseGlow 2s ease-in-out infinite alternate;
-        }
-        
-        @keyframes pulseGlow {
-            from { box-shadow: 0 0 10px rgba(159, 122, 234, 0.5); }
-            to { box-shadow: 0 0 20px rgba(159, 122, 234, 0.8); }
-        }
-        
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(159, 122, 234, 0.3);
-            animation: floatParticle 15s infinite linear;
-        }
-        
-        @keyframes floatParticle {
-            0% { transform: translateY(0) translateX(0); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
-        }
-        
-        .nav-glass {
-            background: rgba(15, 15, 35, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(159, 122, 234, 0.1);
-        }
-        
-        .feature-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: rgba(159, 122, 234, 0.1);
+
+        .logo {
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            border: 1px solid rgba(159, 122, 234, 0.3);
+            gap: 10px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent);
         }
-        
-        .roadmap-item {
-            position: relative;
-            padding-left: 30px;
-            margin-bottom: 40px;
+
+        .logo i {
+            font-size: 2rem;
         }
-        
-        .roadmap-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 5px;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background: var(--primary);
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
         }
-        
-        .roadmap-item::after {
-            content: '';
-            position: absolute;
-            left: 7px;
-            top: 20px;
-            width: 1px;
-            height: calc(100% + 25px);
-            background: rgba(159, 122, 234, 0.3);
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
         }
-        
-        .roadmap-item:last-child::after {
-            display: none;
+
+        .nav-links a:hover {
+            color: var(--accent);
         }
-        
-        .stats-card {
-            background: rgba(15, 15, 35, 0.6);
-            border: 1px solid rgba(159, 122, 234, 0.2);
-            border-radius: 10px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s ease;
+
+        .user-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
         }
-        
-        .stats-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
+
+        .btn {
+            padding: 0.5rem 1.2rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
         }
-        
-        /* Game Canvas Styles */
-        .game-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #c11119;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text);
+            border: 1px solid var(--text);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 80vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1489599809505-7c8c62a0bb51?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            margin-top: 70px;
+        }
+
+        .hero-content {
+            max-width: 600px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Movie Sections */
+        .section {
+            padding: 3rem 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .view-all {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .movie-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
             overflow: hidden;
-            border-radius: 12px;
-            border: 2px solid var(--primary);
-            box-shadow: 0 0 20px rgba(159, 122, 234, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
         }
-        
-        .game-ui {
-            position: absolute;
+
+        .movie-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+
+        .movie-info {
+            padding: 1rem;
+        }
+
+        .movie-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .rating {
+            color: gold;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background-color: var(--secondary);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+            transition: right 0.4s ease-in-out;
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .control-panel.active {
+            right: 0;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-panel {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .panel-section {
+            margin-bottom: 2rem;
+        }
+
+        .panel-section-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .overlay {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            z-index: 10;
-        }
-        
-        .game-score {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 24px;
-            font-weight: bold;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 5px 15px;
-            border-radius: 20px;
-            border: 1px solid var(--primary);
-        }
-        
-        .game-controls {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .game-btn {
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid var(--primary);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-family: 'Orbitron', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .game-btn:hover {
-            background: var(--primary);
-        }
-        
-        .game-over {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            border: 2px solid var(--primary);
-            z-index: 20;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1500;
             display: none;
         }
-        
-        .game-start {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            border: 2px solid var(--primary);
-            z-index: 20;
+
+        .overlay.active {
+            display: block;
         }
-        
-        .mini-game {
-            height: 200px;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-            cursor: pointer;
+
+        /* Footer */
+        footer {
+            background-color: var(--secondary);
+            padding: 3rem 2rem;
+            margin-top: 2rem;
         }
-        
-        .mini-game-title {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px;
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-column h3 {
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text);
+        }
+
+        .copyright {
             text-align: center;
-            font-family: 'Orbitron', sans-serif;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .control-panel {
+                width: 100%;
+                right: -100%;
+            }
+
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
         }
     </style>
 </head>
-<body class="relative">
-    <!-- Animated Background Particles -->
-    <div id="particles-container"></div>
-    
+<body>
     <!-- Navigation -->
-    <nav class="nav-glass fixed w-full z-50 py-4 px-6">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <img src="https://pbs.twimg.com/media/G4Z0UjbWcAA3LR3.png" alt="RaylsLabs Logo" class="w-12 h-12 rounded-lg">
-                <span class="logo-text text-2xl font-bold gradient-text">RaylsLabs Gaming</span>
-            </div>
-            <div class="hidden md:flex space-x-8">
-                <a href="#home" class="hover:text-purple-400 transition-colors font-medium">Home</a>
-                <a href="#games" class="hover:text-purple-400 transition-colors font-medium">Games</a>
-                <a href="#live-games" class="hover:text-purple-400 transition-colors font-medium">Play Now</a>
-                <a href="#features" class="hover:text-purple-400 transition-colors font-medium">Features</a>
-                <a href="#roadmap" class="hover:text-purple-400 transition-colors font-medium">Roadmap</a>
-            </div>
-            <div class="flex items-center space-x-4">
-                <button class="px-6 py-2 rounded-full bg-transparent border border-purple-500 hover:bg-purple-500 transition-colors">Login</button>
-                <button class="btn-primary px-6 py-2 rounded-full font-medium">Sign Up</button>
-            </div>
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-film"></i>
+            <span>MovieHub</span>
+        </div>
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Movies</a>
+            <a href="#">TV Shows</a>
+            <a href="#">New & Popular</a>
+            <a href="#">My List</a>
+        </div>
+        <div class="user-actions">
+            <button class="btn btn-secondary" id="search-btn">
+                <i class="fas fa-search"></i>
+            </button>
+            <button class="btn btn-secondary" id="control-panel-btn">
+                <i class="fas fa-cog"></i> Control Panel
+            </button>
+            <button class="btn btn-primary">Sign In</button>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="hero-bg min-h-screen flex items-center pt-20 px-6">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div class="text-center lg:text-left">
-                <h1 class="text-5xl md:text-7xl font-bold mb-6">The Future of <span class="gradient-text">Web3 Gaming</span> Is Here</h1>
-                <p class="text-xl mb-10 text-gray-300 max-w-2xl">RaylsLabs Gaming combines cutting-edge blockchain technology with immersive gameplay experiences. Play, earn, and own your in-game assets like never before.</p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                    <a href="#live-games" class="btn-primary px-8 py-4 rounded-full text-lg font-semibold text-center">Play Games Now</a>
-                    <button class="px-8 py-4 rounded-full text-lg font-semibold border border-purple-500 hover:bg-purple-500 transition-colors">Watch Trailer</button>
-                </div>
-            </div>
-            <div class="relative">
-                <div class="floating">
-                    <img src="https://pbs.twimg.com/media/G4Z0UjbWcAA3LR3.png" alt="RaylsLabs Gaming" class="w-full max-w-md mx-auto rounded-2xl pulse-glow">
-                </div>
-                <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-500 rounded-full filter blur-3xl opacity-20"></div>
-                <div class="absolute -top-10 -right-10 w-40 h-40 bg-pink-500 rounded-full filter blur-3xl opacity-20"></div>
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Unlimited movies, TV shows, and more.</h1>
+            <p>Watch anywhere. Cancel anytime. Ready to watch? Enter your email to create or restart your membership.</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary">Get Started <i class="fas fa-chevron-right"></i></button>
+                <button class="btn btn-secondary">Learn More</button>
             </div>
         </div>
     </section>
 
-    <!-- Live Games Section -->
-    <section id="live-games" class="py-20 px-6 bg-dark">
-        <div class="max-w-7xl mx-auto">
-            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4 section-title">Play Live Games</h2>
-            <p class="text-xl text-center text-gray-400 mb-16 max-w-3xl mx-auto">Experience our Web3 games right in your browser. No downloads required!</p>
-            
-            <!-- Main Game: Crypto Runner -->
-            <div class="mb-16">
-                <h3 class="text-3xl font-bold text-center mb-8 gradient-text">Crypto Runner</h3>
-                <div class="game-container">
-                    <canvas id="gameCanvas" width="800" height="400"></canvas>
-                    <div class="game-ui">
-                        <div class="game-score">Score: <span id="score">0</span></div>
-                        <div class="game-controls">
-                            <button id="pauseBtn" class="game-btn">Pause</button>
-                            <button id="restartBtn" class="game-btn">Restart</button>
-                        </div>
-                    </div>
-                    <div id="gameOver" class="game-over">
-                        <h3 class="text-2xl font-bold mb-4">Game Over!</h3>
-                        <p class="text-xl mb-2">Your Score: <span id="finalScore">0</span></p>
-                        <p class="text-lg mb-6">Collect $RLS tokens for extra points!</p>
-                        <button id="playAgainBtn" class="btn-primary px-6 py-3 rounded-full">Play Again</button>
-                    </div>
-                    <div id="gameStart" class="game-start">
-                        <h3 class="text-2xl font-bold mb-4">Crypto Runner</h3>
-                        <p class="text-lg mb-2">Use SPACE to jump and avoid obstacles</p>
-                        <p class="text-lg mb-6">Collect $RLS tokens for bonus points!</p>
-                        <button id="startBtn" class="btn-primary px-6 py-3 rounded-full">Start Game</button>
-                    </div>
-                </div>
-                <div class="mt-6 text-center text-gray-400">
-                    <p>Use <kbd class="px-2 py-1 bg-gray-800 rounded">SPACE</kbd> to jump and avoid obstacles. Collect $RLS tokens for extra points!</p>
-                </div>
-            </div>
-            
-            <!-- Mini Games Grid -->
-            <h3 class="text-3xl font-bold text-center mb-8 gradient-text">More Games</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="mini-game" onclick="openMiniGame('tokenTap')">
-                    <div class="w-full h-full flex items-center justify-center">
-                        <div class="text-center">
-                            <div class="text-4xl mb-2">🪙</div>
-                            <div class="text-xl font-bold">Token Tap</div>
-                        </div>
-                    </div>
-                    <div class="mini-game-title">Click to Play</div>
-                </div>
-                
-                <div class="mini-game" onclick="openMiniGame('blockPuzzle')">
-                    <div class="w-full h-full flex items-center justify-center">
-                        <div class="text-center">
-                            <div class="text-4xl mb-2">🧩</div>
-                            <div class="text-xl font-bold">Block Puzzle</div>
-                        </div>
-                    </div>
-                    <div class="mini-game-title">Click to Play</div>
-                </div>
-                
-                <div class="mini-game" onclick="openMiniGame('cryptoMatch')">
-                    <div class="w-full h-full flex items-center justify-center">
-                        <div class="text-center">
-                            <div class="text-4xl mb-2">🔄</div>
-                            <div class="text-xl font-bold">Crypto Match</div>
-                        </div>
-                    </div>
-                    <div class="mini-game-title">Click to Play</div>
-                </div>
-            </div>
+    <!-- Popular Movies Section -->
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Popular Now</h2>
+            <a href="#" class="view-all">View All</a>
+        </div>
+        <div class="movies-grid" id="popular-movies">
+            <!-- Movies will be populated by JavaScript -->
         </div>
     </section>
 
-    <!-- Games Section -->
-    <section id="games" class="py-20 px-6">
-        <div class="max-w-7xl mx-auto">
-            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4 section-title">Featured Games</h2>
-            <p class="text-xl text-center text-gray-400 mb-16 max-w-3xl mx-auto">Discover our collection of innovative Web3 games that redefine player ownership and rewards.</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Game 1 -->
-                <div class="game-card rounded-2xl p-6">
-                    <div class="rounded-xl overflow-hidden mb-6 h-48 bg-gradient-to-br from-purple-900 to-pink-800 flex items-center justify-center">
-                        <span class="text-2xl font-bold">CRYPTO LEGENDS</span>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-3">Crypto Legends</h3>
-                    <p class="text-gray-400 mb-6">Strategic card battler where each card is a unique NFT. Build your deck, battle opponents, and earn rewards.</p>
-                    <div class="flex justify-between items-center">
-                        <span class="px-3 py-1 bg-purple-900 rounded-full text-sm">NFT Battler</span>
-                        <button class="btn-primary px-4 py-2 rounded-full text-sm">Play Now</button>
-                    </div>
-                </div>
-                
-                <!-- Game 2 -->
-                <div class="game-card rounded-2xl p-6">
-                    <div class="rounded-xl overflow-hidden mb-6 h-48 bg-gradient-to-br from-blue-900 to-purple-800 flex items-center justify-center">
-                        <span class="text-2xl font-bold">METAVERSE RACERS</span>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-3">Metaverse Racers</h3>
-                    <p class="text-gray-400 mb-6">High-speed racing game where you own your vehicles as NFTs. Upgrade, customize, and compete in tournaments.</p>
-                    <div class="flex justify-between items-center">
-                        <span class="px-3 py-1 bg-blue-900 rounded-full text-sm">Racing</span>
-                        <button class="btn-primary px-4 py-2 rounded-full text-sm">Play Now</button>
-                    </div>
-                </div>
-                
-                <!-- Game 3 -->
-                <div class="game-card rounded-2xl p-6">
-                    <div class="rounded-xl overflow-hidden mb-6 h-48 bg-gradient-to-br from-green-900 to-blue-800 flex items-center justify-center">
-                        <span class="text-2xl font-bold">BLOCKCHAIN REALMS</span>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-3">Blockchain Realms</h3>
-                    <p class="text-gray-400 mb-6">Open-world RPG where land, items, and characters are player-owned NFTs. Explore, craft, and conquer.</p>
-                    <div class="flex justify-between items-center">
-                        <span class="px-3 py-1 bg-green-900 rounded-full text-sm">MMORPG</span>
-                        <button class="btn-primary px-4py-2 rounded-full text-sm">Play Now</button>
-                    </div>
-                </div>
-            </div>
+    <!-- Trending Movies Section -->
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Trending This Week</h2>
+            <a href="#" class="view-all">View All</a>
+        </div>
+        <div class="movies-grid" id="trending-movies">
+            <!-- Movies will be populated by JavaScript -->
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section id="features" class="py-20 px-6 bg-dark">
-        <div class="max-w-7xl mx-auto">
-            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4 section-title">Why Choose RaylsLabs Gaming?</h2>
-            <p class="text-xl text-center text-gray-400 mb-16 max-w-3xl mx-auto">We're revolutionizing gaming with blockchain technology and player-centric design.</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                <div class="text-center">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4">True Ownership</h3>
-                    <p class="text-gray-400">Your in-game assets are NFTs that you truly own. Trade, sell, or use them across multiple games in our ecosystem.</p>
-                </div>
-                
-                <div class="text-center">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4">Play & Earn</h3>
-                    <p class="text-gray-400">Earn cryptocurrency and valuable NFTs through gameplay. Your skills and time investment are directly rewarded.</p>
-                </div>
-                
-                <div class="text-center">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4">Vibrant Community</h3>
-                    <p class="text-gray-400">Join a passionate community of gamers, developers, and collectors. Participate in governance and shape our future.</p>
-                </div>
-            </div>
+    <!-- Top Rated Movies Section -->
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Top Rated</h2>
+            <a href="#" class="view-all">View All</a>
+        </div>
+        <div class="movies-grid" id="top-rated-movies">
+            <!-- Movies will be populated by JavaScript -->
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="py-12 px-6 border-t border-gray-800">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                <div>
-                    <div class="flex items-center space-x-3 mb-6">
-                        <img src="https://pbs.twimg.com/media/G4Z0UjbWcAA3LR3.png" alt="RaylsLabs Logo" class="w-10 h-10 rounded-lg">
-                        <span class="logo-text text-xl font-bold gradient-text">RaylsLabs Gaming</span>
-                    </div>
-                    <p class="text-gray-400 mb-6">Building the future of Web3 gaming with innovative technology and player-centric design.</p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-purple-400 transition-colors">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
-                            </svg>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-purple-400 transition-colors">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 class="text-lg font-bold mb-6">Games</h4>
-                    <ul class="space-y-3 text-gray-400">
-                        <li><a href="#live-games" class="hover:text-purple-400 transition-colors">Live Games</a></li>
-                        <li><a href="#" class="hover:text-purple-400 transition-colors">Crypto Legends</a></li>
-                        <li><a href="#" class="hover:text-purple-400 transition-colors">Metaverse Racers</a></li>
-                        <li><a href="#" class="hover:text-purple-400 transition-colors">Blockchain Realms</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h4 class="text-lg font-bold mb-6">Resources</h4>
-                    <ul class="space-y-3 text-gray-400">
-                        <li><a href="#" class="hover:text-purple-400 transition-colors">Documentation</a></li>
-                        <li><a href="#" class="hover:text-purple-400 transition-colors">Blog</a></li>
-                        <li><a href="#" class="hover:text-purple-400 transition-colors">FAQ</a></li>
-                        <li><a href="#" class="hover:text-purple-400 transition-colors">Support</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h4 class="text-lg font-bold mb-6">Company</h4>
-                    <ul class="space-y-3 text-gray-400">
-                        <li><a href="#" class="hover:text-purple-400 transition-colors">About Us</a></li>
-                        <li><a href="#" class="hover:text-purple-400 transition-colors">Careers</a></li>
-                        <li><a href="#" class="hover:text-purple-400 transition-colors">Partners</a></li>
-                        <li><a href="#" class="hover:text-purple-400 transition-colors">Contact</a></li>
-                    </ul>
-                </div>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Navigation</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Movies</a></li>
+                    <li><a href="#">TV Shows</a></li>
+                    <li><a href="#">New & Popular</a></li>
+                    <li><a href="#">My List</a></li>
+                </ul>
             </div>
-            
-            <div class="pt-8 border-t border-gray-800 text-center text-gray-500">
-                <p>&copy; 2024 RaylsLabs Gaming. All rights reserved.</p>
+            <div class="footer-column">
+                <h3>Account</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Account</a></li>
+                    <li><a href="#">Redeem Gift Card</a></li>
+                    <li><a href="#">Privacy</a></li>
+                    <li><a href="#">Speed Test</a></li>
+                </ul>
             </div>
+            <div class="footer-column">
+                <h3>Company</h3>
+                <ul class="footer-links">
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Media Center</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Legal</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Terms of Use</a></li>
+                    <li><a href="#">Privacy</a></li>
+                    <li><a href="#">Cookie Preferences</a></li>
+                    <li><a href="#">Corporate Information</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2023 MovieHub. All rights reserved.</p>
         </div>
     </footer>
 
-    <!-- Game Script -->
+    <!-- Control Panel -->
+    <div class="overlay" id="panel-overlay"></div>
+    <div class="control-panel" id="control-panel">
+        <div class="panel-header">
+            <h2 class="panel-title">Admin Control Panel</h2>
+            <button class="close-panel" id="close-panel">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="panel-section">
+            <h3 class="panel-section-title">Quick Stats</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">1,254</div>
+                    <div class="stat-label">Total Movies</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">542</div>
+                    <div class="stat-label">Total TV Shows</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">24.5K</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">86%</div>
+                    <div class="stat-label">Satisfaction Rate</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <h3 class="panel-section-title">Content Management</h3>
+            <div class="form-group">
+                <label class="form-label" for="movie-title">Movie Title</label>
+                <input type="text" id="movie-title" class="form-control" placeholder="Enter movie title">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="movie-description">Description</label>
+                <textarea id="movie-description" class="form-control" rows="3" placeholder="Enter movie description"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="movie-genre">Genre</label>
+                <select id="movie-genre" class="form-control">
+                    <option value="">Select Genre</option>
+                    <option value="action">Action</option>
+                    <option value="comedy">Comedy</option>
+                    <option value="drama">Drama</option>
+                    <option value="horror">Horror</option>
+                    <option value="sci-fi">Sci-Fi</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="movie-rating">Rating</label>
+                <input type="number" id="movie-rating" class="form-control" min="0" max="10" step="0.1" placeholder="0-10">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="movie-poster">Poster URL</label>
+                <input type="text" id="movie-poster" class="form-control" placeholder="Enter poster image URL">
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="featured-movie">
+                <label for="featured-movie">Feature this movie on homepage</label>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;">Add Movie</button>
+        </div>
+
+        <div class="panel-section">
+            <h3 class="panel-section-title">User Management</h3>
+            <div class="form-group">
+                <label class="form-label" for="user-search">Search Users</label>
+                <input type="text" id="user-search" class="form-control" placeholder="Search by username or email">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="user-role">User Role</label>
+                <select id="user-role" class="form-control">
+                    <option value="admin">Admin</option>
+                    <option value="moderator">Moderator</option>
+                    <option value="user" selected>User</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%;">Manage Users</button>
+        </div>
+
+        <div class="panel-section">
+            <h3 class="panel-section-title">Site Settings</h3>
+            <div class="checkbox-group">
+                <input type="checkbox" id="maintenance-mode">
+                <label for="maintenance-mode">Enable Maintenance Mode</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="user-registration" checked>
+                <label for="user-registration">Allow New User Registration</label>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="site-theme">Site Theme</label>
+                <select id="site-theme" class="form-control">
+                    <option value="dark">Dark</option>
+                    <option value="light">Light</option>
+                    <option value="auto">Auto (System Preference)</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;">Save Settings</button>
+        </div>
+    </div>
+
     <script>
-        // Create animated background particles
-        function createParticles() {
-            const container = document.getElementById('particles-container');
-            const particleCount = 30;
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                
-                // Random size
-                const size = Math.random() * 5 + 2;
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                
-                // Random position
-                particle.style.left = `${Math.random() * 100}vw`;
-                particle.style.top = `${Math.random() * 100}vh`;
-                
-                // Random animation delay
-                particle.style.animationDelay = `${Math.random() * 15}s`;
-                
-                container.appendChild(particle);
+        // Sample movie data
+        const movies = [
+            {
+                id: 1,
+                title: "The Matrix Resurrections",
+                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                year: 2021,
+                rating: 7.5,
+                genre: "Sci-Fi"
+            },
+            {
+                id: 2,
+                title: "Spider-Man: No Way Home",
+                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                year: 2021,
+                rating: 8.3,
+                genre: "Action"
+            },
+            {
+                id: 3,
+                title: "Dune",
+                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                year: 2021,
+                rating: 8.1,
+                genre: "Sci-Fi"
+            },
+            {
+                id: 4,
+                title: "No Time To Die",
+                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                year: 2021,
+                rating: 7.4,
+                genre: "Action"
+            },
+            {
+                id: 5,
+                title: "The Batman",
+                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                year: 2022,
+                rating: 8.1,
+                genre: "Action"
+            },
+            {
+                id: 6,
+                title: "Black Widow",
+                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                year: 2021,
+                rating: 6.8,
+                genre: "Action"
+            },
+            {
+                id: 7,
+                title: "Shang-Chi",
+                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                year: 2021,
+                rating: 7.5,
+                genre: "Action"
+            },
+            {
+                id: 8,
+                title: "Eternals",
+                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                year: 2021,
+                rating: 6.4,
+                genre: "Action"
             }
-        }
-        
-        // Initialize particles when page loads
-        document.addEventListener('DOMContentLoaded', createParticles);
-        
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                
-                const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
-                
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
+        ];
 
-        // Crypto Runner Game
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreElement = document.getElementById('score');
-        const finalScoreElement = document.getElementById('finalScore');
-        const gameOverElement = document.getElementById('gameOver');
-        const gameStartElement = document.getElementById('gameStart');
-        const startBtn = document.getElementById('startBtn');
-        const playAgainBtn = document.getElementById('playAgainBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const restartBtn = document.getElementById('restartBtn');
+        // Populate movie sections
+        function populateMovies() {
+            const popularMovies = document.getElementById('popular-movies');
+            const trendingMovies = document.getElementById('trending-movies');
+            const topRatedMovies = document.getElementById('top-rated-movies');
 
-        // Game variables
-        let score = 0;
-        let gameSpeed = 5;
-        let isGameOver = false;
-        let isPaused = false;
-        let animationId;
+            // Clear existing content
+            popularMovies.innerHTML = '';
+            trendingMovies.innerHTML = '';
+            topRatedMovies.innerHTML = '';
 
-        // Player
-        const player = {
-            x: 50,
-            y: canvas.height - 50,
-            width: 40,
-            height: 40,
-            dy: 0,
-            jumpPower: 12,
-            grounded: true,
-            color: '#9f7aea'
-        };
-
-        // Obstacles
-        let obstacles = [];
-        let tokens = [];
-
-        // Game functions
-        function drawPlayer() {
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            
-            // Draw player details
-            ctx.fillStyle = '#6B46C1';
-            ctx.fillRect(player.x + 5, player.y + 5, player.width - 10, player.height - 10);
-        }
-
-        function createObstacle() {
-            const width = 20;
-            const height = 30 + Math.random() * 30;
-            obstacles.push({
-                x: canvas.width,
-                y: canvas.height - height,
-                width: width,
-                height: height,
-                color: '#D53F8C'
+            // Add movies to each section
+            movies.forEach(movie => {
+                const movieCard = createMovieCard(movie);
+                popularMovies.appendChild(movieCard.cloneNode(true));
+                trendingMovies.appendChild(movieCard.cloneNode(true));
+                topRatedMovies.appendChild(movieCard.cloneNode(true));
             });
         }
 
-        function createToken() {
-            if (Math.random() < 0.02) { // 2% chance each frame
-                tokens.push({
-                    x: canvas.width,
-                    y: canvas.height - 100 - Math.random() * 100,
-                    width: 20,
-                    height: 20,
-                    color: '#F6E05E'
-                });
-            }
+        // Create movie card element
+        function createMovieCard(movie) {
+            const card = document.createElement('div');
+            card.className = 'movie-card';
+            card.innerHTML = `
+                <img src="${movie.poster}" alt="${movie.title}" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">${movie.title}</h3>
+                    <div class="movie-meta">
+                        <span>${movie.year}</span>
+                        <span class="rating"><i class="fas fa-star"></i> ${movie.rating}</span>
+                    </div>
+                </div>
+            `;
+            return card;
         }
 
-        function drawObstacles() {
-            obstacles.forEach(obstacle => {
-                ctx.fillStyle = obstacle.color;
-                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-            });
-        }
+        // Control Panel functionality
+        const controlPanelBtn = document.getElementById('control-panel-btn');
+        const closePanelBtn = document.getElementById('close-panel');
+        const controlPanel = document.getElementById('control-panel');
+        const panelOverlay = document.getElementById('panel-overlay');
 
-        function drawTokens() {
-            tokens.forEach(token => {
-                ctx.fillStyle = token.color;
-                ctx.beginPath();
-                ctx.arc(token.x + token.width/2, token.y + token.height/2, token.width/2, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Draw $ symbol
-                ctx.fillStyle = '#000';
-                ctx.font = '12px Arial';
-                ctx.fillText('$', token.x + 6, token.y + 13);
-            });
-        }
-
-        function updateObstacles() {
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                obstacles[i].x -= gameSpeed;
-                
-                // Remove obstacles that are off screen
-                if (obstacles[i].x + obstacles[i].width < 0) {
-                    obstacles.splice(i, 1);
-                    score++;
-                    scoreElement.textContent = score;
-                }
-                
-                // Check collision
-                if (detectCollision(player, obstacles[i])) {
-                    gameOver();
-                }
-            }
-        }
-
-        function updateTokens() {
-            for (let i = tokens.length - 1; i >= 0; i--) {
-                tokens[i].x -= gameSpeed;
-                
-                // Remove tokens that are off screen
-                if (tokens[i].x + tokens[i].width < 0) {
-                    tokens.splice(i, 1);
-                }
-                
-                // Check collection
-                if (detectCollision(player, tokens[i])) {
-                    tokens.splice(i, 1);
-                    score += 5;
-                    scoreElement.textContent = score;
-                }
-            }
-        }
-
-        function detectCollision(rect1, rect2) {
-            return rect1.x < rect2.x + rect2.width &&
-                   rect1.x + rect1.width > rect2.x &&
-                   rect1.y < rect2.y + rect2.height &&
-                   rect1.y + rect1.height > rect2.y;
-        }
-
-        function updatePlayer() {
-            // Apply gravity
-            if (!player.grounded) {
-                player.dy += 0.8;
-            }
-            
-            // Update position
-            player.y += player.dy;
-            
-            // Ground collision
-            if (player.y >= canvas.height - player.height) {
-                player.y = canvas.height - player.height;
-                player.dy = 0;
-                player.grounded = true;
-            }
-        }
-
-        function gameOver() {
-            isGameOver = true;
-            finalScoreElement.textContent = score;
-            gameOverElement.style.display = 'block';
-            cancelAnimationFrame(animationId);
-        }
-
-        function resetGame() {
-            score = 0;
-            gameSpeed = 5;
-            isGameOver = false;
-            isPaused = false;
-            obstacles = [];
-            tokens = [];
-            player.y = canvas.height - 50;
-            player.dy = 0;
-            player.grounded = true;
-            scoreElement.textContent = score;
-            gameOverElement.style.display = 'none';
-            gameStartElement.style.display = 'none';
-            pauseBtn.textContent = 'Pause';
-        }
-
-        function gameLoop() {
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw background
-            ctx.fillStyle = '#0f0f23';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw ground
-            ctx.fillStyle = '#2D3748';
-            ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
-            
-            // Update and draw game elements
-            updatePlayer();
-            drawPlayer();
-            
-            // Create new obstacles and tokens
-            if (Math.random() < 0.02) {
-                createObstacle();
-            }
-            createToken();
-            
-            updateObstacles();
-            drawObstacles();
-            
-            updateTokens();
-            drawTokens();
-            
-            // Increase game speed over time
-            if (score > 0 && score % 10 === 0) {
-                gameSpeed = 5 + Math.floor(score / 10);
-            }
-            
-            if (!isGameOver && !isPaused) {
-                animationId = requestAnimationFrame(gameLoop);
-            }
-        }
-
-        // Event listeners
-        startBtn.addEventListener('click', () => {
-            gameStartElement.style.display = 'none';
-            gameLoop();
+        controlPanelBtn.addEventListener('click', () => {
+            controlPanel.classList.add('active');
+            panelOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
         });
 
-        playAgainBtn.addEventListener('click', () => {
-            resetGame();
-            gameLoop();
+        closePanelBtn.addEventListener('click', () => {
+            controlPanel.classList.remove('active');
+            panelOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
         });
 
-        pauseBtn.addEventListener('click', () => {
-            if (isPaused) {
-                isPaused = false;
-                pauseBtn.textContent = 'Pause';
-                gameLoop();
-            } else {
-                isPaused = true;
-                pauseBtn.textContent = 'Resume';
-                cancelAnimationFrame(animationId);
-            }
+        panelOverlay.addEventListener('click', () => {
+            controlPanel.classList.remove('active');
+            panelOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
         });
 
-        restartBtn.addEventListener('click', () => {
-            resetGame();
-            gameStartElement.style.display = 'block';
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            populateMovies();
         });
-
-        // Jump when spacebar is pressed
-        document.addEventListener('keydown', (e) => {
-            if ((e.code === 'Space' || e.key === ' ') && player.grounded && !isGameOver && !isPaused) {
-                player.dy = -player.jumpPower;
-                player.grounded = false;
-            }
-        });
-
-        // Mini game functions
-        function openMiniGame(gameName) {
-            alert(`Opening ${gameName}...\n\nThis would launch a separate mini-game in a real implementation.`);
-            // In a real implementation, this would open the selected mini-game
-        }
-
-        // Initialize game start screen
-        gameStartElement.style.display = 'block';
     </script>
 </body>
 </html>
