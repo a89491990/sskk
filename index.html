@@ -336,6 +336,141 @@
             display: block;
         }
 
+        /* Upload Section Styles */
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--accent);
+            background-color: rgba(229, 9, 20, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .upload-text {
+            margin-bottom: 1rem;
+        }
+
+        .upload-btn {
+            background-color: var(--accent);
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .upload-btn:hover {
+            background-color: #c11119;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .progress-container {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: var(--accent);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .uploaded-files {
+            margin-top: 1.5rem;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .file-icon {
+            color: var(--accent);
+        }
+
+        .file-name {
+            font-size: 0.9rem;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-size {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .file-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .file-action-btn:hover {
+            color: var(--text);
+        }
+
+        .success-message {
+            background-color: rgba(46, 204, 113, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 0.8rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            display: none;
+        }
+
         /* Footer */
         footer {
             background-color: var(--secondary);
@@ -556,6 +691,33 @@
         </div>
 
         <div class="panel-section">
+            <h3 class="panel-section-title">Upload Movie Files</h3>
+            
+            <div class="upload-area" id="upload-area">
+                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                <p class="upload-text">Drag & drop your movie files here or click to browse</p>
+                <button class="upload-btn">Select Files</button>
+                <input type="file" id="file-input" class="file-input" multiple accept=".mp4,.avi,.mkv,.mov,.wmv">
+            </div>
+            
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar">
+                    <div class="progress" id="progress-bar"></div>
+                </div>
+                <div class="progress-text" id="progress-text">Uploading... 0%</div>
+            </div>
+            
+            <div class="success-message" id="success-message">
+                <i class="fas fa-check-circle"></i> File uploaded successfully!
+            </div>
+            
+            <div class="uploaded-files" id="uploaded-files">
+                <h4>Recently Uploaded Files</h4>
+                <!-- Uploaded files will appear here -->
+            </div>
+        </div>
+
+        <div class="panel-section">
             <h3 class="panel-section-title">Content Management</h3>
             <div class="form-group">
                 <label class="form-label" for="movie-title">Movie Title</label>
@@ -759,6 +921,118 @@
             panelOverlay.classList.remove('active');
             document.body.style.overflow = 'auto';
         });
+
+        // File Upload Functionality
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const successMessage = document.getElementById('success-message');
+        const uploadedFiles = document.getElementById('uploaded-files');
+
+        // Click on upload area to trigger file input
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Handle file selection
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect();
+            }
+        });
+
+        // Handle file selection and upload simulation
+        function handleFileSelect() {
+            const files = fileInput.files;
+            if (files.length === 0) return;
+            
+            // Show progress container
+            progressContainer.style.display = 'block';
+            successMessage.style.display = 'none';
+            
+            // Simulate upload progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    // Show success message
+                    setTimeout(() => {
+                        successMessage.style.display = 'block';
+                        progressContainer.style.display = 'none';
+                        
+                        // Add files to uploaded list
+                        addFilesToUploadedList(files);
+                    }, 500);
+                }
+                
+                // Update progress bar and text
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `Uploading... ${Math.round(progress)}%`;
+            }, 200);
+        }
+
+        // Add files to uploaded files list
+        function addFilesToUploadedList(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const fileSize = formatFileSize(file.size);
+                
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <i class="fas fa-file-video file-icon"></i>
+                        <div>
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${fileSize}</div>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="file-action-btn" title="Play">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="file-action-btn" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                uploadedFiles.appendChild(fileItem);
+            }
+        }
+
+        // Format file size to human readable format
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', () => {
