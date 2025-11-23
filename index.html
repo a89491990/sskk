@@ -1,1043 +1,839 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieHub - Ultimate Movie Experience</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Airdrop Project Manager</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
-        :root {
-            --primary: #0f1014;
-            --secondary: #1a1c23;
-            --accent: #e50914;
-            --text: #ffffff;
-            --text-secondary: #b3b3b3;
-            --card-bg: #181a21;
-            --success: #2ecc71;
-            --warning: #f39c12;
-            --info: #3498db;
-        }
-
+        
         body {
-            background-color: var(--primary);
-            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
             overflow-x: hidden;
         }
-
-        /* Navigation */
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2rem;
-            background-color: rgba(15, 16, 20, 0.95);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--accent);
-        }
-
-        .logo i {
-            font-size: 2rem;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 1.5rem;
-        }
-
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .user-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 0.5rem 1.2rem;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background-color: var(--accent);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #c11119;
-        }
-
-        .btn-secondary {
-            background-color: transparent;
-            color: var(--text);
-            border: 1px solid var(--text);
-        }
-
-        .btn-secondary:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Hero Section */
-        .hero {
-            height: 80vh;
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
-                        url('https://images.unsplash.com/photo-1489599809505-7c8c62a0bb51?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            padding: 0 2rem;
-            margin-top: 70px;
-        }
-
-        .hero-content {
-            max-width: 600px;
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            line-height: 1.2;
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            color: var(--text-secondary);
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-
-        /* Movie Sections */
-        .section {
-            padding: 3rem 2rem;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .section-title {
-            font-size: 1.8rem;
-            font-weight: 600;
-        }
-
-        .view-all {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .movies-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .movie-card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
-        }
-
-        .movie-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-        }
-
-        .movie-poster {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-        }
-
-        .movie-info {
-            padding: 1rem;
-        }
-
-        .movie-title {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .movie-meta {
-            display: flex;
-            justify-content: space-between;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .rating {
-            color: gold;
-        }
-
-        /* Control Panel */
-        .control-panel {
-            position: fixed;
-            top: 0;
-            right: -400px;
-            width: 400px;
-            height: 100vh;
-            background-color: var(--secondary);
-            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
-            transition: right 0.4s ease-in-out;
-            z-index: 2000;
-            overflow-y: auto;
-            padding: 2rem;
-        }
-
-        .control-panel.active {
-            right: 0;
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .panel-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        .close-panel {
-            background: none;
-            border: none;
-            color: var(--text);
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .panel-section {
-            margin-bottom: 2rem;
-        }
-
-        .panel-section-title {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            color: var(--accent);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.8rem;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-            color: var(--text);
-            font-size: 1rem;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background-color: var(--card-bg);
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .overlay {
+        
+        body::before {
+            content: '';
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 1500;
-            display: none;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.05" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+            background-position: bottom;
+            pointer-events: none;
+            z-index: 0;
         }
-
-        .overlay.active {
-            display: block;
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
-
-        /* Upload Section Styles */
-        .upload-area {
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            padding: 2rem;
+        
+        .header {
             text-align: center;
-            margin-bottom: 1.5rem;
-            transition: all 0.3s;
-            cursor: pointer;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease-out;
         }
-
-        .upload-area:hover, .upload-area.dragover {
-            border-color: var(--accent);
-            background-color: rgba(229, 9, 20, 0.05);
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-
-        .upload-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--text-secondary);
-        }
-
-        .upload-text {
-            margin-bottom: 1rem;
-        }
-
-        .upload-btn {
-            background-color: var(--accent);
+        
+        .header h1 {
+            font-size: 3.5em;
             color: white;
-            padding: 0.7rem 1.5rem;
-            border-radius: 4px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .share-info {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            color: white;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .share-info h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .share-info p {
+            font-size: 0.95em;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .share-link-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .share-link {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background: #4CAF50;
+            color: white;
             border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            transition: background-color 0.3s;
-        }
-
-        .upload-btn:hover {
-            background-color: #c11119;
-        }
-
-        .file-input {
-            display: none;
-        }
-
-        .progress-container {
-            margin-top: 1.5rem;
-            display: none;
-        }
-
-        .progress-bar {
-            height: 8px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 0.5rem;
-        }
-
-        .progress {
-            height: 100%;
-            background-color: var(--accent);
-            width: 0%;
-            transition: width 0.3s;
-        }
-
-        .progress-text {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            text-align: center;
-        }
-
-        .uploaded-files {
-            margin-top: 1.5rem;
-        }
-
-        .file-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.8rem;
-            background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-            margin-bottom: 0.5rem;
-        }
-
-        .file-info {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        .file-icon {
-            color: var(--accent);
-        }
-
-        .file-name {
-            font-size: 0.9rem;
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            transition: all 0.3s;
             white-space: nowrap;
         }
 
-        .file-size {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
+        .copy-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
         }
-
-        .file-actions {
+        
+        .stats-container {
             display: flex;
-            gap: 0.5rem;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
         }
-
-        .file-action-btn {
-            background: none;
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px 40px;
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .add-project-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             border: none;
-            color: var(--text-secondary);
+            padding: 18px 45px;
+            font-size: 18px;
+            border-radius: 50px;
             cursor: pointer;
-            font-size: 0.9rem;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
-
-        .file-action-btn:hover {
-            color: var(--text);
+        
+        .add-project-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
         }
-
-        .success-message {
-            background-color: rgba(46, 204, 113, 0.2);
-            border: 1px solid var(--success);
-            color: var(--success);
-            padding: 0.8rem;
-            border-radius: 4px;
-            margin-top: 1rem;
+        
+        .add-project-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .modal {
             display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+            margin: 50px auto;
+            padding: 40px;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 650px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease;
+            position: relative;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-content h2 {
+            color: #1e3c72;
+            margin-bottom: 30px;
+            font-size: 2em;
+            font-weight: 600;
+        }
+        
+        .close {
+            position: absolute;
+            right: 25px;
+            top: 25px;
+            color: #999;
+            font-size: 32px;
+            font-weight: 300;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #333;
+            transform: rotate(90deg);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="url"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e7ff;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+            background: white;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        #logoInput {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .logo-preview {
+            max-width: 180px;
+            max-height: 180px;
+            margin-top: 15px;
+            border-radius: 15px;
+            display: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            border: 3px solid white;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            font-size: 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            font-weight: 600;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
         }
 
-        /* Footer */
-        footer {
-            background-color: var(--secondary);
-            padding: 3rem 2rem;
-            margin-top: 2rem;
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
-
-        .footer-content {
+        
+        .projects-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+            animation: fadeInUp 0.8s ease-out;
         }
-
-        .footer-column h3 {
-            margin-bottom: 1.5rem;
-            color: var(--accent);
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-
-        .footer-links {
-            list-style: none;
+        
+        .project-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
         }
-
-        .footer-links li {
-            margin-bottom: 0.8rem;
+        
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         }
-
-        .footer-links a {
-            color: var(--text-secondary);
+        
+        .project-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+        
+        .project-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+        
+        .project-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 3px solid white;
+        }
+        
+        .project-title {
+            flex: 1;
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #1e3c72;
+            line-height: 1.3;
+        }
+        
+        .project-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #667eea;
             text-decoration: none;
-            transition: color 0.3s;
+            margin-bottom: 15px;
+            font-weight: 500;
+            word-break: break-all;
+            transition: all 0.3s;
         }
-
-        .footer-links a:hover {
-            color: var(--text);
+        
+        .project-link:hover {
+            color: #764ba2;
+            transform: translateX(5px);
         }
-
-        .copyright {
+        
+        .project-notes {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8edff 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            color: #555;
+            line-height: 1.8;
+            border-left: 4px solid #667eea;
+        }
+        
+        .reminder-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .daily {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        
+        .weekly {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .project-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .delete-btn, .edit-btn {
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            flex: 1;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .delete-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 0 3px 10px rgba(245, 87, 108, 0.3);
+        }
+        
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.5);
+        }
+        
+        .edit-btn {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            box-shadow: 0 3px 10px rgba(255, 152, 0, 0.3);
+        }
+        
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 152, 0, 0.5);
+        }
+        
+        .empty-state {
             text-align: center;
-            margin-top: 3rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-secondary);
+            color: white;
+            padding: 80px 20px;
+            font-size: 1.3em;
+            animation: fadeIn 0.8s ease;
         }
-
-        /* Responsive Design */
+        
+        .empty-state-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+        
         @media (max-width: 768px) {
-            .navbar {
-                padding: 1rem;
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-container {
+                flex-direction: column;
+                gap: 15px;
             }
 
-            .nav-links {
-                display: none;
-            }
-
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .control-panel {
-                width: 100%;
-                right: -100%;
-            }
-
-            .movies-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            .share-link-container {
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="logo">
-            <i class="fas fa-film"></i>
-            <span>MovieHub</span>
-        </div>
-        <div class="nav-links">
-            <a href="#">Home</a>
-            <a href="#">Movies</a>
-            <a href="#">TV Shows</a>
-            <a href="#">New & Popular</a>
-            <a href="#">My List</a>
-        </div>
-        <div class="user-actions">
-            <button class="btn btn-secondary" id="search-btn">
-                <i class="fas fa-search"></i>
-            </button>
-            <button class="btn btn-secondary" id="control-panel-btn">
-                <i class="fas fa-cog"></i> Control Panel
-            </button>
-            <button class="btn btn-primary">Sign In</button>
-        </div>
-    </nav>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Airdrop Project Manager</h1>
+            <p>আপনার সকল প্রজেক্ট সবার সাথে শেয়ার করুন</p>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Unlimited movies, TV shows, and more.</h1>
-            <p>Watch anywhere. Cancel anytime. Ready to watch? Enter your email to create or restart your membership.</p>
-            <div class="hero-buttons">
-                <button class="btn btn-primary">Get Started <i class="fas fa-chevron-right"></i></button>
-                <button class="btn btn-secondary">Learn More</button>
+            <div class="share-info">
+                <h3>📢 সবাই দেখতে পারবে!</h3>
+                <p>এই অ্যাপে যোগ করা সব প্রজেক্ট সবাই দেখতে পারবে যারা এই পেজটি ওপেন করবে। আপনার প্রজেক্ট শেয়ার করার জন্য নিচের লিংকটি কপি করে শেয়ার করুন:</p>
+                <div class="share-link-container">
+                    <div class="share-link" id="shareLink"></div>
+                    <button class="copy-btn" onclick="copyShareLink()">📋 কপি</button>
+                </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Popular Movies Section -->
-    <section class="section">
-        <div class="section-header">
-            <h2 class="section-title">Popular Now</h2>
-            <a href="#" class="view-all">View All</a>
-        </div>
-        <div class="movies-grid" id="popular-movies">
-            <!-- Movies will be populated by JavaScript -->
-        </div>
-    </section>
-
-    <!-- Trending Movies Section -->
-    <section class="section">
-        <div class="section-header">
-            <h2 class="section-title">Trending This Week</h2>
-            <a href="#" class="view-all">View All</a>
-        </div>
-        <div class="movies-grid" id="trending-movies">
-            <!-- Movies will be populated by JavaScript -->
-        </div>
-    </section>
-
-    <!-- Top Rated Movies Section -->
-    <section class="section">
-        <div class="section-header">
-            <h2 class="section-title">Top Rated</h2>
-            <a href="#" class="view-all">View All</a>
-        </div>
-        <div class="movies-grid" id="top-rated-movies">
-            <!-- Movies will be populated by JavaScript -->
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-column">
-                <h3>Navigation</h3>
-                <ul class="footer-links">
-                    <li><a href="#">Home</a></li>
-                    <li><a href="#">Movies</a></li>
-                    <li><a href="#">TV Shows</a></li>
-                    <li><a href="#">New & Popular</a></li>
-                    <li><a href="#">My List</a></li>
-                </ul>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <span class="stat-number" id="totalProjects">0</span>
+                    <span class="stat-label">মোট প্রজেক্ট</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="dailyReminders">0</span>
+                    <span class="stat-label">ডেইলি রিমাইন্ডার</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="weeklyReminders">0</span>
+                    <span class="stat-label">উইকলি রিমাইন্ডার</span>
+                </div>
             </div>
-            <div class="footer-column">
-                <h3>Account</h3>
-                <ul class="footer-links">
-                    <li><a href="#">Account</a></li>
-                    <li><a href="#">Redeem Gift Card</a></li>
-                    <li><a href="#">Privacy</a></li>
-                    <li><a href="#">Speed Test</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h3>Company</h3>
-                <ul class="footer-links">
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Careers</a></li>
-                    <li><a href="#">Contact Us</a></li>
-                    <li><a href="#">Media Center</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h3>Legal</h3>
-                <ul class="footer-links">
-                    <li><a href="#">Terms of Use</a></li>
-                    <li><a href="#">Privacy</a></li>
-                    <li><a href="#">Cookie Preferences</a></li>
-                    <li><a href="#">Corporate Information</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="copyright">
-            <p>&copy; 2023 MovieHub. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <!-- Control Panel -->
-    <div class="overlay" id="panel-overlay"></div>
-    <div class="control-panel" id="control-panel">
-        <div class="panel-header">
-            <h2 class="panel-title">Admin Control Panel</h2>
-            <button class="close-panel" id="close-panel">
-                <i class="fas fa-times"></i>
+            
+            <button class="add-project-btn" onclick="openModal()">
+                <span style="font-size: 1.5em;">+</span> নতুন প্রজেক্ট যোগ করুন
             </button>
         </div>
-
-        <div class="panel-section">
-            <h3 class="panel-section-title">Quick Stats</h3>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">1,254</div>
-                    <div class="stat-label">Total Movies</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">542</div>
-                    <div class="stat-label">Total TV Shows</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">24.5K</div>
-                    <div class="stat-label">Active Users</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">86%</div>
-                    <div class="stat-label">Satisfaction Rate</div>
-                </div>
-            </div>
+        
+        <div class="projects-grid" id="projectsGrid"></div>
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-state-icon">📋</div>
+            কোনো প্রজেক্ট নেই। উপরের বাটনে ক্লিক করে নতুন প্রজেক্ট যোগ করুন!
         </div>
+    </div>
 
-        <div class="panel-section">
-            <h3 class="panel-section-title">Upload Movie Files</h3>
-            
-            <div class="upload-area" id="upload-area">
-                <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                <p class="upload-text">Drag & drop your movie files here or click to browse</p>
-                <button class="upload-btn">Select Files</button>
-                <input type="file" id="file-input" class="file-input" multiple accept=".mp4,.avi,.mkv,.mov,.wmv">
-            </div>
-            
-            <div class="progress-container" id="progress-container">
-                <div class="progress-bar">
-                    <div class="progress" id="progress-bar"></div>
+    <!-- Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">নতুন প্রজেক্ট যোগ করুন</h2>
+            <form id="projectForm" onsubmit="saveProject(event)">
+                <input type="hidden" id="projectId">
+                
+                <div class="form-group">
+                    <label>প্রজেক্টের নাম *</label>
+                    <input type="text" id="projectName" required placeholder="যেমন: Bitcoin Airdrop">
                 </div>
-                <div class="progress-text" id="progress-text">Uploading... 0%</div>
-            </div>
-            
-            <div class="success-message" id="success-message">
-                <i class="fas fa-check-circle"></i> File uploaded successfully!
-            </div>
-            
-            <div class="uploaded-files" id="uploaded-files">
-                <h4>Recently Uploaded Files</h4>
-                <!-- Uploaded files will appear here -->
-            </div>
-        </div>
-
-        <div class="panel-section">
-            <h3 class="panel-section-title">Content Management</h3>
-            <div class="form-group">
-                <label class="form-label" for="movie-title">Movie Title</label>
-                <input type="text" id="movie-title" class="form-control" placeholder="Enter movie title">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="movie-description">Description</label>
-                <textarea id="movie-description" class="form-control" rows="3" placeholder="Enter movie description"></textarea>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="movie-genre">Genre</label>
-                <select id="movie-genre" class="form-control">
-                    <option value="">Select Genre</option>
-                    <option value="action">Action</option>
-                    <option value="comedy">Comedy</option>
-                    <option value="drama">Drama</option>
-                    <option value="horror">Horror</option>
-                    <option value="sci-fi">Sci-Fi</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="movie-rating">Rating</label>
-                <input type="number" id="movie-rating" class="form-control" min="0" max="10" step="0.1" placeholder="0-10">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="movie-poster">Poster URL</label>
-                <input type="text" id="movie-poster" class="form-control" placeholder="Enter poster image URL">
-            </div>
-            <div class="checkbox-group">
-                <input type="checkbox" id="featured-movie">
-                <label for="featured-movie">Feature this movie on homepage</label>
-            </div>
-            <button class="btn btn-primary" style="width: 100%;">Add Movie</button>
-        </div>
-
-        <div class="panel-section">
-            <h3 class="panel-section-title">User Management</h3>
-            <div class="form-group">
-                <label class="form-label" for="user-search">Search Users</label>
-                <input type="text" id="user-search" class="form-control" placeholder="Search by username or email">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="user-role">User Role</label>
-                <select id="user-role" class="form-control">
-                    <option value="admin">Admin</option>
-                    <option value="moderator">Moderator</option>
-                    <option value="user" selected>User</option>
-                </select>
-            </div>
-            <button class="btn btn-secondary" style="width: 100%;">Manage Users</button>
-        </div>
-
-        <div class="panel-section">
-            <h3 class="panel-section-title">Site Settings</h3>
-            <div class="checkbox-group">
-                <input type="checkbox" id="maintenance-mode">
-                <label for="maintenance-mode">Enable Maintenance Mode</label>
-            </div>
-            <div class="checkbox-group">
-                <input type="checkbox" id="user-registration" checked>
-                <label for="user-registration">Allow New User Registration</label>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="site-theme">Site Theme</label>
-                <select id="site-theme" class="form-control">
-                    <option value="dark">Dark</option>
-                    <option value="light">Light</option>
-                    <option value="auto">Auto (System Preference)</option>
-                </select>
-            </div>
-            <button class="btn btn-primary" style="width: 100%;">Save Settings</button>
+                
+                <div class="form-group">
+                    <label>প্রজেক্ট লিংক</label>
+                    <input type="url" id="projectLink" placeholder="https://example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>লোগো আপলোড করুন</label>
+                    <div class="file-input-wrapper">
+                        <label for="logoInput" class="file-input-label">
+                            <span style="font-size: 1.5em;">📁</span>
+                            <span>লোগো বাছাই করুন</span>
+                        </label>
+                        <input type="file" id="logoInput" accept="image/*" onchange="previewLogo(event)">
+                    </div>
+                    <img id="logoPreview" class="logo-preview">
+                </div>
+                
+                <div class="form-group">
+                    <label>নোট/বিবরণ</label>
+                    <textarea id="projectNotes" placeholder="আজকে কি কাজ করলেন লিখুন..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>রিমাইন্ডার সেট করুন</label>
+                    <select id="reminderType">
+                        <option value="none">রিমাইন্ডার নাই</option>
+                        <option value="daily">ডেইলি রিমাইন্ডার</option>
+                        <option value="weekly">উইকলি রিমাইন্ডার</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">সেভ করুন</button>
+            </form>
         </div>
     </div>
 
     <script>
-        // Sample movie data
-        const movies = [
-            {
-                id: 1,
-                title: "The Matrix Resurrections",
-                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-                year: 2021,
-                rating: 7.5,
-                genre: "Sci-Fi"
-            },
-            {
-                id: 2,
-                title: "Spider-Man: No Way Home",
-                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-                year: 2021,
-                rating: 8.3,
-                genre: "Action"
-            },
-            {
-                id: 3,
-                title: "Dune",
-                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-                year: 2021,
-                rating: 8.1,
-                genre: "Sci-Fi"
-            },
-            {
-                id: 4,
-                title: "No Time To Die",
-                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-                year: 2021,
-                rating: 7.4,
-                genre: "Action"
-            },
-            {
-                id: 5,
-                title: "The Batman",
-                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-                year: 2022,
-                rating: 8.1,
-                genre: "Action"
-            },
-            {
-                id: 6,
-                title: "Black Widow",
-                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-                year: 2021,
-                rating: 6.8,
-                genre: "Action"
-            },
-            {
-                id: 7,
-                title: "Shang-Chi",
-                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-                year: 2021,
-                rating: 7.5,
-                genre: "Action"
-            },
-            {
-                id: 8,
-                title: "Eternals",
-                poster: "https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-                year: 2021,
-                rating: 6.4,
-                genre: "Action"
-            }
-        ];
+        let projects = [];
+        let editingId = null;
 
-        // Populate movie sections
-        function populateMovies() {
-            const popularMovies = document.getElementById('popular-movies');
-            const trendingMovies = document.getElementById('trending-movies');
-            const topRatedMovies = document.getElementById('top-rated-movies');
+        // Set share link
+        document.getElementById('shareLink').textContent = window.location.href;
 
-            // Clear existing content
-            popularMovies.innerHTML = '';
-            trendingMovies.innerHTML = '';
-            topRatedMovies.innerHTML = '';
-
-            // Add movies to each section
-            movies.forEach(movie => {
-                const movieCard = createMovieCard(movie);
-                popularMovies.appendChild(movieCard.cloneNode(true));
-                trendingMovies.appendChild(movieCard.cloneNode(true));
-                topRatedMovies.appendChild(movieCard.cloneNode(true));
+        function copyShareLink() {
+            const link = window.location.href;
+            navigator.clipboard.writeText(link).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ কপি!';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                }, 2000);
+            }).catch(() => {
+                alert('লিংক কপি করুন: ' + link);
             });
         }
 
-        // Create movie card element
-        function createMovieCard(movie) {
-            const card = document.createElement('div');
-            card.className = 'movie-card';
-            card.innerHTML = `
-                <img src="${movie.poster}" alt="${movie.title}" class="movie-poster">
-                <div class="movie-info">
-                    <h3 class="movie-title">${movie.title}</h3>
-                    <div class="movie-meta">
-                        <span>${movie.year}</span>
-                        <span class="rating"><i class="fas fa-star"></i> ${movie.rating}</span>
-                    </div>
-                </div>
-            `;
-            return card;
+        async function loadProjects() {
+            try {
+                const result = await window.storage.list('project:', true);
+                
+                if (result && result.keys && result.keys.length > 0) {
+                    projects = [];
+                    
+                    for (const key of result.keys) {
+                        try {
+                            const projectData = await window.storage.get(key, true);
+                            if (projectData && projectData.value) {
+                                projects.push(JSON.parse(projectData.value));
+                            }
+                        } catch (err) {
+                            console.log('Skipping project:', key);
+                        }
+                    }
+                    
+                    projects.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                }
+
+                displayProjects();
+                updateStats();
+                checkReminders();
+
+            } catch (error) {
+                console.error('Load error:', error);
+                displayProjects();
+                updateStats();
+            }
         }
 
-        // Control Panel functionality
-        const controlPanelBtn = document.getElementById('control-panel-btn');
-        const closePanelBtn = document.getElementById('close-panel');
-        const controlPanel = document.getElementById('control-panel');
-        const panelOverlay = document.getElementById('panel-overlay');
+        function updateStats() {
+            document.getElementById('totalProjects').textContent = projects.length;
+            document.getElementById('dailyReminders').textContent = 
+                projects.filter(p => p.reminder === 'daily').length;
+            document.getElementById('weeklyReminders').textContent = 
+                projects.filter(p => p.reminder === 'weekly').length;
+        }
 
-        controlPanelBtn.addEventListener('click', () => {
-            controlPanel.classList.add('active');
-            panelOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        });
-
-        closePanelBtn.addEventListener('click', () => {
-            controlPanel.classList.remove('active');
-            panelOverlay.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        });
-
-        panelOverlay.addEventListener('click', () => {
-            controlPanel.classList.remove('active');
-            panelOverlay.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        });
-
-        // File Upload Functionality
-        const uploadArea = document.getElementById('upload-area');
-        const fileInput = document.getElementById('file-input');
-        const progressContainer = document.getElementById('progress-container');
-        const progressBar = document.getElementById('progress-bar');
-        const progressText = document.getElementById('progress-text');
-        const successMessage = document.getElementById('success-message');
-        const uploadedFiles = document.getElementById('uploaded-files');
-
-        // Click on upload area to trigger file input
-        uploadArea.addEventListener('click', () => {
-            fileInput.click();
-        });
-
-        // Handle file selection
-        fileInput.addEventListener('change', handleFileSelect);
-
-        // Drag and drop functionality
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
+        function openModal(project = null) {
+            const modal = document.getElementById('projectModal');
+            const form = document.getElementById('projectForm');
             
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                handleFileSelect();
+            if (project) {
+                document.getElementById('modalTitle').textContent = 'প্রজেক্ট এডিট করুন';
+                document.getElementById('projectId').value = project.id;
+                document.getElementById('projectName').value = project.name;
+                document.getElementById('projectLink').value = project.link || '';
+                document.getElementById('projectNotes').value = project.notes || '';
+                document.getElementById('reminderType').value = project.reminder || 'none';
+                
+                if (project.logo) {
+                    document.getElementById('logoPreview').src = project.logo;
+                    document.getElementById('logoPreview').style.display = 'block';
+                }
+                editingId = project.id;
+            } else {
+                document.getElementById('modalTitle').textContent = 'নতুন প্রজেক্ট যোগ করুন';
+                form.reset();
+                document.getElementById('logoPreview').style.display = 'none';
+                editingId = null;
             }
-        });
+            
+            modal.style.display = 'block';
+        }
 
-        // Handle file selection and upload simulation
-        function handleFileSelect() {
-            const files = fileInput.files;
-            if (files.length === 0) return;
+        function closeModal() {
+            document.getElementById('projectModal').style.display = 'none';
+        }
+
+        function previewLogo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('logoPreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function saveProject(event) {
+            event.preventDefault();
             
-            // Show progress container
-            progressContainer.style.display = 'block';
-            successMessage.style.display = 'none';
-            
-            // Simulate upload progress
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 10;
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(interval);
-                    
-                    // Show success message
-                    setTimeout(() => {
-                        successMessage.style.display = 'block';
-                        progressContainer.style.display = 'none';
-                        
-                        // Add files to uploaded list
-                        addFilesToUploadedList(files);
-                    }, 500);
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'সেভ হচ্ছে...';
+
+            try {
+                const name = document.getElementById('projectName').value;
+                const link = document.getElementById('projectLink').value;
+                const notes = document.getElementById('projectNotes').value;
+                const reminder = document.getElementById('reminderType').value;
+                const logoPreview = document.getElementById('logoPreview');
+                const logo = logoPreview.style.display === 'block' ? logoPreview.src : null;
+                
+                let project;
+                
+                if (editingId) {
+                    const existingProject = projects.find(p => p.id === editingId);
+                    project = {
+                        ...existingProject,
+                        name,
+                        link,
+                        notes,
+                        reminder,
+                        logo,
+                        updatedAt: new Date().toISOString()
+                    };
+                } else {
+                    project = {
+                        id: 'proj_' + Date.now(),
+                        name,
+                        link,
+                        notes,
+                        reminder,
+                        logo,
+                        createdAt: new Date().toISOString(),
+                        lastReminder: null
+                    };
                 }
                 
-                // Update progress bar and text
-                progressBar.style.width = `${progress}%`;
-                progressText.textContent = `Uploading... ${Math.round(progress)}%`;
-            }, 200);
-        }
+                // Save to shared storage
+                await window.storage.set('project:' + project.id, JSON.stringify(project), true);
+                
+                // Reload projects
+                await loadProjects();
+                
+                closeModal();
+                document.getElementById('projectForm').reset();
+                document.getElementById('logoPreview').style.display = 'none';
+                editingId = null;
 
-        // Add files to uploaded files list
-        function addFilesToUploadedList(files) {
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-                
-                const fileSize = formatFileSize(file.size);
-                
-                fileItem.innerHTML = `
-                    <div class="file-info">
-                        <i class="fas fa-file-video file-icon"></i>
-                        <div>
-                            <div class="file-name">${file.name}</div>
-                            <div class="file-size">${fileSize}</div>
-                        </div>
-                    </div>
-                    <div class="file-actions">
-                        <button class="file-action-btn" title="Play">
-                            <i class="fas fa-play"></i>
-                        </button>
-                        <button class="file-action-btn" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                
-                uploadedFiles.appendChild(fileItem);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'সেভ করুন';
             }
         }
 
-        // Format file size to human readable format
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
+        function displayProjects() {
+            const grid = document.getElementById('projectsGrid');
+            const emptyState = document.getElementById('emptyState');
             
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            if (projects.length === 0) {
+                grid.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
             
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', () => {
-            populateMovies();
-        });
-    </script>
-</body>
-</html>
+            emptyState.style.display = 'none';
+            grid.innerHTML = projects.map(project => `
+                <div class="project-card">
+                    <div class="project-header">
+                        ${project.logo ? `<img src="${project.logo}" class="project-logo" alt="Logo">` : '<div style="width:70px;height:70px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:2em;box-shadow:0 5px 15px rgba(0,0,0,0.1);">🚀</div>'}
+                        <div class="project-title">${escapeHtml(project.name)}</div>
+                    </div>
+                    
+                    ${project.link ? `<a href="${escapeHtml(project.link)}" class="project-link" target="_blank">🔗 ${escapeHtml(project.link)}</a><br>` : ''}
+                    
+                    ${project.notes ? `<div class
