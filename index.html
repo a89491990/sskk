@@ -163,6 +163,28 @@
             opacity: 0.9;
             font-weight: 300;
         }
+
+        .loading-spinner {
+            text-align: center;
+            color: white;
+            padding: 50px;
+            font-size: 1.5em;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         
         .add-project-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -183,10 +205,6 @@
         .add-project-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
-        }
-        
-        .add-project-btn:active {
-            transform: translateY(-1px);
         }
         
         .modal {
@@ -463,6 +481,7 @@
             color: #555;
             line-height: 1.8;
             border-left: 4px solid #667eea;
+            white-space: pre-wrap;
         }
         
         .reminder-badge {
@@ -539,6 +558,23 @@
             margin-bottom: 20px;
             opacity: 0.8;
         }
+
+        .config-notice {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid rgba(255, 193, 7, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            color: white;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .config-notice h3 {
+            color: #ffd54f;
+            margin-bottom: 10px;
+        }
         
         @media (max-width: 768px) {
             .header h1 {
@@ -566,9 +602,15 @@
             <h1>🚀 Airdrop Project Manager</h1>
             <p>আপনার সকল প্রজেক্ট সবার সাথে শেয়ার করুন</p>
 
+            <!-- Supabase Configuration Notice -->
+            <div class="config-notice" id="configNotice">
+                <h3>⚙️ Supabase সেটআপ প্রয়োজন</h3>
+                <p>এই অ্যাপ চালানোর জন্য Supabase URL এবং ANON KEY প্রয়োজন। নিচের স্ক্রিপ্টে আপনার credentials যোগ করুন।</p>
+            </div>
+
             <div class="share-info">
                 <h3>📢 সবাই দেখতে পারবে!</h3>
-                <p>এই অ্যাপে যোগ করা সব প্রজেক্ট সবাই দেখতে পারবে যারা এই পেজটি ওপেন করবে। আপনার প্রজেক্ট শেয়ার করার জন্য নিচের লিংকটি কপি করে শেয়ার করুন:</p>
+                <p>এই অ্যাপে যোগ করা সব প্রজেক্ট সবাই দেখতে পারবে যারা এই পেজটি ওপেন করবে।</p>
                 <div class="share-link-container">
                     <div class="share-link" id="shareLink"></div>
                     <button class="copy-btn" onclick="copyShareLink()">📋 কপি</button>
@@ -593,6 +635,11 @@
             <button class="add-project-btn" onclick="openModal()">
                 <span style="font-size: 1.5em;">+</span> নতুন প্রজেক্ট যোগ করুন
             </button>
+        </div>
+
+        <div class="loading-spinner" id="loadingSpinner" style="display: none;">
+            <div class="spinner"></div>
+            <div>লোড হচ্ছে...</div>
         </div>
         
         <div class="projects-grid" id="projectsGrid"></div>
@@ -651,7 +698,30 @@
         </div>
     </div>
 
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script>
+        // ⚠️ আপনার Supabase Configuration এখানে যোগ করুন
+        const SUPABASE_URL = 'https://axjqnbpvmalefhfyjpyn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4anFuYnB2bWFsZWZoZnlqcHluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4NzUxOTUsImV4cCI6MjA3OTQ1MTE5NX0.hy2rVH-sXQUxA0SQc6BrlTiZ2itFEMa76Ln7Wvs-qD4';
+
+        // Supabase Initialize
+        let supabase;
+        let supabaseInitialized = false;
+
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            
+            if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+                supabaseInitialized = true;
+                document.getElementById('configNotice').style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Supabase initialization error:', error);
+        }
+
+        // Global variables
         let projects = [];
         let editingId = null;
 
@@ -668,39 +738,78 @@
                     btn.innerHTML = originalText;
                 }, 2000);
             }).catch(() => {
-                alert('লিংক কপি করুন: ' + link);
+                alert('লিংক: ' + link);
             });
         }
 
+        // Load projects from Supabase
         async function loadProjects() {
-            try {
-                const result = await window.storage.list('project:', true);
-                
-                if (result && result.keys && result.keys.length > 0) {
-                    projects = [];
-                    
-                    for (const key of result.keys) {
-                        try {
-                            const projectData = await window.storage.get(key, true);
-                            if (projectData && projectData.value) {
-                                projects.push(JSON.parse(projectData.value));
-                            }
-                        } catch (err) {
-                            console.log('Skipping project:', key);
-                        }
-                    }
-                    
-                    projects.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                }
+            if (!supabaseInitialized) {
+                updateStats();
+                displayProjects();
+                return;
+            }
 
+            const spinner = document.getElementById('loadingSpinner');
+            spinner.style.display = 'block';
+
+            try {
+                const { data, error } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                projects = data || [];
                 displayProjects();
                 updateStats();
                 checkReminders();
 
             } catch (error) {
                 console.error('Load error:', error);
-                displayProjects();
-                updateStats();
+                if (error.message.includes('relation') || error.message.includes('does not exist')) {
+                    document.getElementById('configNotice').innerHTML = `
+                        <h3>⚠️ Table তৈরি করুন</h3>
+                        <p>Supabase SQL Editor এ গিয়ে নিচের SQL চালান:</p>
+                        <code style="display:block;background:rgba(0,0,0,0.2);padding:10px;border-radius:5px;margin-top:10px;font-size:12px;">
+                        CREATE TABLE projects (
+                          id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                          name TEXT NOT NULL,
+                          link TEXT,
+                          logo TEXT,
+                          notes TEXT,
+                          reminder TEXT DEFAULT 'none',
+                          last_reminder TIMESTAMP,
+                          created_at TIMESTAMP DEFAULT NOW()
+                        );
+                        
+                        -- Enable RLS
+                        ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+                        
+                        -- Allow public read access
+                        CREATE POLICY "Public read" ON projects FOR SELECT USING (true);
+                        
+                        -- Allow public insert/update/delete
+                        CREATE POLICY "Public insert" ON projects FOR INSERT WITH CHECK (true);
+                        CREATE POLICY "Public update" ON projects FOR UPDATE USING (true);
+                        CREATE POLICY "Public delete" ON projects FOR DELETE USING (true);
+                        </code>
+                    `;
+                    document.getElementById('configNotice').style.display = 'block';
+                }
+            } finally {
+                spinner.style.display = 'none';
+            }
+
+            // Setup realtime subscription
+            if (supabaseInitialized) {
+                supabase
+                    .channel('projects-channel')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => {
+                        loadProjects();
+                    })
+                    .subscribe();
             }
         }
 
@@ -722,118 +831,4 @@
                 document.getElementById('projectName').value = project.name;
                 document.getElementById('projectLink').value = project.link || '';
                 document.getElementById('projectNotes').value = project.notes || '';
-                document.getElementById('reminderType').value = project.reminder || 'none';
-                
-                if (project.logo) {
-                    document.getElementById('logoPreview').src = project.logo;
-                    document.getElementById('logoPreview').style.display = 'block';
-                }
-                editingId = project.id;
-            } else {
-                document.getElementById('modalTitle').textContent = 'নতুন প্রজেক্ট যোগ করুন';
-                form.reset();
-                document.getElementById('logoPreview').style.display = 'none';
-                editingId = null;
-            }
-            
-            modal.style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('projectModal').style.display = 'none';
-        }
-
-        function previewLogo(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('logoPreview');
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        async function saveProject(event) {
-            event.preventDefault();
-            
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'সেভ হচ্ছে...';
-
-            try {
-                const name = document.getElementById('projectName').value;
-                const link = document.getElementById('projectLink').value;
-                const notes = document.getElementById('projectNotes').value;
-                const reminder = document.getElementById('reminderType').value;
-                const logoPreview = document.getElementById('logoPreview');
-                const logo = logoPreview.style.display === 'block' ? logoPreview.src : null;
-                
-                let project;
-                
-                if (editingId) {
-                    const existingProject = projects.find(p => p.id === editingId);
-                    project = {
-                        ...existingProject,
-                        name,
-                        link,
-                        notes,
-                        reminder,
-                        logo,
-                        updatedAt: new Date().toISOString()
-                    };
-                } else {
-                    project = {
-                        id: 'proj_' + Date.now(),
-                        name,
-                        link,
-                        notes,
-                        reminder,
-                        logo,
-                        createdAt: new Date().toISOString(),
-                        lastReminder: null
-                    };
-                }
-                
-                // Save to shared storage
-                await window.storage.set('project:' + project.id, JSON.stringify(project), true);
-                
-                // Reload projects
-                await loadProjects();
-                
-                closeModal();
-                document.getElementById('projectForm').reset();
-                document.getElementById('logoPreview').style.display = 'none';
-                editingId = null;
-
-            } catch (error) {
-                alert('Error: ' + error.message);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'সেভ করুন';
-            }
-        }
-
-        function displayProjects() {
-            const grid = document.getElementById('projectsGrid');
-            const emptyState = document.getElementById('emptyState');
-            
-            if (projects.length === 0) {
-                grid.innerHTML = '';
-                emptyState.style.display = 'block';
-                return;
-            }
-            
-            emptyState.style.display = 'none';
-            grid.innerHTML = projects.map(project => `
-                <div class="project-card">
-                    <div class="project-header">
-                        ${project.logo ? `<img src="${project.logo}" class="project-logo" alt="Logo">` : '<div style="width:70px;height:70px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:2em;box-shadow:0 5px 15px rgba(0,0,0,0.1);">🚀</div>'}
-                        <div class="project-title">${escapeHtml(project.name)}</div>
-                    </div>
-                    
-                    ${project.link ? `<a href="${escapeHtml(project.link)}" class="project-link" target="_blank">🔗 ${escapeHtml(project.link)}</a><br>` : ''}
-                    
-                    ${project.notes ? `<div class
+                document.getElementById('
