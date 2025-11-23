@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airdrop Project Manager</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.05" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+            background-position: bottom;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header h1 {
+            font-size: 3.5em;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .share-info {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            color: white;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .share-info h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .share-info p {
+            font-size: 0.95em;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .share-link-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .share-link {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px 40px;
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            color: white;
+            padding: 50px;
+            font-size: 1.5em;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .add-project-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .add-project-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+            margin: 50px auto;
+            padding: 40px;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 650px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease;
+            position: relative;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-content h2 {
+            color: #1e3c72;
+            margin-bottom: 30px;
+            font-size: 2em;
+            font-weight: 600;
+        }
+        
+        .close {
+            position: absolute;
+            right: 25px;
+            top: 25px;
+            color: #999;
+            font-size: 32px;
+            font-weight: 300;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #333;
+            transform: rotate(90deg);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="url"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e7ff;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+            background: white;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        #logoInput {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .logo-preview {
+            max-width: 180px;
+            max-height: 180px;
+            margin-top: 15px;
+            border-radius: 15px;
+            display: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            border: 3px solid white;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            font-size: 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            font-weight: 600;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .project-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .project-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+        
+        .project-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+        
+        .project-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 3px solid white;
+        }
+        
+        .project-title {
+            flex: 1;
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #1e3c72;
+            line-height: 1.3;
+        }
+        
+        .project-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #667eea;
+            text-decoration: none;
+            margin-bottom: 15px;
+            font-weight: 500;
+            word-break: break-all;
+            transition: all 0.3s;
+        }
+        
+        .project-link:hover {
+            color: #764ba2;
+            transform: translateX(5px);
+        }
+        
+        .project-notes {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8edff 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            color: #555;
+            line-height: 1.8;
+            border-left: 4px solid #667eea;
+            white-space: pre-wrap;
+        }
+        
+        .reminder-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .daily {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        
+        .weekly {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .project-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .delete-btn, .edit-btn {
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            flex: 1;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .delete-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 0 3px 10px rgba(245, 87, 108, 0.3);
+        }
+        
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.5);
+        }
+        
+        .edit-btn {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            box-shadow: 0 3px 10px rgba(255, 152, 0, 0.3);
+        }
+        
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 152, 0, 0.5);
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: white;
+            padding: 80px 20px;
+            font-size: 1.3em;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        .empty-state-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .config-notice {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid rgba(255, 193, 7, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            color: white;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .config-notice h3 {
+            color: #ffd54f;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .share-link-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Airdrop Project Manager</h1>
+            <p>আপনার সকল প্রজেক্ট সবার সাথে শেয়ার করুন</p>
+
+            <!-- Supabase Configuration Notice -->
+            <div class="config-notice" id="configNotice">
+                <h3>⚙️ Supabase সেটআপ প্রয়োজন</h3>
+                <p>এই অ্যাপ চালানোর জন্য Supabase URL এবং ANON KEY প্রয়োজন। নিচের স্ক্রিপ্টে আপনার credentials যোগ করুন।</p>
+            </div>
+
+            <div class="share-info">
+                <h3>📢 সবাই দেখতে পারবে!</h3>
+                <p>এই অ্যাপে যোগ করা সব প্রজেক্ট সবাই দেখতে পারবে যারা এই পেজটি ওপেন করবে।</p>
+                <div class="share-link-container">
+                    <div class="share-link" id="shareLink"></div>
+                    <button class="copy-btn" onclick="copyShareLink()">📋 কপি</button>
+                </div>
+            </div>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <span class="stat-number" id="totalProjects">0</span>
+                    <span class="stat-label">মোট প্রজেক্ট</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="dailyReminders">0</span>
+                    <span class="stat-label">ডেইলি রিমাইন্ডার</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="weeklyReminders">0</span>
+                    <span class="stat-label">উইকলি রিমাইন্ডার</span>
+                </div>
+            </div>
+            
+            <button class="add-project-btn" onclick="openModal()">
+                <span style="font-size: 1.5em;">+</span> নতুন প্রজেক্ট যোগ করুন
+            </button>
+        </div>
+
+        <div class="loading-spinner" id="loadingSpinner" style="display: none;">
+            <div class="spinner"></div>
+            <div>লোড হচ্ছে...</div>
+        </div>
+        
+        <div class="projects-grid" id="projectsGrid"></div>
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-state-icon">📋</div>
+            কোনো প্রজেক্ট নেই। উপরের বাটনে ক্লিক করে নতুন প্রজেক্ট যোগ করুন!
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">নতুন প্রজেক্ট যোগ করুন</h2>
+            <form id="projectForm" onsubmit="saveProject(event)">
+                <input type="hidden" id="projectId">
+                
+                <div class="form-group">
+                    <label>প্রজেক্টের নাম *</label>
+                    <input type="text" id="projectName" required placeholder="যেমন: Bitcoin Airdrop">
+                </div>
+                
+                <div class="form-group">
+                    <label>প্রজেক্ট লিংক</label>
+                    <input type="url" id="projectLink" placeholder="https://example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>লোগো আপলোড করুন</label>
+                    <div class="file-input-wrapper">
+                        <label for="logoInput" class="file-input-label">
+                            <span style="font-size: 1.5em;">📁</span>
+                            <span>লোগো বাছাই করুন</span>
+                        </label>
+                        <input type="file" id="logoInput" accept="image/*" onchange="previewLogo(event)">
+                    </div>
+                    <img id="logoPreview" class="logo-preview">
+                </div>
+                
+                <div class="form-group">
+                    <label>নোট/বিবরণ</label>
+                    <textarea id="projectNotes" placeholder="আজকে কি কাজ করলেন লিখুন..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>রিমাইন্ডার সেট করুন</label>
+                    <select id="reminderType">
+                        <option value="none">রিমাইন্ডার নাই</option>
+                        <option value="daily">ডেইলি রিমাইন্ডার</option>
+                        <option value="weekly">উইকলি রিমাইন্ডার</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">সেভ করুন</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // ⚠️ আপনার Supabase Configuration এখানে যোগ করুন
+        const SUPABASE_URL = 'https://axjqnbpvmalefhfyjpyn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4anFuYnB2bWFsZWZoZnlqcHluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4NzUxOTUsImV4cCI6MjA3OTQ1MTE5NX0.hy2rVH-sXQUxA0SQc6BrlTiZ2itFEMa76Ln7Wvs-qD4';
+
+        // Supabase Initialize
+        let supabase;
+        let supabaseInitialized = false;
+
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            
+            if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+                supabaseInitialized = true;
+                document.getElementById('configNotice').style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Supabase initialization error:', error);
+        }
+
+        // Global variables
+        let projects = [];
+        let editingId = null;
+
+        // Set share link
+        document.getElementById('shareLink').textContent = window.location.href;
+
+        function copyShareLink() {
+            const link = window.location.href;
+            navigator.clipboard.writeText(link).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ কপি!';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                }, 2000);
+            }).catch(() => {
+                alert('লিংক: ' + link);
+            });
+        }
+
+        // Load projects from Supabase
+        async function loadProjects() {
+            if (!supabaseInitialized) {
+                updateStats();
+                displayProjects();
+                return;
+            }
+
+            const spinner = document.getElementById('loadingSpinner');
+            spinner.style.display = 'block';
+
+            try {
+                const { data, error } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                projects = data || [];
+                displayProjects();
+                updateStats();
+                checkReminders();
+
+            } catch (error) {
+                console.error('Load error:', error);
+                if (error.message.includes('relation') || error.message.includes('does not exist')) {
+                    document.getElementById('configNotice').innerHTML = `
+                        <h3>⚠️ Table তৈরি করুন</h3>
+                        <p>Supabase SQL Editor এ গিয়ে নিচের SQL চালান:</p>
+                        <code style="display:block;background:rgba(0,0,0,0.2);padding:10px;border-radius:5px;margin-top:10px;font-size:12px;">
+                        CREATE TABLE projects (
+                          id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                          name TEXT NOT NULL,
+                          link TEXT,
+                          logo TEXT,
+                          notes TEXT,
+                          reminder TEXT DEFAULT 'none',
+                          last_reminder TIMESTAMP,
+                          created_at TIMESTAMP DEFAULT NOW()
+                        );
+                        
+                        -- Enable RLS
+                        ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+                        
+                        -- Allow public read access
+                        CREATE POLICY "Public read" ON projects FOR SELECT USING (true);
+                        
+                        -- Allow public insert/update/delete
+                        CREATE POLICY "Public insert" ON projects FOR INSERT WITH CHECK (true);
+                        CREATE POLICY "Public update" ON projects FOR UPDATE USING (true);
+                        CREATE POLICY "Public delete" ON projects FOR DELETE USING (true);
+                        </code>
+                    `;
+                    document.getElementById('configNotice').style.display = 'block';
+                }
+            } finally {
+                spinner.style.display = 'none';
+            }
+
+            // Setup realtime subscription
+            if (supabaseInitialized) {
+                supabase
+                    .channel('projects-channel')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => {
+                        loadProjects();
+                    })
+                    .subscribe();
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('totalProjects').textContent = projects.length;
+            document.getElementById('dailyReminders').textContent = 
+                projects.filter(p => p.reminder === 'daily').length;
+            document.getElementById('weeklyReminders').textContent = 
+                projects.filter(p => p.reminder === 'weekly').length;
+        }
+
+        function openModal(project = null) {
+            const modal = document.getElementById('projectModal');
+            const form = document.getElementById('projectForm');
+            
+            if (project) {
+                document.getElementById('modalTitle').textContent = 'প্রজেক্ট এডিট করুন';
+                document.getElementById('projectId').value = project.id;
+                document.getElementById('projectName').value = project.name;
+                document.getElementById('projectLink').value = project.link || '';
+                document.getElementById('projectNotes').value = project.notes || '';
+                document.getElementById('
