@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EARN&POINT Pro - Project Management Dashboard</title>
+  <title>Airdrop Pro - Professional Project Manager</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -203,6 +203,11 @@
 
     .btn-danger {
       background: var(--danger);
+      color: white;
+    }
+
+    .btn-warning {
+      background: var(--warning);
       color: white;
     }
 
@@ -621,6 +626,49 @@
       flex: 1;
     }
 
+    /* Backup Modal */
+    .backup-modal {
+      max-width: 500px;
+    }
+
+    .backup-options {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .backup-option {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      border: 1px solid var(--gray-light);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .backup-option:hover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .backup-option i {
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    .backup-option-content h4 {
+      margin-bottom: 5px;
+      color: var(--dark);
+    }
+
+    .backup-option-content p {
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+
     /* Toast notification */
     .toast {
       position: fixed;
@@ -649,6 +697,25 @@
 
     .toast.info {
       background: var(--info);
+    }
+
+    .toast.warning {
+      background: var(--warning);
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     /* Responsive */
@@ -728,8 +795,7 @@
       <ul class="nav-links">
         <li><a href="#" class="active"><i class="fas fa-home"></i> <span>ড্যাশবোর্ড</span></a></li>
         <li><a href="#"><i class="fas fa-project-diagram"></i> <span>প্রজেক্টস</span></a></li>
-        <li><a href="#"><i class="fas fa-calendar-alt"></i> <span>ক্যালেন্ডার</span></a></li>
-        <li><a href="#"><i class="fas fa-chart-line"></i> <span>অ্যানালিটিক্স</span></a></li>
+        <li><a href="#"><i class="fas fa-database"></i> <span>ব্যাকআপ</span></a></li>
         <li><a href="#"><i class="fas fa-cog"></i> <span>সেটিংস</span></a></li>
       </ul>
     </div>
@@ -741,6 +807,9 @@
         <div class="header-actions">
           <button class="btn btn-primary" onclick="openModal()">
             <i class="fas fa-plus"></i> নতুন প্রজেক্ট
+          </button>
+          <button class="btn btn-secondary" onclick="openBackupModal()">
+            <i class="fas fa-database"></i> ব্যাকআপ
           </button>
           <button class="btn theme-toggle" onclick="toggleTheme()">
             <i class="fas fa-moon"></i>
@@ -779,6 +848,16 @@
             <p>ছবি সহ প্রজেক্ট</p>
           </div>
         </div>
+
+        <div class="stat-card">
+          <div class="stat-icon primary">
+            <i class="fas fa-server"></i>
+          </div>
+          <div class="stat-content">
+            <h3 id="apiStatus">Online</h3>
+            <p>API স্ট্যাটাস</p>
+          </div>
+        </div>
       </div>
 
       <!-- Projects Section -->
@@ -786,8 +865,8 @@
         <div class="section-header">
           <h2 class="section-title">সকল প্রজেক্ট</h2>
           <div class="section-actions">
-            <button class="btn btn-outline btn-sm">
-              <i class="fas fa-filter"></i> ফিল্টার
+            <button class="btn btn-outline btn-sm" onclick="refreshProjects()">
+              <i class="fas fa-sync-alt"></i> রিফ্রেশ
             </button>
           </div>
         </div>
@@ -799,7 +878,7 @@
     </div>
   </div>
 
-  <!-- Modal -->
+  <!-- Project Modal -->
   <div class="modal-overlay" id="modal">
     <div class="modal">
       <div class="modal-header">
@@ -852,7 +931,7 @@
           </div>
           
           <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" id="submitBtn">
               <i class="fas fa-check"></i> প্রজেক্ট সংরক্ষণ করুন
             </button>
             <button type="button" class="btn btn-outline" onclick="closeModal()">
@@ -864,6 +943,59 @@
     </div>
   </div>
 
+  <!-- Backup Modal -->
+  <div class="modal-overlay" id="backupModal">
+    <div class="modal backup-modal">
+      <div class="modal-header">
+        <h2>ডেটা ব্যাকআপ ম্যানেজমেন্ট</h2>
+        <button class="close-btn" onclick="closeBackupModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="backup-options">
+          <div class="backup-option" onclick="backupToJSONBin()">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <div class="backup-option-content">
+              <h4>JSONBin-এ ব্যাকআপ নিন</h4>
+              <p>বর্তমান ডেটা JSONBin-এ সংরক্ষণ করুন</p>
+            </div>
+          </div>
+          
+          <div class="backup-option" onclick="restoreFromJSONBin()">
+            <i class="fas fa-cloud-download-alt"></i>
+            <div class="backup-option-content">
+              <h4>JSONBin থেকে রিস্টোর করুন</h4>
+              <p>JSONBin থেকে ডেটা পুনরুদ্ধার করুন</p>
+            </div>
+          </div>
+          
+          <div class="backup-option" onclick="exportData()">
+            <i class="fas fa-file-export"></i>
+            <div class="backup-option-content">
+              <h4>ডেটা এক্সপোর্ট করুন</h4>
+              <p>সকল ডেটা JSON ফাইল হিসেবে ডাউনলোড করুন</p>
+            </div>
+          </div>
+          
+          <div class="backup-option" onclick="importData()">
+            <i class="fas fa-file-import"></i>
+            <div class="backup-option-content">
+              <h4>ডেটা ইম্পোর্ট করুন</h4>
+              <p>JSON ফাইল থেকে ডেটা ইম্পোর্ট করুন</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" onclick="closeBackupModal()">
+            <i class="fas fa-times"></i> বন্ধ করুন
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div class="toast" id="toast">
     <i class="fas fa-check-circle"></i>
@@ -871,51 +1003,217 @@
   </div>
 
   <script>
-    // 🔹 তোমার JSONBin API সেটআপ
-    const BIN_ID = "6927bafa43b1c97be9c79deb";
-    const API_KEY = "$2a$10$oGg8RSUOeo1gxuEBtwe7K.XBhkAEYb8hxn31SZ/lovkudlLPfmK82";
-    const JSON_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+    // 🔹 API Configuration
+    const MOCKAPI_URL = "https://6927c2a1b35b4ffc5812f92d.mockapi.io/projects";
+    const JSONBIN_BIN_ID = "6927bb28d0ea881f40029c3e";
+    const JSONBIN_API_KEY = "$2a$10$oGg8RSUOeo1gxuEBtwe7K.XBhkAEYb8hxn31SZ/lovkudlLPfmK82";
+    const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
     let projects = [];
     let isEditing = false;
     let currentImage = null;
+    let currentProjectId = null;
 
-    // 🔸 ডেটা লোড
+    // 🔸 MockAPI থেকে ডেটা লোড
     async function loadProjects() {
       try {
         showToast("প্রজেক্ট লোড হচ্ছে...", "info");
-        const res = await fetch(JSON_URL, {
-          headers: { 
-            "X-Master-Key": API_KEY,
-            "Content-Type": "application/json"
-          }
-        });
-        const data = await res.json();
-        projects = data.record?.projects || [];
+        
+        // Try MockAPI first
+        let response = await fetch(MOCKAPI_URL);
+        
+        if (!response.ok) {
+          throw new Error("MockAPI failed, trying JSONBin backup...");
+        }
+        
+        projects = await response.json();
+        document.getElementById('apiStatus').textContent = "Online";
+        document.getElementById('apiStatus').style.color = "var(--secondary)";
+        
         renderProjects();
         updateStats();
         showToast("প্রজেক্ট সফলভাবে লোড হয়েছে!", "success");
-      } catch (err) {
-        showToast("ডেটা লোড করা যায়নি!", "error");
-        console.error(err);
+        
+      } catch (error) {
+        console.log("MockAPI failed, trying JSONBin backup:", error);
+        
+        // Fallback to JSONBin
+        try {
+          const binResponse = await fetch(JSONBIN_URL, {
+            headers: { "X-Master-Key": JSONBIN_API_KEY }
+          });
+          
+          if (!binResponse.ok) throw new Error("JSONBin also failed");
+          
+          const data = await binResponse.json();
+          projects = data.record?.projects || [];
+          document.getElementById('apiStatus').textContent = "Backup";
+          document.getElementById('apiStatus').style.color = "var(--warning)";
+          
+          renderProjects();
+          updateStats();
+          showToast("ব্যাকআপ থেকে ডেটা লোড হয়েছে!", "warning");
+          
+        } catch (backupError) {
+          console.error("Both APIs failed:", backupError);
+          document.getElementById('apiStatus').textContent = "Offline";
+          document.getElementById('apiStatus').style.color = "var(--danger)";
+          showToast("ডেটা লোড করা যায়নি! অফলাইন মোড।", "error");
+        }
       }
     }
 
-    // 🔸 সার্ভারে সেভ
-    async function saveToServer() {
+    // 🔸 MockAPI-তে প্রজেক্ট সেভ
+    async function saveProjectToAPI(project) {
       try {
-        await fetch(JSON_URL, {
+        let url = MOCKAPI_URL;
+        let method = 'POST';
+        
+        if (project.id && project.id.length < 10) { // MockAPI ID format check
+          url += `/${project.id}`;
+          method = 'PUT';
+        }
+        
+        const response = await fetch(url, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(project)
+        });
+        
+        if (!response.ok) throw new Error("MockAPI save failed");
+        
+        return await response.json();
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    // 🔸 MockAPI থেকে প্রজেক্ট ডিলিট
+    async function deleteProjectFromAPI(id) {
+      try {
+        const response = await fetch(`${MOCKAPI_URL}/${id}`, {
+          method: 'DELETE'
+        });
+        
+        if (!response.ok) throw new Error("MockAPI delete failed");
+        
+        return true;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    // 🔸 JSONBin-এ ব্যাকআপ
+    async function backupToJSONBin() {
+      try {
+        showToast("ব্যাকআপ তৈরি হচ্ছে...", "info");
+        
+        await fetch(JSONBIN_URL, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            "X-Master-Key": API_KEY
+            "X-Master-Key": JSONBIN_API_KEY
           },
-          body: JSON.stringify({ projects })
+          body: JSON.stringify({ 
+            projects: projects,
+            lastBackup: new Date().toISOString(),
+            totalProjects: projects.length
+          })
         });
-      } catch (err) {
-        showToast("সেভে সমস্যা হয়েছে!", "error");
-        console.error(err);
+        
+        closeBackupModal();
+        showToast("ব্যাকআপ সফলভাবে তৈরি হয়েছে!", "success");
+      } catch (error) {
+        console.error("Backup failed:", error);
+        showToast("ব্যাকআপ তৈরি করা যায়নি!", "error");
       }
+    }
+
+    // 🔸 JSONBin থেকে রিস্টোর
+    async function restoreFromJSONBin() {
+      try {
+        showToast("ডেটা রিস্টোর হচ্ছে...", "info");
+        
+        const response = await fetch(JSONBIN_URL, {
+          headers: { "X-Master-Key": JSONBIN_API_KEY }
+        });
+        
+        if (!response.ok) throw new Error("JSONBin restore failed");
+        
+        const data = await response.json();
+        projects = data.record?.projects || [];
+        
+        // Save restored data to MockAPI
+        for (let project of projects) {
+          await saveProjectToAPI(project);
+        }
+        
+        closeBackupModal();
+        renderProjects();
+        updateStats();
+        showToast("ডেটা সফলভাবে রিস্টোর হয়েছে!", "success");
+      } catch (error) {
+        console.error("Restore failed:", error);
+        showToast("ডেটা রিস্টোর করা যায়নি!", "error");
+      }
+    }
+
+    // 🔸 ডেটা এক্সপোর্ট
+    function exportData() {
+      const dataStr = JSON.stringify(projects, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `airdrop-projects-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      closeBackupModal();
+      showToast("ডেটা সফলভাবে এক্সপোর্ট হয়েছে!", "success");
+    }
+
+    // 🔸 ডেটা ইম্পোর্ট
+    function importData() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        try {
+          const text = await file.text();
+          const importedProjects = JSON.parse(text);
+          
+          if (Array.isArray(importedProjects)) {
+            projects = importedProjects;
+            
+            // Save imported projects to MockAPI
+            for (let project of projects) {
+              await saveProjectToAPI(project);
+            }
+            
+            renderProjects();
+            updateStats();
+            showToast("ডেটা সফলভাবে ইম্পোর্ট হয়েছে!", "success");
+          } else {
+            throw new Error("Invalid file format");
+          }
+        } catch (error) {
+          console.error("Import failed:", error);
+          showToast("ডেটা ইম্পোর্ট করা যায়নি!", "error");
+        }
+      };
+      
+      input.click();
+      closeBackupModal();
     }
 
     // 🔸 প্রজেক্ট দেখানো
@@ -1001,38 +1299,56 @@
     }
 
     // 🔸 প্রজেক্ট যোগ করা
-    function saveProject(event) {
+    async function saveProject(event) {
       event.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<div class="loading-spinner"></div> সংরক্ষণ হচ্ছে...';
+      submitBtn.disabled = true;
+      
       const name = document.getElementById('projectName').value;
       const link = document.getElementById('projectLink').value;
       const notes = document.getElementById('projectNotes').value;
       const reminder = document.getElementById('reminderType').value;
       const id = document.getElementById('projectId').value || Date.now().toString();
 
-      const index = projects.findIndex(p => p.id === id);
-      const newProject = { 
-        id, 
+      const projectData = { 
+        id: id,
         name, 
         link, 
         notes, 
         reminder,
-        image: currentImage || (index >= 0 ? projects[index].image : null),
-        createdAt: index >= 0 ? projects[index].createdAt : new Date().toISOString(),
+        image: currentImage,
+        createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
       
-      if (index >= 0) {
-        projects[index] = newProject;
-        showToast("প্রজেক্ট আপডেট করা হয়েছে!", "success");
-      } else {
-        projects.push(newProject);
-        showToast("নতুন প্রজেক্ট যোগ করা হয়েছে!", "success");
+      try {
+        // Save to MockAPI
+        const savedProject = await saveProjectToAPI(projectData);
+        
+        // Update local projects array
+        const index = projects.findIndex(p => p.id === id);
+        if (index >= 0) {
+          projects[index] = savedProject;
+          showToast("প্রজেক্ট আপডেট করা হয়েছে!", "success");
+        } else {
+          projects.push(savedProject);
+          showToast("নতুন প্রজেক্ট যোগ করা হয়েছে!", "success");
+        }
+        
+        closeModal();
+        renderProjects();
+        updateStats();
+        
+      } catch (error) {
+        console.error("Save failed:", error);
+        showToast("প্রজেক্ট সংরক্ষণ করা যায়নি!", "error");
+      } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
       }
-
-      saveToServer();
-      closeModal();
-      renderProjects();
-      updateStats();
     }
 
     // 🔸 এডিট করা
@@ -1062,13 +1378,18 @@
     }
 
     // 🔸 ডিলিট
-    function deleteProject(id) {
+    async function deleteProject(id) {
       if (confirm("আপনি কি নিশ্চিত যে এই প্রজেক্টটি ডিলিট করতে চান?")) {
-        projects = projects.filter(p => p.id !== id);
-        saveToServer();
-        renderProjects();
-        updateStats();
-        showToast("প্রজেক্ট ডিলিট করা হয়েছে!", "success");
+        try {
+          await deleteProjectFromAPI(id);
+          projects = projects.filter(p => p.id !== id);
+          renderProjects();
+          updateStats();
+          showToast("প্রজেক্ট ডিলিট করা হয়েছে!", "success");
+        } catch (error) {
+          console.error("Delete failed:", error);
+          showToast("প্রজেক্ট ডিলিট করা যায়নি!", "error");
+        }
       }
     }
 
@@ -1085,6 +1406,14 @@
       removeImage();
       isEditing = false;
       currentImage = null;
+    }
+
+    function openBackupModal() {
+      document.getElementById('backupModal').classList.add('active');
+    }
+
+    function closeBackupModal() {
+      document.getElementById('backupModal').classList.remove('active');
     }
 
     // 🔸 থিম টগল
@@ -1107,6 +1436,11 @@
       document.getElementById('projectsWithImages').textContent = projects.filter(p => p.image).length;
     }
 
+    // 🔸 প্রজেক্ট রিফ্রেশ
+    function refreshProjects() {
+      loadProjects();
+    }
+
     // 🔸 টোস্ট নোটিফিকেশন
     function showToast(message, type = "success") {
       const toast = document.getElementById('toast');
@@ -1123,6 +1457,9 @@
       } else if (type === "info") {
         toast.classList.add('info');
         toastIcon.className = 'fas fa-info-circle';
+      } else if (type === "warning") {
+        toast.classList.add('warning');
+        toastIcon.className = 'fas fa-exclamation-triangle';
       } else {
         toastIcon.className = 'fas fa-check-circle';
       }
@@ -1165,6 +1502,12 @@
       document.getElementById('modal').addEventListener('click', function(e) {
         if (e.target === this) {
           closeModal();
+        }
+      });
+      
+      document.getElementById('backupModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeBackupModal();
         }
       });
     });
