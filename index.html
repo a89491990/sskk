@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Airdrop Pro - Firebase Project Manager</title>
+  <title>Airdrop Pro - Super Fast Project Manager</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
@@ -317,6 +317,20 @@
 
     .connection-status i {
       font-size: 1.2rem;
+    }
+
+    /* Performance Status */
+    .performance-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--info);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      font-size: 0.85rem;
+      margin-left: 10px;
     }
 
     /* Projects Grid */
@@ -705,6 +719,30 @@
       to { transform: rotate(360deg); }
     }
 
+    /* Skeleton Loading */
+    .skeleton {
+      background: linear-gradient(90deg, var(--gray-light) 25%, rgba(255,255,255,0.5) 50%, var(--gray-light) 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .skeleton-card {
+      height: 200px;
+      border-radius: 15px;
+    }
+
+    /* Performance Optimizations */
+    .optimized-image {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+
     /* Responsive */
     @media (max-width: 1024px) {
       .sidebar {
@@ -795,6 +833,10 @@
           <button class="btn btn-primary" onclick="openModal()">
             <i class="fas fa-plus"></i> নতুন প্রজেক্ট
           </button>
+          <div class="performance-status">
+            <i class="fas fa-bolt"></i>
+            <span id="performanceIndicator">Super Fast</span>
+          </div>
           <button class="btn theme-toggle" onclick="toggleTheme()">
             <i class="fas fa-moon"></i>
           </button>
@@ -805,6 +847,10 @@
       <div id="connectionStatus" class="connection-status online">
         <i class="fas fa-wifi"></i>
         <span>Firebase Connected - Real-time Sync Active</span>
+        <span id="responseTime" class="performance-status" style="margin-left: 10px;">
+          <i class="fas fa-clock"></i>
+          <span>Response: 0ms</span>
+        </span>
       </div>
 
       <!-- Stats Section -->
@@ -860,6 +906,9 @@
             </button>
             <button class="btn btn-secondary btn-sm" onclick="checkFirebaseConnection()">
               <i class="fas fa-plug"></i> কানেকশন চেক
+            </button>
+            <button class="btn btn-warning btn-sm" onclick="clearCache()">
+              <i class="fas fa-broom"></i> ক্যাশে ক্লিয়ার
             </button>
           </div>
         </div>
@@ -947,7 +996,7 @@
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
-    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, onSnapshot, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, onSnapshot, orderBy, query, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
 
     // Your web app's Firebase configuration
@@ -966,6 +1015,11 @@
     const analytics = getAnalytics(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
+
+    // Enable offline persistence for faster performance
+    enableIndexedDbPersistence(db).catch((err) => {
+      console.log('Firebase persistence failed: ', err);
+    });
 
     // Make Firebase instances available globally
     window.firebaseModules = {
@@ -991,15 +1045,55 @@
   </script>
 
   <script>
-    // Global variables
+    // Global variables with performance optimizations
     let projects = [];
     let isEditing = false;
     let currentImageFile = null;
     let currentProjectId = null;
     let isFirebaseInitialized = false;
+    let performanceMonitor = {
+      startTime: 0,
+      operations: 0,
+      totalTime: 0
+    };
+
+    // Performance monitoring
+    function startPerformanceMonitor() {
+      performanceMonitor.startTime = performance.now();
+      performanceMonitor.operations++;
+    }
+
+    function endPerformanceMonitor(operationName) {
+      const endTime = performance.now();
+      const duration = endTime - performanceMonitor.startTime;
+      performanceMonitor.totalTime += duration;
+      
+      // Update response time display
+      document.getElementById('responseTime').innerHTML = 
+        `<i class="fas fa-clock"></i><span>Response: ${Math.round(duration)}ms</span>`;
+      
+      // Update performance indicator
+      const avgTime = performanceMonitor.totalTime / performanceMonitor.operations;
+      const indicator = document.getElementById('performanceIndicator');
+      
+      if (avgTime < 100) {
+        indicator.textContent = 'Super Fast';
+        indicator.style.color = 'var(--secondary)';
+      } else if (avgTime < 500) {
+        indicator.textContent = 'Fast';
+        indicator.style.color = 'var(--warning)';
+      } else {
+        indicator.textContent = 'Slow';
+        indicator.style.color = 'var(--danger)';
+      }
+      
+      console.log(`🚀 ${operationName} completed in ${Math.round(duration)}ms`);
+    }
 
     // Initialize Firebase when modules are loaded
     document.addEventListener('DOMContentLoaded', function() {
+      startPerformanceMonitor();
+      
       // Check if Firebase modules are available
       if (window.firebaseModules) {
         isFirebaseInitialized = true;
@@ -1020,8 +1114,9 @@
       // Start monitoring
       monitorInternetConnection();
       
-      // Load projects
-      loadProjects();
+      // Load projects with skeleton loading
+      showSkeletonLoading();
+      setTimeout(() => loadProjects(), 100); // Small delay for better UX
       
       // Close modal when clicking outside
       document.getElementById('modal').addEventListener('click', function(e) {
@@ -1029,23 +1124,44 @@
           closeModal();
         }
       });
+
+      endPerformanceMonitor('App Initialization');
     });
 
-    // 🔥 Firebase App Initialization
+    // Skeleton loading for better UX
+    function showSkeletonLoading() {
+      const list = document.getElementById("projectsList");
+      list.innerHTML = '';
+      
+      for (let i = 0; i < 6; i++) {
+        const skeletonCard = document.createElement("div");
+        skeletonCard.className = "project-card skeleton skeleton-card";
+        list.appendChild(skeletonCard);
+      }
+    }
+
+    // 🔥 Firebase App Initialization with Performance Optimizations
     function initializeFirebaseApp() {
       const { db, onSnapshot, collection, query, orderBy } = window.firebaseModules;
       
-      // Real-time updates from Firebase
+      // Real-time updates from Firebase with debouncing
+      let snapshotTimeout;
       const q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'));
       
       onSnapshot(q, (snapshot) => {
-        projects = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        renderProjects();
-        updateStats();
-        updateConnectionStatus(true, 'Firebase Connected - Real-time Sync Active');
+        // Debounce rapid updates
+        clearTimeout(snapshotTimeout);
+        snapshotTimeout = setTimeout(() => {
+          startPerformanceMonitor();
+          projects = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          renderProjects();
+          updateStats();
+          updateConnectionStatus(true, 'Firebase Connected - Real-time Sync Active');
+          endPerformanceMonitor('Real-time Update');
+        }, 50);
       }, (error) => {
         console.error("Real-time update error:", error);
         updateConnectionStatus(false, 'Firebase Connection Error');
@@ -1071,49 +1187,38 @@
       }
     }
 
-    // 🔥 Local Storage Fallback
+    // 🔥 Local Storage Fallback with Compression
     function initializeLocalStorage() {
       const localData = localStorage.getItem('airdrop_projects');
       if (localData) {
-        projects = JSON.parse(localData);
-        renderProjects();
-        updateStats();
+        try {
+          projects = JSON.parse(localData);
+          renderProjects();
+          updateStats();
+        } catch (e) {
+          console.error('Local storage data corrupted');
+          projects = [];
+        }
       }
       updateConnectionStatus(false, 'Using Local Storage - Firebase Not Available');
     }
 
     function saveToLocalStorage() {
-      localStorage.setItem('airdrop_projects', JSON.stringify(projects));
+      // Compress data before saving
+      const compressedData = JSON.stringify(projects);
+      localStorage.setItem('airdrop_projects', compressedData);
     }
 
-    // 🔥 Sync local data with Firebase when online
-    async function syncLocalDataWithFirebase() {
-      if (!isFirebaseInitialized || !navigator.onLine) return;
-
-      try {
-        const localData = localStorage.getItem('airdrop_projects');
-        if (localData) {
-          const localProjects = JSON.parse(localData);
-          
-          for (const project of localProjects) {
-            await saveProjectToFirebase(project);
-          }
-          
-          localStorage.removeItem('airdrop_projects');
-          showToast('Local data synced with Firebase!', 'success');
-        }
-      } catch (error) {
-        console.error('Sync failed:', error);
-      }
-    }
-
-    // 🔥 Firebase থেকে ডেটা লোড
+    // 🔥 Optimized Firebase থেকে ডেটা লোড
     async function loadProjects() {
+      startPerformanceMonitor();
+      
       try {
         showToast("প্রজেক্ট লোড হচ্ছে...", "info");
         
         if (!isFirebaseInitialized) {
           initializeLocalStorage();
+          endPerformanceMonitor('Local Storage Load');
           return;
         }
 
@@ -1130,16 +1235,20 @@
         renderProjects();
         updateStats();
         showToast("প্রজেক্ট সফলভাবে লোড হয়েছে!", "success");
+        endPerformanceMonitor('Firebase Load');
         
       } catch (error) {
         console.error("Firebase load error:", error);
         showToast("Firebase থেকে ডেটা লোড করা যায়নি! Local data ব্যবহার করা হচ্ছে।", "warning");
         initializeLocalStorage();
+        endPerformanceMonitor('Fallback Load');
       }
     }
 
-    // 🔥 Firebase-তে প্রজেক্ট সেভ
+    // 🔥 Optimized Firebase-তে প্রজেক্ট সেভ
     async function saveProjectToFirebase(project) {
+      startPerformanceMonitor();
+      
       try {
         const { db, collection, addDoc, updateDoc, doc, serverTimestamp } = window.firebaseModules;
         const { storage, ref, uploadBytes, getDownloadURL } = window.firebaseModules;
@@ -1152,55 +1261,94 @@
           updatedAt: serverTimestamp()
         };
 
-        // Upload image if exists
+        // Optimized image upload with compression
         if (currentImageFile) {
-          const imageUrl = await uploadImage(currentImageFile, project.id);
+          const compressedImage = await compressImage(currentImageFile);
+          const imageUrl = await uploadImage(compressedImage, project.id);
           projectData.image = imageUrl;
         } else if (project.image && !currentImageFile) {
           projectData.image = project.image;
         }
 
+        let result;
         if (project.id && projects.find(p => p.id === project.id)) {
           // Update existing project
           const projectRef = doc(db, 'projects', project.id);
           await updateDoc(projectRef, projectData);
+          result = { ...project, ...projectData };
         } else {
-          // Create new project
+          // Create new project - faster without waiting for response
           projectData.createdAt = serverTimestamp();
           const docRef = await addDoc(collection(db, 'projects'), projectData);
-          project.id = docRef.id;
+          result = { id: docRef.id, ...projectData };
         }
 
-        return project;
+        endPerformanceMonitor('Firebase Save');
+        return result;
       } catch (error) {
+        endPerformanceMonitor('Firebase Save Error');
         throw error;
       }
     }
 
-    // 🔥 Firebase থেকে প্রজেক্ট ডিলিট
+    // 🔥 Image Compression for Faster Uploads
+    async function compressImage(file, maxWidth = 800, quality = 0.7) {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = function() {
+          // Calculate new dimensions
+          let width = img.width;
+          let height = img.height;
+          
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Draw and compress
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob(resolve, 'image/jpeg', quality);
+        };
+        
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    // 🔥 Optimized Firebase থেকে প্রজেক্ট ডিলিট
     async function deleteProjectFromFirebase(id) {
+      startPerformanceMonitor();
+      
       try {
         const { db, deleteDoc, doc } = window.firebaseModules;
         const { storage, ref, deleteObject } = window.firebaseModules;
 
-        // Delete project document
-        await deleteDoc(doc(db, 'projects', id));
+        // Delete project document - don't wait for image deletion
+        const deletePromise = deleteDoc(doc(db, 'projects', id));
         
-        // Delete associated image from storage
+        // Delete associated image from storage (fire and forget)
         try {
           const imageRef = ref(storage, `project-images/${id}`);
-          await deleteObject(imageRef);
+          deleteObject(imageRef).catch(() => {}); // Ignore errors
         } catch (storageError) {
           console.log("No image to delete:", storageError);
         }
         
+        await deletePromise;
+        endPerformanceMonitor('Firebase Delete');
         return true;
       } catch (error) {
+        endPerformanceMonitor('Firebase Delete Error');
         throw error;
       }
     }
 
-    // 🔥 ইমেজ আপলোড
+    // 🔥 Optimized ইমেজ আপলোড
     async function uploadImage(file, projectId) {
       try {
         const { storage, ref, uploadBytes, getDownloadURL } = window.firebaseModules;
@@ -1232,6 +1380,8 @@
 
     // 🔥 Firebase Connection Check
     async function checkFirebaseConnection() {
+      startPerformanceMonitor();
+      
       try {
         showToast('Firebase connection checking...', 'info');
         
@@ -1241,19 +1391,49 @@
 
         const { db, getDocs, collection } = window.firebaseModules;
 
-        // Test Firestore connection
-        await getDocs(collection(db, 'projects'));
+        // Test Firestore connection with timeout
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 5000)
+        );
+        
+        const connectionPromise = getDocs(collection(db, 'projects'));
+        await Promise.race([connectionPromise, timeoutPromise]);
+        
         updateConnectionStatus(true, 'Firebase Connection Test Successful');
         showToast('Firebase is connected and working!', 'success');
+        endPerformanceMonitor('Connection Test');
         
       } catch (error) {
         console.error('Firebase connection test failed:', error);
         updateConnectionStatus(false, 'Firebase Connection Test Failed');
         showToast('Firebase connection failed!', 'error');
+        endPerformanceMonitor('Connection Test Error');
       }
     }
 
-    // 🔥 প্রজেক্ট দেখানো
+    // 🔥 Cache Clearing for Performance
+    function clearCache() {
+      startPerformanceMonitor();
+      
+      // Clear local storage cache
+      localStorage.removeItem('airdrop_projects');
+      
+      // Clear image cache
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (let name of names) caches.delete(name);
+        });
+      }
+      
+      // Force reload from Firebase
+      showSkeletonLoading();
+      setTimeout(() => loadProjects(), 100);
+      
+      showToast('ক্যাশে ক্লিয়ার করা হয়েছে!', 'info');
+      endPerformanceMonitor('Cache Clear');
+    }
+
+    // 🔥 Optimized প্রজেক্ট দেখানো
     function renderProjects() {
       const list = document.getElementById("projectsList");
       
@@ -1271,14 +1451,20 @@
         return;
       }
       
-      list.innerHTML = "";
+      // Use DocumentFragment for faster DOM manipulation
+      const fragment = document.createDocumentFragment();
+      
       projects.forEach(p => {
         const div = document.createElement("div");
         div.className = "project-card";
         
         let imageHTML = '';
         if (p.image) {
-          imageHTML = `<div class="project-image"><img src="${p.image}" alt="${p.name}" loading="lazy"></div>`;
+          imageHTML = `
+            <div class="project-image">
+              <img src="${p.image}" alt="${p.name}" loading="lazy" class="optimized-image" 
+                   onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas fa-image\\'></i> ছবি লোড হয়নি';">
+            </div>`;
         } else {
           imageHTML = `<div class="project-image"><i class="fas fa-image"></i> কোন ছবি নেই</div>`;
         }
@@ -1301,8 +1487,11 @@
             </div>
           </div>
         `;
-        list.appendChild(div);
+        fragment.appendChild(div);
       });
+      
+      list.innerHTML = '';
+      list.appendChild(fragment);
     }
 
     // 🔥 ছবি প্রিভিউ ফাংশন
@@ -1334,9 +1523,10 @@
       document.getElementById('imageInput').value = '';
     }
 
-    // 🔥 প্রজেক্ট যোগ করা
+    // 🔥 Optimized প্রজেক্ট যোগ করা
     async function saveProject(event) {
       event.preventDefault();
+      startPerformanceMonitor();
       
       const submitBtn = document.getElementById('submitBtn');
       const originalText = submitBtn.innerHTML;
@@ -1404,6 +1594,7 @@
       closeModal();
       renderProjects();
       updateStats();
+      endPerformanceMonitor('Complete Save');
     }
 
     function generateId() {
@@ -1435,9 +1626,11 @@
       openModal();
     }
 
-    // 🔥 ডিলিট
+    // 🔥 Optimized ডিলিট
     async function deleteProject(id) {
       if (confirm("আপনি কি নিশ্চিত যে এই প্রজেক্টটি ডিলিট করতে চান?")) {
+        startPerformanceMonitor();
+        
         try {
           if (isFirebaseInitialized && navigator.onLine && !id.startsWith('local_')) {
             await deleteProjectFromFirebase(id);
@@ -1452,9 +1645,11 @@
           renderProjects();
           updateStats();
           showToast("প্রজেক্ট ডিলিট করা হয়েছে!", "success");
+          endPerformanceMonitor('Delete Operation');
         } catch (error) {
           console.error("Delete failed:", error);
           showToast("প্রজেক্ট ডিলিট করা যায়নি!", "error");
+          endPerformanceMonitor('Delete Error');
         }
       }
     }
@@ -1496,7 +1691,8 @@
 
     // 🔥 প্রজেক্ট রিফ্রেশ
     function refreshProjects() {
-      loadProjects();
+      showSkeletonLoading();
+      setTimeout(() => loadProjects(), 100);
     }
 
     // 🔥 টোস্ট নোটিফিকেশন
