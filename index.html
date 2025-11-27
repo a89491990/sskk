@@ -7,11 +7,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
-  
   <style>
     :root {
       --primary: #6366f1;
@@ -947,8 +942,15 @@
     <span id="toastMessage">প্রজেক্ট সফলভাবে সংরক্ষিত হয়েছে!</span>
   </div>
 
-  <script>
-    // Firebase Configuration
+  <!-- Firebase Modular SDK -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, onSnapshot, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
+
+    // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAZNDCJ4VIR3j_Ex4R-lIcCnDDEbV12lfk",
       authDomain: "backup-4a8c9.firebaseapp.com",
@@ -959,58 +961,104 @@
       measurementId: "G-M3WF7DGLNZ"
     };
 
-    // Initialize Firebase with error handling
-    let app, db, storage;
-    let isFirebaseInitialized = false;
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
 
-    try {
-      app = firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-      storage = firebase.storage();
-      isFirebaseInitialized = true;
-      console.log('Firebase initialized successfully');
-    } catch (error) {
-      console.error('Firebase initialization failed:', error);
-      showToast('Firebase initialization failed! Using local storage.', 'error');
-      initializeLocalStorage();
-    }
+    // Make Firebase instances available globally
+    window.firebaseModules = {
+      db,
+      storage,
+      collection,
+      addDoc,
+      updateDoc,
+      deleteDoc,
+      doc,
+      getDocs,
+      onSnapshot,
+      orderBy,
+      query,
+      serverTimestamp,
+      ref,
+      uploadBytes,
+      getDownloadURL,
+      deleteObject
+    };
 
+    console.log('Firebase Modular SDK initialized successfully');
+  </script>
+
+  <script>
+    // Global variables
     let projects = [];
     let isEditing = false;
     let currentImageFile = null;
     let currentProjectId = null;
+    let isFirebaseInitialized = false;
 
-    // 🔥 Firebase Connection Monitoring
-    function monitorFirebaseConnection() {
-      if (!isFirebaseInitialized) return;
+    // Initialize Firebase when modules are loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if Firebase modules are available
+      if (window.firebaseModules) {
+        isFirebaseInitialized = true;
+        console.log('Firebase Modular SDK ready');
+        initializeFirebaseApp();
+      } else {
+        console.log('Firebase Modular SDK not loaded, using local storage');
+        initializeLocalStorage();
+      }
 
-      // Check Firestore connection
-      db.enablePersistence()
-        .then(() => {
-          updateConnectionStatus(true, 'Firebase Connected - Real-time Sync Active');
-        })
-        .catch((err) => {
-          console.error('Firebase persistence failed: ', err);
-          updateConnectionStatus(false, 'Firebase Offline - Using Local Cache');
-        });
-
-      // Monitor connection state
-      db.collection('projects').onSnapshot(
-        (snapshot) => {
-          updateConnectionStatus(true, 'Firebase Connected - Real-time Sync Active');
-        },
-        (error) => {
-          console.error('Firebase connection error:', error);
-          updateConnectionStatus(false, 'Firebase Connection Error');
+      // Load saved theme
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.querySelector('.theme-toggle i').className = 'fas fa-sun';
+      }
+      
+      // Start monitoring
+      monitorInternetConnection();
+      
+      // Load projects
+      loadProjects();
+      
+      // Close modal when clicking outside
+      document.getElementById('modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeModal();
         }
-      );
+      });
+    });
+
+    // 🔥 Firebase App Initialization
+    function initializeFirebaseApp() {
+      const { db, onSnapshot, collection, query, orderBy } = window.firebaseModules;
+      
+      // Real-time updates from Firebase
+      const q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'));
+      
+      onSnapshot(q, (snapshot) => {
+        projects = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        renderProjects();
+        updateStats();
+        updateConnectionStatus(true, 'Firebase Connected - Real-time Sync Active');
+      }, (error) => {
+        console.error("Real-time update error:", error);
+        updateConnectionStatus(false, 'Firebase Connection Error');
+      });
     }
 
     // 🔥 Internet Connection Monitoring
     function monitorInternetConnection() {
       window.addEventListener('online', () => {
         updateConnectionStatus(true, 'Internet Connected - Syncing with Firebase');
-        syncLocalDataWithFirebase();
+        if (isFirebaseInitialized) {
+          syncLocalDataWithFirebase();
+        }
       });
 
       window.addEventListener('offline', () => {
@@ -1031,6 +1079,7 @@
         renderProjects();
         updateStats();
       }
+      updateConnectionStatus(false, 'Using Local Storage - Firebase Not Available');
     }
 
     function saveToLocalStorage() {
@@ -1068,9 +1117,10 @@
           return;
         }
 
-        const snapshot = await db.collection('projects')
-          .orderBy('createdAt', 'desc')
-          .get();
+        const { db, getDocs, collection, orderBy, query } = window.firebaseModules;
+        
+        const q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'));
+        const snapshot = await getDocs(q);
         
         projects = snapshot.docs.map(doc => ({
           id: doc.id,
@@ -1091,12 +1141,15 @@
     // 🔥 Firebase-তে প্রজেক্ট সেভ
     async function saveProjectToFirebase(project) {
       try {
+        const { db, collection, addDoc, updateDoc, doc, serverTimestamp } = window.firebaseModules;
+        const { storage, ref, uploadBytes, getDownloadURL } = window.firebaseModules;
+
         let projectData = {
           name: project.name,
           link: project.link || '',
           notes: project.notes || '',
           reminder: project.reminder || 'none',
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          updatedAt: serverTimestamp()
         };
 
         // Upload image if exists
@@ -1108,10 +1161,13 @@
         }
 
         if (project.id && projects.find(p => p.id === project.id)) {
-          await db.collection('projects').doc(project.id).update(projectData);
+          // Update existing project
+          const projectRef = doc(db, 'projects', project.id);
+          await updateDoc(projectRef, projectData);
         } else {
-          projectData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-          const docRef = await db.collection('projects').add(projectData);
+          // Create new project
+          projectData.createdAt = serverTimestamp();
+          const docRef = await addDoc(collection(db, 'projects'), projectData);
           project.id = docRef.id;
         }
 
@@ -1124,10 +1180,16 @@
     // 🔥 Firebase থেকে প্রজেক্ট ডিলিট
     async function deleteProjectFromFirebase(id) {
       try {
-        await db.collection('projects').doc(id).delete();
+        const { db, deleteDoc, doc } = window.firebaseModules;
+        const { storage, ref, deleteObject } = window.firebaseModules;
+
+        // Delete project document
+        await deleteDoc(doc(db, 'projects', id));
         
+        // Delete associated image from storage
         try {
-          await storage.ref().child(`project-images/${id}`).delete();
+          const imageRef = ref(storage, `project-images/${id}`);
+          await deleteObject(imageRef);
         } catch (storageError) {
           console.log("No image to delete:", storageError);
         }
@@ -1141,10 +1203,11 @@
     // 🔥 ইমেজ আপলোড
     async function uploadImage(file, projectId) {
       try {
-        const storageRef = storage.ref();
-        const imageRef = storageRef.child(`project-images/${projectId}`);
-        const snapshot = await imageRef.put(file);
-        const downloadURL = await snapshot.ref.getDownloadURL();
+        const { storage, ref, uploadBytes, getDownloadURL } = window.firebaseModules;
+        
+        const storageRef = ref(storage, `project-images/${projectId}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
         return downloadURL;
       } catch (error) {
         throw error;
@@ -1176,8 +1239,10 @@
           throw new Error('Firebase not initialized');
         }
 
+        const { db, getDocs, collection } = window.firebaseModules;
+
         // Test Firestore connection
-        await db.collection('projects').limit(1).get();
+        await getDocs(collection(db, 'projects'));
         updateConnectionStatus(true, 'Firebase Connection Test Successful');
         showToast('Firebase is connected and working!', 'success');
         
@@ -1479,47 +1544,6 @@
       };
       return reminderTexts[reminder] || reminder;
     }
-
-    // 🔥 ইনিশিয়ালাইজেশন
-    document.addEventListener('DOMContentLoaded', function() {
-      // Load saved theme
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        document.querySelector('.theme-toggle i').className = 'fas fa-sun';
-      }
-      
-      // Start monitoring
-      monitorFirebaseConnection();
-      monitorInternetConnection();
-      
-      // Load projects
-      loadProjects();
-      
-      // Close modal when clicking outside
-      document.getElementById('modal').addEventListener('click', function(e) {
-        if (e.target === this) {
-          closeModal();
-        }
-      });
-
-      // Real-time updates from Firebase
-      if (isFirebaseInitialized) {
-        db.collection('projects')
-          .orderBy('createdAt', 'desc')
-          .onSnapshot((snapshot) => {
-            projects = snapshot.docs.map(doc => ({
-              id: doc.id,
-              ...doc.data()
-            }));
-            renderProjects();
-            updateStats();
-          }, (error) => {
-            console.error("Real-time update error:", error);
-            updateConnectionStatus(false, 'Real-time Sync Failed');
-          });
-      }
-    });
   </script>
 </body>
 </html>
