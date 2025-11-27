@@ -2,11 +2,11 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <title>🚀 Airdrop Project Manager (Firebase Sync)</title>
+  <title>🚀 Airdrop Project Manager (Photo + Firebase)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js" type="module"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js" type="module"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js" type="module"></script>
   <style>
     body {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -23,7 +23,7 @@
   <div class="container mx-auto px-5 py-10">
     <div class="text-center mb-10">
       <h1 class="text-4xl font-extrabold mb-3">🚀 Airdrop Project Manager</h1>
-      <p class="text-gray-200 mb-6">Firebase Realtime Version – Instant Upload & Sync</p>
+      <p class="text-gray-200 mb-6">Firebase + Multi Photo Upload Version</p>
       <button onclick="openModal()" class="px-6 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-600 font-semibold shadow-lg">+ নতুন প্রজেক্ট যোগ করুন</button>
     </div>
 
@@ -61,6 +61,10 @@
           <label class="block text-sm mb-2">লোগো (optional)</label>
           <input id="logoInput" type="file" accept="image/*" class="text-sm text-white">
         </div>
+        <div class="mb-4">
+          <label class="block text-sm mb-2">ফটো (একাধিক বাছাই করুন)</label>
+          <input id="photosInput" type="file" accept="image/*" multiple class="text-sm text-white">
+        </div>
         <div class="flex justify-end gap-3 mt-6">
           <button type="button" onclick="closeModal()" class="px-4 py-2 rounded bg-gray-400 hover:bg-gray-500">বাতিল</button>
           <button type="submit" class="px-4 py-2 rounded bg-indigo-500 hover:bg-indigo-600">সেভ</button>
@@ -69,12 +73,14 @@
     </div>
   </div>
 
+  <!-- Firebase Logic -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
 
-    // 🔥 Your Firebase Config (Replace this)
+    // 🔥 তোমার Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyAZNDCJ4VIR3j_Ex4R-lIcCnDDEbV12lfk",
       authDomain: "backup-4a8c9.firebaseapp.com",
@@ -87,46 +93,42 @@
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
 
     let projects = [];
 
-    // 🧠 Load all projects instantly (no delay)
+    // Realtime listener (instant)
     const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
     onSnapshot(q, (snapshot) => {
       projects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderProjects();
     });
 
-    // 🧩 Upload & Save Project
+    // 🧩 Save project with multiple photos
     async function saveProject(e) {
       e.preventDefault();
       const name = projectName.value.trim();
       const link = projectLink.value.trim();
       const notes = projectNotes.value.trim();
       const reminder = reminderType.value;
-      const file = logoInput.files[0];
-
-      // instant UI optimistic update
-      const tempProject = { id: Date.now().toString(), name, link, notes, reminder, createdAt: new Date().toISOString() };
-      projects.unshift(tempProject);
-      renderProjects();
+      const logoFile = logoInput.files[0];
+      const photoFiles = Array.from(photosInput.files);
 
       let logoUrl = null;
-      if (file) {
-        const fileRef = ref(storage, `logos/${Date.now()}-${file.name}`);
-        const compressed = await compressImage(file, 0.6);
-        await uploadBytes(fileRef, compressed);
-        logoUrl = await getDownloadURL(fileRef);
+      if (logoFile) logoUrl = await uploadImage(logoFile);
+
+      let photoUrls = [];
+      for (const file of photoFiles) {
+        const url = await uploadImage(file);
+        photoUrls.push(url);
       }
 
       await addDoc(collection(db, "projects"), {
-        name,
-        link,
-        notes,
-        reminder,
+        name, link, notes, reminder,
         logo: logoUrl,
+        photos: photoUrls,
         createdAt: serverTimestamp()
       });
 
@@ -134,36 +136,18 @@
       projectForm.reset();
     }
 
+    // 🧩 Image Upload Helper
+    async function uploadImage(file) {
+      const fileRef = ref(storage, `images/${Date.now()}-${file.name}`);
+      await uploadBytes(fileRef, file);
+      return await getDownloadURL(fileRef);
+    }
+
     // 🧩 Delete Project
     async function deleteProject(id) {
       if (confirm("আপনি কি ডিলিট করতে চান?")) {
         await deleteDoc(doc(db, "projects", id));
       }
-    }
-
-    // 🧩 Compress Image
-    async function compressImage(file, quality = 0.6) {
-      return new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          const img = new Image();
-          img.src = e.target.result;
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            const scale = Math.min(600 / img.width, 600 / img.height, 1);
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            canvas.toBlob(
-              blob => resolve(blob),
-              "image/webp",
-              quality
-            );
-          };
-        };
-        reader.readAsDataURL(file);
-      });
     }
 
     // 🧩 Render Projects
@@ -188,12 +172,22 @@
           ${p.link ? `<a href="${p.link}" class="text-blue-300 underline break-all">${p.link}</a>` : ""}
           ${p.notes ? `<p class="text-gray-200 mt-2">${p.notes}</p>` : ""}
           ${p.reminder !== "none" ? `<span class="mt-3 inline-block px-3 py-1 rounded-full text-sm ${p.reminder === "daily" ? "bg-green-500" : "bg-blue-500"}">🔔 ${p.reminder}</span>` : ""}
+          ${p.photos?.length ? renderPhotos(p.photos) : ""}
           <div class="flex gap-3 mt-4">
             <button class="px-3 py-1 bg-red-500 rounded-lg hover:bg-red-600" onclick="deleteProject('${p.id}')">🗑️ ডিলিট</button>
           </div>
         `;
         grid.appendChild(div);
       });
+    }
+
+    // 🧩 Render Photo Gallery
+    function renderPhotos(photoArray) {
+      return `
+        <div class="grid grid-cols-3 gap-2 mt-3">
+          ${photoArray.map(url => `<img src="${url}" class="rounded-lg w-full h-24 object-cover">`).join("")}
+        </div>
+      `;
     }
 
     // Modal controls
