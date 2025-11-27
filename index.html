@@ -2,69 +2,90 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <title>Airdrop Project Manager (Shared)</title>
+  <title>🚀 Airdrop Project Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { font-family: Arial, sans-serif; background: #f3f4f6; margin: 0; padding: 20px; }
-    .container { max-width: 800px; margin: auto; }
-    h1 { text-align: center; color: #4f46e5; }
-    button { padding: 10px 20px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; }
-    button:hover { background: #4338ca; }
-    .project { background: white; padding: 15px; border-radius: 10px; margin-top: 15px; box-shadow: 0 3px 8px rgba(0,0,0,0.1); }
-    .project h3 { margin: 0; color: #111827; }
-    .project a { color: #2563eb; text-decoration: none; }
-    .form-group { margin: 10px 0; }
-    input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
-<body>
-  <div class="container">
-    <h1>🚀 Airdrop Project Manager</h1>
-    <button onclick="openModal()">+ নতুন প্রজেক্ট যোগ করুন</button>
+<body class="text-white font-sans">
+  <div class="container mx-auto px-5 py-10">
+    <div class="text-center mb-10">
+      <h1 class="text-4xl font-extrabold mb-2 drop-shadow-lg">🚀 Airdrop Project Manager</h1>
+      <p class="text-gray-200 text-lg">অ্যাডমিন প্রজেক্ট অ্যাড করলে, সবাই দেখতে পাবে</p>
+      <button onclick="openModal()" class="mt-5 px-6 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-semibold shadow-lg">
+        + নতুন প্রজেক্ট যোগ করুন
+      </button>
+    </div>
 
-    <div id="projectsList"></div>
+    <div id="projectsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <div id="emptyState" class="text-center text-white mt-10 hidden">
+      <p class="text-2xl opacity-80">📋 কোনো প্রজেক্ট নেই</p>
+    </div>
+  </div>
 
-    <!-- Modal -->
-    <div id="modal" style="display:none; background:rgba(0,0,0,0.5); position:fixed; top:0; left:0; width:100%; height:100%; justify-content:center; align-items:center;">
-      <div style="background:white; padding:20px; border-radius:10px; width:400px;">
-        <h2 id="modalTitle">নতুন প্রজেক্ট</h2>
-        <form id="projectForm" onsubmit="saveProject(event)">
-          <input type="hidden" id="projectId">
-          <div class="form-group">
-            <label>প্রজেক্ট নাম</label>
-            <input type="text" id="projectName" required>
-          </div>
-          <div class="form-group">
-            <label>লিংক</label>
-            <input type="url" id="projectLink">
-          </div>
-          <div class="form-group">
-            <label>নোট</label>
-            <textarea id="projectNotes"></textarea>
-          </div>
-          <div class="form-group">
-            <label>রিমাইন্ডার</label>
-            <select id="reminderType">
-              <option value="none">নাই</option>
-              <option value="daily">ডেইলি</option>
-              <option value="weekly">উইকলি</option>
-            </select>
-          </div>
-          <button type="submit">✅ সেভ</button>
-          <button type="button" onclick="closeModal()">❌ বাতিল</button>
-        </form>
-      </div>
+  <!-- Modal -->
+  <div id="projectModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-60 z-50">
+    <div class="glass rounded-2xl p-8 w-11/12 md:w-1/2 fade-in">
+      <h2 id="modalTitle" class="text-2xl font-bold mb-5">নতুন প্রজেক্ট যোগ করুন</h2>
+      <form id="projectForm" onsubmit="saveProject(event)">
+        <input type="hidden" id="projectId">
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2">প্রজেক্টের নাম *</label>
+          <input id="projectName" required class="w-full p-3 rounded-lg border border-gray-300 text-black">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2">লিংক</label>
+          <input id="projectLink" type="url" class="w-full p-3 rounded-lg border border-gray-300 text-black">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2">নোট / বিবরণ</label>
+          <textarea id="projectNotes" class="w-full p-3 rounded-lg border border-gray-300 text-black"></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2">রিমাইন্ডার</label>
+          <select id="reminderType" class="w-full p-3 rounded-lg border border-gray-300 text-black">
+            <option value="none">রিমাইন্ডার নাই</option>
+            <option value="daily">ডেইলি</option>
+            <option value="weekly">উইকলি</option>
+          </select>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" onclick="closeModal()" class="px-5 py-2 rounded-lg bg-gray-400 hover:bg-gray-500">বাতিল</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600">সেভ করুন</button>
+        </div>
+      </form>
     </div>
   </div>
 
   <script>
-    // 🔹 তোমার JSONBin API সেটআপ
-    const BIN_ID = "6927bb28d0ea881f40029c3e";
+    const BIN_ID = "6927bb28d0ea881f40029c3e"; // ⬅️ এখানে তোমার Bin ID বসাও
     const API_KEY = "$2a$10$oGg8RSUOeo1gxuEBtwe7K.XBhkAEYb8hxn31SZ/lovkudlLPfmK82";
     const JSON_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
     let projects = [];
 
-    // 🔸 ডেটা লোড
+    // Load data from JSONBin
     async function loadProjects() {
       try {
         const res = await fetch(JSON_URL, {
@@ -72,14 +93,13 @@
         });
         const data = await res.json();
         projects = data.record?.projects || [];
-        renderProjects();
-      } catch (err) {
-        alert("ডেটা লোড করা যায়নি!");
-        console.error(err);
+        displayProjects();
+      } catch (e) {
+        console.error("Load error:", e);
       }
     }
 
-    // 🔸 সার্ভারে সেভ
+    // Save data to JSONBin
     async function saveToServer() {
       try {
         await fetch(JSON_URL, {
@@ -90,51 +110,58 @@
           },
           body: JSON.stringify({ projects })
         });
-      } catch (err) {
-        alert("সেভে সমস্যা হয়েছে!");
-        console.error(err);
+      } catch (e) {
+        alert("সেভ করতে সমস্যা হয়েছে!");
       }
     }
 
-    // 🔸 প্রজেক্ট দেখানো
-    function renderProjects() {
-      const list = document.getElementById("projectsList");
-      list.innerHTML = "";
+    // Display projects
+    function displayProjects() {
+      const grid = document.getElementById("projectsGrid");
+      const empty = document.getElementById("emptyState");
+      grid.innerHTML = "";
+
+      if (projects.length === 0) {
+        empty.classList.remove("hidden");
+        return;
+      }
+      empty.classList.add("hidden");
+
       projects.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "project";
-        div.innerHTML = `
-          <h3>${p.name}</h3>
-          ${p.link ? `<a href="${p.link}" target="_blank">🔗 ${p.link}</a><br>` : ""}
-          ${p.notes ? `<p>${p.notes}</p>` : ""}
-          ${p.reminder !== "none" ? `<span>⏰ ${p.reminder.toUpperCase()} Reminder</span>` : ""}
-          <br><button onclick="editProject('${p.id}')">✏️ এডিট</button>
-          <button onclick="deleteProject('${p.id}')">🗑️ ডিলিট</button>
+        const card = document.createElement("div");
+        card.className = "glass rounded-2xl p-6 fade-in";
+        card.innerHTML = `
+          <h3 class="text-xl font-semibold mb-2 text-white">${p.name}</h3>
+          ${p.link ? `<a href="${p.link}" class="text-blue-300 underline break-all" target="_blank">${p.link}</a>` : ""}
+          ${p.notes ? `<p class="text-gray-200 mt-2">${p.notes}</p>` : ""}
+          ${p.reminder !== "none" ? `<span class="mt-3 inline-block px-3 py-1 rounded-full text-sm font-medium ${p.reminder === "daily" ? "bg-green-500" : "bg-blue-500"}">🔔 ${p.reminder === "daily" ? "Daily" : "Weekly"} Reminder</span>` : ""}
+          <div class="flex gap-3 mt-4">
+            <button class="px-3 py-1 bg-yellow-400 rounded-lg text-black font-semibold hover:bg-yellow-500" onclick='editProject("${p.id}")'>✏️ এডিট</button>
+            <button class="px-3 py-1 bg-red-500 rounded-lg text-white font-semibold hover:bg-red-600" onclick='deleteProject("${p.id}")'>🗑️ ডিলিট</button>
+          </div>
         `;
-        list.appendChild(div);
+        grid.appendChild(card);
       });
     }
 
-    // 🔸 প্রজেক্ট যোগ করা
     function saveProject(event) {
       event.preventDefault();
-      const name = projectName.value;
-      const link = projectLink.value;
-      const notes = projectNotes.value;
-      const reminder = reminderType.value;
-      const id = projectId.value || Date.now().toString();
-
-      const index = projects.findIndex(p => p.id === id);
-      const newProject = { id, name, link, notes, reminder };
-      if (index >= 0) projects[index] = newProject;
-      else projects.push(newProject);
-
+      const id = document.getElementById("projectId").value || Date.now().toString();
+      const project = {
+        id,
+        name: projectName.value,
+        link: projectLink.value,
+        notes: projectNotes.value,
+        reminder: reminderType.value
+      };
+      const idx = projects.findIndex(p => p.id === id);
+      if (idx >= 0) projects[idx] = project;
+      else projects.push(project);
       saveToServer();
+      displayProjects();
       closeModal();
-      renderProjects();
     }
 
-    // 🔸 এডিট করা
     function editProject(id) {
       const p = projects.find(x => x.id === id);
       if (!p) return;
@@ -143,21 +170,26 @@
       projectLink.value = p.link;
       projectNotes.value = p.notes;
       reminderType.value = p.reminder;
-      openModal(true);
+      openModal();
     }
 
-    // 🔸 ডিলিট
     function deleteProject(id) {
-      if (confirm("ডিলিট করতে চাও?")) {
+      if (confirm("এই প্রজেক্টটি ডিলিট করতে চান?")) {
         projects = projects.filter(p => p.id !== id);
         saveToServer();
-        renderProjects();
+        displayProjects();
       }
     }
 
-    // 🔸 Modal control
-    function openModal() { document.getElementById("modal").style.display = "flex"; }
-    function closeModal() { document.getElementById("modal").style.display = "none"; }
+    function openModal() {
+      document.getElementById("projectModal").classList.remove("hidden");
+      document.getElementById("projectModal").classList.add("flex");
+    }
+    function closeModal() {
+      document.getElementById("projectModal").classList.add("hidden");
+      document.getElementById("projectModal").classList.remove("flex");
+      document.getElementById("projectForm").reset();
+    }
 
     loadProjects();
   </script>
