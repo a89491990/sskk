@@ -1,86 +1,226 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <title>🚀 Airdrop Project Manager (Photo + Firebase)</title>
+  <meta charset="UTF-8" />
+  <title>🚀 Airdrop Project Manager Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js" type="module"></script>
-  <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js" type="module"></script>
-  <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js" type="module"></script>
   <style>
     body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #667eea 0%, #7c3aed 50%, #ec4899 100%);
       min-height: 100vh;
     }
     .glass {
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+      height: 6px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, .6);
+      border-radius: 999px;
     }
   </style>
 </head>
 <body class="text-white font-sans">
-  <div class="container mx-auto px-5 py-10">
-    <div class="text-center mb-10">
-      <h1 class="text-4xl font-extrabold mb-3">🚀 Airdrop Project Manager</h1>
-      <p class="text-gray-200 mb-6">Firebase + Multi Photo Upload Version</p>
-      <button onclick="openModal()" class="px-6 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-600 font-semibold shadow-lg">+ নতুন প্রজেক্ট যোগ করুন</button>
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow">
+          🚀 Airdrop Project Manager
+        </h1>
+        <p class="text-slate-100/80 mt-1">
+          Firebase + Multi Photo + Search + Reminder
+        </p>
+      </div>
+      <button
+        class="px-5 py-3 rounded-2xl bg-indigo-500 hover:bg-indigo-600 font-semibold shadow-lg shadow-indigo-500/40 flex items-center gap-2"
+        onclick="openModal()"
+      >
+        <span class="text-xl">＋</span> নতুন প্রজেক্ট
+      </button>
     </div>
 
-    <div id="projectsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    <div id="emptyState" class="hidden text-center text-xl text-gray-100 mt-10">📋 কোনো প্রজেক্ট নেই</div>
+    <!-- Search + Filter -->
+    <div class="glass rounded-2xl px-4 py-3 mb-6 flex flex-col md:flex-row gap-3 items-start md:items-center">
+      <div class="flex-1 w-full">
+        <label class="block text-xs uppercase tracking-wide text-slate-200/70 mb-1">Search</label>
+        <div class="relative">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="প্রজেক্ট নাম / নোট দিয়ে সার্চ করুন…"
+            class="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900/40 border border-slate-500/60 text-sm outline-none focus:ring-2 focus:ring-pink-500"
+          />
+          <span class="absolute inset-y-0 left-2 flex items-center text-slate-300">
+            🔍
+          </span>
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs uppercase tracking-wide text-slate-200/70 mb-1">Reminder Filter</label>
+        <select
+          id="filterSelect"
+          class="px-3 py-2 rounded-xl bg-slate-900/40 border border-slate-500/60 text-sm outline-none focus:ring-2 focus:ring-pink-500"
+        >
+          <option value="all">All</option>
+          <option value="daily">Daily Only</option>
+          <option value="weekly">Weekly Only</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Projects Grid -->
+    <div id="projectsGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    <div id="emptyState" class="hidden text-center text-lg mt-10 text-slate-100/80">
+      📋 কোনো প্রজেক্ট নেই – উপরের বাটন থেকে নতুন প্রজেক্ট যোগ করুন।
+    </div>
   </div>
 
   <!-- Modal -->
-  <div id="projectModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-60 z-50">
-    <div class="glass rounded-2xl p-8 w-11/12 md:w-1/2">
-      <h2 id="modalTitle" class="text-2xl font-bold mb-5">নতুন প্রজেক্ট যোগ করুন</h2>
-      <form id="projectForm" onsubmit="saveProject(event)">
-        <input type="hidden" id="projectId">
-        <div class="mb-4">
-          <label class="block text-sm mb-2">প্রজেক্টের নাম *</label>
-          <input id="projectName" required class="w-full p-3 rounded-lg border border-gray-300 text-black">
+  <div
+    id="projectModal"
+    class="fixed inset-0 hidden items-center justify-center bg-black/60 z-50"
+  >
+    <div class="glass rounded-3xl p-6 w-11/12 max-w-xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h2 id="modalTitle" class="text-2xl font-bold">নতুন প্রজেক্ট</h2>
+        <button
+          class="w-9 h-9 rounded-full bg-slate-900/70 hover:bg-slate-800 flex items-center justify-center"
+          type="button"
+          onclick="closeModal()"
+        >
+          ✕
+        </button>
+      </div>
+
+      <form id="projectForm" onsubmit="saveProject(event)" class="space-y-4">
+        <input type="hidden" id="projectId" />
+
+        <div>
+          <label class="block text-sm mb-1">প্রজেক্টের নাম *</label>
+          <input
+            id="projectName"
+            required
+            class="w-full px-3 py-2 rounded-xl bg-slate-900/50 border border-slate-500/70 text-sm outline-none focus:ring-2 focus:ring-pink-500"
+          />
         </div>
-        <div class="mb-4">
-          <label class="block text-sm mb-2">লিংক</label>
-          <input id="projectLink" type="url" class="w-full p-3 rounded-lg border border-gray-300 text-black">
+
+        <div>
+          <label class="block text-sm mb-1">প্রজেক্ট লিংক</label>
+          <input
+            id="projectLink"
+            type="url"
+            placeholder="https://example.com"
+            class="w-full px-3 py-2 rounded-xl bg-slate-900/50 border border-slate-500/70 text-sm outline-none focus:ring-2 focus:ring-pink-500"
+          />
         </div>
-        <div class="mb-4">
-          <label class="block text-sm mb-2">নোট</label>
-          <textarea id="projectNotes" class="w-full p-3 rounded-lg border border-gray-300 text-black"></textarea>
+
+        <div>
+          <label class="block text-sm mb-1">নোট</label>
+          <textarea
+            id="projectNotes"
+            rows="3"
+            class="w-full px-3 py-2 rounded-xl bg-slate-900/50 border border-slate-500/70 text-sm outline-none focus:ring-2 focus:ring-pink-500"
+          ></textarea>
         </div>
-        <div class="mb-4">
-          <label class="block text-sm mb-2">রিমাইন্ডার</label>
-          <select id="reminderType" class="w-full p-3 rounded-lg border border-gray-300 text-black">
+
+        <div>
+          <label class="block text-sm mb-1">রিমাইন্ডার</label>
+          <select
+            id="reminderType"
+            class="w-full px-3 py-2 rounded-xl bg-slate-900/50 border border-slate-500/70 text-sm outline-none focus:ring-2 focus:ring-pink-500"
+          >
             <option value="none">রিমাইন্ডার নাই</option>
             <option value="daily">ডেইলি</option>
             <option value="weekly">উইকলি</option>
           </select>
         </div>
-        <div class="mb-4">
-          <label class="block text-sm mb-2">লোগো (optional)</label>
-          <input id="logoInput" type="file" accept="image/*" class="text-sm text-white">
+
+        <!-- Logo upload -->
+        <div>
+          <label class="block text-sm mb-1">লোগো (একটা ছবি)</label>
+          <input
+            id="logoInput"
+            type="file"
+            accept="image/*"
+            class="text-sm"
+          />
+          <div class="mt-2">
+            <img
+              id="logoPreview"
+              class="hidden w-20 h-20 rounded-xl object-cover border border-slate-500/70"
+            />
+          </div>
         </div>
-        <div class="mb-4">
-          <label class="block text-sm mb-2">ফটো (একাধিক বাছাই করুন)</label>
-          <input id="photosInput" type="file" accept="image/*" multiple class="text-sm text-white">
+
+        <!-- Multiple photos -->
+        <div>
+          <label class="block text-sm mb-1">ফটো (একাধিক সিলেক্ট করুন)</label>
+          <input
+            id="photosInput"
+            type="file"
+            accept="image/*"
+            multiple
+            class="text-sm"
+          />
+          <div
+            id="photosPreview"
+            class="mt-2 grid grid-cols-4 gap-2 max-h-32 overflow-x-auto scrollbar-thin"
+          ></div>
         </div>
-        <div class="flex justify-end gap-3 mt-6">
-          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded bg-gray-400 hover:bg-gray-500">বাতিল</button>
-          <button type="submit" class="px-4 py-2 rounded bg-indigo-500 hover:bg-indigo-600">সেভ</button>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-xl bg-slate-600/70 hover:bg-slate-700 text-sm"
+            onclick="closeModal()"
+          >
+            বাতিল
+          </button>
+          <button
+            id="saveBtn"
+            type="submit"
+            class="px-4 py-2 rounded-xl bg-pink-500 hover:bg-pink-600 text-sm font-semibold flex items-center gap-2"
+          >
+            <span id="saveBtnText">সেভ করুন</span>
+            <span
+              id="saveBtnSpinner"
+              class="hidden w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"
+            ></span>
+          </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Firebase Logic -->
+  <!-- Firebase + App Logic -->
   <script type="module">
+    // Import Firebase SDKs
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      onSnapshot,
+      query,
+      orderBy,
+      deleteDoc,
+      doc,
+      serverTimestamp,
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import {
+      getStorage,
+      ref,
+      uploadBytes,
+      getDownloadURL,
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
 
-    // 🔥 তোমার Firebase Config
+    // 🔥 Your Firebase config (তোমারটাই ব্যবহার করছি)
     const firebaseConfig = {
       apiKey: "AIzaSyAZNDCJ4VIR3j_Ex4R-lIcCnDDEbV12lfk",
       authDomain: "backup-4a8c9.firebaseapp.com",
@@ -88,117 +228,315 @@
       storageBucket: "backup-4a8c9.firebasestorage.app",
       messagingSenderId: "244182636630",
       appId: "1:244182636630:web:4cba2de413bdccfb7dc3f7",
-      measurementId: "G-M3WF7DGLNZ"
+      measurementId: "G-M3WF7DGLNZ",
     };
 
-    // Initialize Firebase
+    // Init Firebase
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
+    getAnalytics(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
 
+    // ---------- State ----------
     let projects = [];
+    let searchTerm = "";
+    let filterType = "all";
 
-    // Realtime listener (instant)
-    const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
-    onSnapshot(q, (snapshot) => {
-      projects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      renderProjects();
+    // Reminder last shown times (localStorage)
+    const REMINDER_KEY = "airdrop_reminders";
+    function loadReminderState() {
+      try {
+        return JSON.parse(localStorage.getItem(REMINDER_KEY)) || {};
+      } catch {
+        return {};
+      }
+    }
+    function saveReminderState(state) {
+      localStorage.setItem(REMINDER_KEY, JSON.stringify(state));
+    }
+    let reminderState = loadReminderState();
+
+    // ---------- Realtime listener ----------
+    const qRef = query(
+      collection(db, "projects"),
+      orderBy("createdAt", "desc")
+    );
+
+    onSnapshot(qRef, (snapshot) => {
+      projects = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      applyFiltersAndRender();
     });
 
-    // 🧩 Save project with multiple photos
-    async function saveProject(e) {
-      e.preventDefault();
-      const name = projectName.value.trim();
-      const link = projectLink.value.trim();
-      const notes = projectNotes.value.trim();
-      const reminder = reminderType.value;
-      const logoFile = logoInput.files[0];
-      const photoFiles = Array.from(photosInput.files);
+    // ---------- Helpers ----------
+    function applyFiltersAndRender() {
+      let list = [...projects];
 
-      let logoUrl = null;
-      if (logoFile) logoUrl = await uploadImage(logoFile);
-
-      let photoUrls = [];
-      for (const file of photoFiles) {
-        const url = await uploadImage(file);
-        photoUrls.push(url);
+      // search
+      if (searchTerm.trim()) {
+        const s = searchTerm.toLowerCase();
+        list = list.filter(
+          (p) =>
+            (p.name || "").toLowerCase().includes(s) ||
+            (p.notes || "").toLowerCase().includes(s)
+        );
       }
 
-      await addDoc(collection(db, "projects"), {
-        name, link, notes, reminder,
-        logo: logoUrl,
-        photos: photoUrls,
-        createdAt: serverTimestamp()
-      });
-
-      closeModal();
-      projectForm.reset();
-    }
-
-    // 🧩 Image Upload Helper
-    async function uploadImage(file) {
-      const fileRef = ref(storage, `images/${Date.now()}-${file.name}`);
-      await uploadBytes(fileRef, file);
-      return await getDownloadURL(fileRef);
-    }
-
-    // 🧩 Delete Project
-    async function deleteProject(id) {
-      if (confirm("আপনি কি ডিলিট করতে চান?")) {
-        await deleteDoc(doc(db, "projects", id));
+      // filter by reminder
+      if (filterType !== "all") {
+        list = list.filter((p) => p.reminder === filterType);
       }
+
+      renderProjects(list);
     }
 
-    // 🧩 Render Projects
-    function renderProjects() {
+    function renderProjects(list) {
       const grid = document.getElementById("projectsGrid");
       const empty = document.getElementById("emptyState");
       grid.innerHTML = "";
-      if (projects.length === 0) {
+
+      if (!list.length) {
         empty.classList.remove("hidden");
         return;
       }
       empty.classList.add("hidden");
 
-      projects.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "glass rounded-2xl p-6";
-        div.innerHTML = `
-          <div class="flex items-center mb-3 gap-3">
-            ${p.logo ? `<img src="${p.logo}" class="w-14 h-14 rounded-lg">` : `<div class="w-14 h-14 bg-indigo-400 rounded-lg flex items-center justify-center">🚀</div>`}
-            <div class="text-lg font-bold">${p.name}</div>
+      list.forEach((p) => {
+        const card = document.createElement("div");
+        card.className =
+          "glass rounded-2xl p-5 flex flex-col gap-3 shadow-lg shadow-slate-900/40";
+
+        const logoBlock = p.logo
+          ? `<img src="${p.logo}" class="w-12 h-12 rounded-xl object-cover" />`
+          : `<div class="w-12 h-12 rounded-xl bg-indigo-500 flex items-center justify-center">🚀</div>`;
+
+        const photosHtml =
+          p.photos && p.photos.length
+            ? `<div class="grid grid-cols-3 gap-1 mt-2">
+                ${p.photos
+                  .map(
+                    (url) =>
+                      `<img src="${url}" class="w-full h-16 object-cover rounded-md" />`
+                  )
+                  .join("")}
+              </div>`
+            : "";
+
+        const reminderBadge =
+          p.reminder && p.reminder !== "none"
+            ? `<span class="inline-flex items-center px-2 py-1 rounded-full text-[11px] bg-emerald-500/80">
+                🔔 ${p.reminder === "daily" ? "Daily" : "Weekly"}
+              </span>`
+            : "";
+
+        card.innerHTML = `
+          <div class="flex items-center gap-3">
+            ${logoBlock}
+            <div class="flex-1">
+              <div class="font-semibold text-base">${p.name || ""}</div>
+              <div class="text-xs text-slate-200/80 mt-1 flex items-center gap-2">
+                ${reminderBadge}
+                <span class="opacity-70">${
+                  p.createdAt?.toDate
+                    ? p.createdAt.toDate().toLocaleString()
+                    : ""
+                }</span>
+              </div>
+            </div>
           </div>
-          ${p.link ? `<a href="${p.link}" class="text-blue-300 underline break-all">${p.link}</a>` : ""}
-          ${p.notes ? `<p class="text-gray-200 mt-2">${p.notes}</p>` : ""}
-          ${p.reminder !== "none" ? `<span class="mt-3 inline-block px-3 py-1 rounded-full text-sm ${p.reminder === "daily" ? "bg-green-500" : "bg-blue-500"}">🔔 ${p.reminder}</span>` : ""}
-          ${p.photos?.length ? renderPhotos(p.photos) : ""}
-          <div class="flex gap-3 mt-4">
-            <button class="px-3 py-1 bg-red-500 rounded-lg hover:bg-red-600" onclick="deleteProject('${p.id}')">🗑️ ডিলিট</button>
+
+          ${
+            p.link
+              ? `<a href="${p.link}" target="_blank" class="text-xs text-sky-300 underline break-all">🔗 ${p.link}</a>`
+              : ""
+          }
+
+          ${
+            p.notes
+              ? `<p class="text-sm text-slate-100/90">${p.notes}</p>`
+              : ""
+          }
+
+          ${photosHtml}
+
+          <div class="flex justify-end mt-2">
+            <button
+              class="px-3 py-1 rounded-lg bg-red-500 hover:bg-red-600 text-xs"
+              onclick="deleteProject('${p.id}')"
+            >
+              🗑️ ডিলিট
+            </button>
           </div>
         `;
-        grid.appendChild(div);
+
+        grid.appendChild(card);
       });
     }
 
-    // 🧩 Render Photo Gallery
-    function renderPhotos(photoArray) {
-      return `
-        <div class="grid grid-cols-3 gap-2 mt-3">
-          ${photoArray.map(url => `<img src="${url}" class="rounded-lg w-full h-24 object-cover">`).join("")}
-        </div>
-      `;
+    // ---------- File preview ----------
+    const logoInput = document.getElementById("logoInput");
+    const logoPreview = document.getElementById("logoPreview");
+    const photosInput = document.getElementById("photosInput");
+    const photosPreview = document.getElementById("photosPreview");
+
+    logoInput.addEventListener("change", () => {
+      const file = logoInput.files[0];
+      if (!file) {
+        logoPreview.classList.add("hidden");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        logoPreview.src = e.target.result;
+        logoPreview.classList.remove("hidden");
+      };
+      reader.readAsDataURL(file);
+    });
+
+    photosInput.addEventListener("change", () => {
+      photosPreview.innerHTML = "";
+      const files = Array.from(photosInput.files);
+      if (!files.length) return;
+      files.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          img.className =
+            "w-full h-16 object-cover rounded-lg border border-slate-600/60";
+          photosPreview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // ---------- Upload helper ----------
+    async function uploadImage(file, folder) {
+      const fileRef = ref(
+        storage,
+        `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}-${
+          file.name
+        }`
+      );
+      await uploadBytes(fileRef, file);
+      return await getDownloadURL(fileRef);
     }
 
-    // Modal controls
-    window.openModal = () => {
+    // ---------- Save project ----------
+    async function saveProject(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById("saveBtn");
+      const saveText = document.getElementById("saveBtnText");
+      const saveSpinner = document.getElementById("saveBtnSpinner");
+
+      saveBtn.disabled = true;
+      saveText.textContent = "Saving...";
+      saveSpinner.classList.remove("hidden");
+
+      const name = document.getElementById("projectName").value.trim();
+      const link = document.getElementById("projectLink").value.trim();
+      const notes = document.getElementById("projectNotes").value.trim();
+      const reminder = document.getElementById("reminderType").value;
+
+      const logoFile = logoInput.files[0];
+      const photoFiles = Array.from(photosInput.files);
+
+      let logoUrl = null;
+      if (logoFile) {
+        logoUrl = await uploadImage(logoFile, "logos");
+      }
+
+      const photoUrls = [];
+      for (const f of photoFiles) {
+        const url = await uploadImage(f, "photos");
+        photoUrls.push(url);
+      }
+
+      await addDoc(collection(db, "projects"), {
+        name,
+        link,
+        notes,
+        reminder,
+        logo: logoUrl,
+        photos: photoUrls,
+        createdAt: serverTimestamp(),
+      });
+
+      saveBtn.disabled = false;
+      saveText.textContent = "সেভ করুন";
+      saveSpinner.classList.add("hidden");
+
+      closeModal();
+      document.getElementById("projectForm").reset();
+      logoPreview.classList.add("hidden");
+      photosPreview.innerHTML = "";
+    }
+
+    // ---------- Delete ----------
+    async function deleteProject(id) {
+      if (confirm("আপনি কি এই প্রজেক্টটি ডিলিট করতে চান?")) {
+        await deleteDoc(doc(db, "projects", id));
+      }
+    }
+
+    // ---------- Modal ----------
+    function openModal() {
       document.getElementById("projectModal").classList.remove("hidden");
       document.getElementById("projectModal").classList.add("flex");
-    };
-    window.closeModal = () => {
+    }
+    function closeModal() {
       document.getElementById("projectModal").classList.add("hidden");
       document.getElementById("projectModal").classList.remove("flex");
-    };
+    }
+
+    // search + filter events
+    document.getElementById("searchInput").addEventListener("input", (e) => {
+      searchTerm = e.target.value;
+      applyFiltersAndRender();
+    });
+    document.getElementById("filterSelect").addEventListener("change", (e) => {
+      filterType = e.target.value;
+      applyFiltersAndRender();
+    });
+
+    // ---------- Reminder checker ----------
+    function checkReminders() {
+      const now = new Date();
+      const todayStr = now.toDateString();
+
+      projects.forEach((p) => {
+        if (!p.reminder || p.reminder === "none") return;
+
+        const last = reminderState[p.id];
+        if (p.reminder === "daily") {
+          if (last === todayStr) return;
+          // show
+          alert(`🔔 Daily Reminder: ${p.name}\nএই প্রজেক্টে আজ কাজ করেছেন তো?`);
+          reminderState[p.id] = todayStr;
+        } else if (p.reminder === "weekly") {
+          const lastDate = last ? new Date(last) : null;
+          if (lastDate) {
+            const diff =
+              (now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
+            if (diff < 7) return;
+          }
+          alert(
+            `🔔 Weekly Reminder: ${p.name}\nএই সপ্তাহে এই প্রজেক্ট আপডেট করুন।`
+          );
+          reminderState[p.id] = now.toISOString();
+        }
+      });
+
+      saveReminderState(reminderState);
+    }
+
+    // run reminder check প্রতি ১ ঘন্টায় একবার
+    setInterval(checkReminders, 60 * 60 * 1000);
+    // পেজ লোডের কিছুক্ষণ পর একবার
+    setTimeout(checkReminders, 10 * 1000);
+
+    // expose for inline handlers
+    window.openModal = openModal;
+    window.closeModal = closeModal;
     window.deleteProject = deleteProject;
   </script>
 </body>
