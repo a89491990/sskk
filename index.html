@@ -1146,22 +1146,20 @@
       
       // Real-time updates from Firebase with debouncing
       let snapshotTimeout;
-      const q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'));
-      
-      onSnapshot(q, (snapshot) => {
-        // Debounce rapid updates
-        clearTimeout(snapshotTimeout);
-        snapshotTimeout = setTimeout(() => {
-          startPerformanceMonitor();
-          projects = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-          renderProjects();
-          updateStats();
-          updateConnectionStatus(true, 'Firebase Connected - Real-time Sync Active');
-          endPerformanceMonitor('Real-time Update');
-        }, 50);
+const q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'));
+
+onSnapshot(q, (snapshot) => {
+  clearTimeout(snapshotTimeout);
+  snapshotTimeout = setTimeout(() => {
+    startPerformanceMonitor();
+    projects = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    renderProjects();
+    updateStats();
+    updateConnectionStatus(true, 'Firebase Connected – Real-Time Sync Active');
+  }, 0);
       }, (error) => {
         console.error("Real-time update error:", error);
         updateConnectionStatus(false, 'Firebase Connection Error');
