@@ -297,6 +297,33 @@
       font-weight: 500;
     }
 
+    /* Connection Status */
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .connection-status.online {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--secondary);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .connection-status.offline {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .connection-status i {
+      font-size: 1.2rem;
+    }
+
     /* Projects Grid */
     .projects-section {
       margin-bottom: 30px;
@@ -683,26 +710,6 @@
       to { transform: rotate(360deg); }
     }
 
-    .firebase-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 15px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 500;
-    }
-
-    .firebase-status.connected {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--secondary);
-    }
-
-    .firebase-status.disconnected {
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--danger);
-    }
-
     /* Responsive */
     @media (max-width: 1024px) {
       .sidebar {
@@ -793,14 +800,16 @@
           <button class="btn btn-primary" onclick="openModal()">
             <i class="fas fa-plus"></i> নতুন প্রজেক্ট
           </button>
-          <div id="firebaseStatus" class="firebase-status connected">
-            <i class="fas fa-circle"></i>
-            <span>Firebase Connected</span>
-          </div>
           <button class="btn theme-toggle" onclick="toggleTheme()">
             <i class="fas fa-moon"></i>
           </button>
         </div>
+      </div>
+
+      <!-- Connection Status -->
+      <div id="connectionStatus" class="connection-status online">
+        <i class="fas fa-wifi"></i>
+        <span>Firebase Connected - Real-time Sync Active</span>
       </div>
 
       <!-- Stats Section -->
@@ -840,8 +849,8 @@
             <i class="fas fa-database"></i>
           </div>
           <div class="stat-content">
-            <h3 id="storageUsed">0 MB</h3>
-            <p>স্টোরেজ ব্যবহৃত</p>
+            <h3 id="firebaseStatus">Connected</h3>
+            <p>ডেটাবেস স্ট্যাটাস</p>
           </div>
         </div>
       </div>
@@ -853,6 +862,9 @@
           <div class="section-actions">
             <button class="btn btn-outline btn-sm" onclick="refreshProjects()">
               <i class="fas fa-sync-alt"></i> রিফ্রেশ
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="checkFirebaseConnection()">
+              <i class="fas fa-plug"></i> কানেকশন চেক
             </button>
           </div>
         </div>
@@ -947,31 +959,115 @@
       measurementId: "G-M3WF7DGLNZ"
     };
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const storage = firebase.storage();
+    // Initialize Firebase with error handling
+    let app, db, storage;
+    let isFirebaseInitialized = false;
+
+    try {
+      app = firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      storage = firebase.storage();
+      isFirebaseInitialized = true;
+      console.log('Firebase initialized successfully');
+    } catch (error) {
+      console.error('Firebase initialization failed:', error);
+      showToast('Firebase initialization failed! Using local storage.', 'error');
+      initializeLocalStorage();
+    }
 
     let projects = [];
     let isEditing = false;
     let currentImageFile = null;
     let currentProjectId = null;
 
-    // Firebase Connection Status
-    db.enablePersistence()
-      .then(() => {
-        updateFirebaseStatus(true);
-      })
-      .catch((err) => {
-        console.error("Firebase persistence failed: ", err);
-        updateFirebaseStatus(false);
+    // 🔥 Firebase Connection Monitoring
+    function monitorFirebaseConnection() {
+      if (!isFirebaseInitialized) return;
+
+      // Check Firestore connection
+      db.enablePersistence()
+        .then(() => {
+          updateConnectionStatus(true, 'Firebase Connected - Real-time Sync Active');
+        })
+        .catch((err) => {
+          console.error('Firebase persistence failed: ', err);
+          updateConnectionStatus(false, 'Firebase Offline - Using Local Cache');
+        });
+
+      // Monitor connection state
+      db.collection('projects').onSnapshot(
+        (snapshot) => {
+          updateConnectionStatus(true, 'Firebase Connected - Real-time Sync Active');
+        },
+        (error) => {
+          console.error('Firebase connection error:', error);
+          updateConnectionStatus(false, 'Firebase Connection Error');
+        }
+      );
+    }
+
+    // 🔥 Internet Connection Monitoring
+    function monitorInternetConnection() {
+      window.addEventListener('online', () => {
+        updateConnectionStatus(true, 'Internet Connected - Syncing with Firebase');
+        syncLocalDataWithFirebase();
       });
 
-    // 🔸 Firebase থেকে ডেটা লোড
+      window.addEventListener('offline', () => {
+        updateConnectionStatus(false, 'Internet Offline - Using Local Data');
+      });
+
+      // Initial check
+      if (!navigator.onLine) {
+        updateConnectionStatus(false, 'Internet Offline - Using Local Data');
+      }
+    }
+
+    // 🔥 Local Storage Fallback
+    function initializeLocalStorage() {
+      const localData = localStorage.getItem('airdrop_projects');
+      if (localData) {
+        projects = JSON.parse(localData);
+        renderProjects();
+        updateStats();
+      }
+    }
+
+    function saveToLocalStorage() {
+      localStorage.setItem('airdrop_projects', JSON.stringify(projects));
+    }
+
+    // 🔥 Sync local data with Firebase when online
+    async function syncLocalDataWithFirebase() {
+      if (!isFirebaseInitialized || !navigator.onLine) return;
+
+      try {
+        const localData = localStorage.getItem('airdrop_projects');
+        if (localData) {
+          const localProjects = JSON.parse(localData);
+          
+          for (const project of localProjects) {
+            await saveProjectToFirebase(project);
+          }
+          
+          localStorage.removeItem('airdrop_projects');
+          showToast('Local data synced with Firebase!', 'success');
+        }
+      } catch (error) {
+        console.error('Sync failed:', error);
+      }
+    }
+
+    // 🔥 Firebase থেকে ডেটা লোড
     async function loadProjects() {
       try {
         showToast("প্রজেক্ট লোড হচ্ছে...", "info");
         
+        if (!isFirebaseInitialized) {
+          initializeLocalStorage();
+          return;
+        }
+
         const snapshot = await db.collection('projects')
           .orderBy('createdAt', 'desc')
           .get();
@@ -987,19 +1083,19 @@
         
       } catch (error) {
         console.error("Firebase load error:", error);
-        showToast("ডেটা লোড করা যায়নি!", "error");
-        updateFirebaseStatus(false);
+        showToast("Firebase থেকে ডেটা লোড করা যায়নি! Local data ব্যবহার করা হচ্ছে।", "warning");
+        initializeLocalStorage();
       }
     }
 
-    // 🔸 Firebase-তে প্রজেক্ট সেভ
+    // 🔥 Firebase-তে প্রজেক্ট সেভ
     async function saveProjectToFirebase(project) {
       try {
         let projectData = {
           name: project.name,
-          link: project.link,
-          notes: project.notes,
-          reminder: project.reminder,
+          link: project.link || '',
+          notes: project.notes || '',
+          reminder: project.reminder || 'none',
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
@@ -1008,15 +1104,12 @@
           const imageUrl = await uploadImage(currentImageFile, project.id);
           projectData.image = imageUrl;
         } else if (project.image && !currentImageFile) {
-          // Keep existing image if not changing
           projectData.image = project.image;
         }
 
         if (project.id && projects.find(p => p.id === project.id)) {
-          // Update existing project
           await db.collection('projects').doc(project.id).update(projectData);
         } else {
-          // Create new project
           projectData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
           const docRef = await db.collection('projects').add(projectData);
           project.id = docRef.id;
@@ -1028,17 +1121,15 @@
       }
     }
 
-    // 🔸 Firebase থেকে প্রজেক্ট ডিলিট
+    // 🔥 Firebase থেকে প্রজেক্ট ডিলিট
     async function deleteProjectFromFirebase(id) {
       try {
-        // Delete project document
         await db.collection('projects').doc(id).delete();
         
-        // Delete associated image from storage
         try {
           await storage.ref().child(`project-images/${id}`).delete();
         } catch (storageError) {
-          console.log("No image to delete or error deleting image:", storageError);
+          console.log("No image to delete:", storageError);
         }
         
         return true;
@@ -1047,7 +1138,7 @@
       }
     }
 
-    // 🔸 ইমেজ আপলোড
+    // 🔥 ইমেজ আপলোড
     async function uploadImage(file, projectId) {
       try {
         const storageRef = storage.ref();
@@ -1060,19 +1151,44 @@
       }
     }
 
-    // 🔸 Firebase স্ট্যাটাস আপডেট
-    function updateFirebaseStatus(connected) {
-      const statusElement = document.getElementById('firebaseStatus');
+    // 🔥 Connection Status Update
+    function updateConnectionStatus(connected, message) {
+      const statusElement = document.getElementById('connectionStatus');
+      const firebaseStatusElement = document.getElementById('firebaseStatus');
+      
       if (connected) {
-        statusElement.className = 'firebase-status connected';
-        statusElement.innerHTML = '<i class="fas fa-circle"></i><span>Firebase Connected</span>';
+        statusElement.className = 'connection-status online';
+        statusElement.innerHTML = `<i class="fas fa-wifi"></i><span>${message}</span>`;
+        firebaseStatusElement.textContent = 'Connected';
       } else {
-        statusElement.className = 'firebase-status disconnected';
-        statusElement.innerHTML = '<i class="fas fa-circle"></i><span>Firebase Offline</span>';
+        statusElement.className = 'connection-status offline';
+        statusElement.innerHTML = `<i class="fas fa-wifi-slash"></i><span>${message}</span>`;
+        firebaseStatusElement.textContent = 'Offline';
       }
     }
 
-    // 🔸 প্রজেক্ট দেখানো
+    // 🔥 Firebase Connection Check
+    async function checkFirebaseConnection() {
+      try {
+        showToast('Firebase connection checking...', 'info');
+        
+        if (!isFirebaseInitialized) {
+          throw new Error('Firebase not initialized');
+        }
+
+        // Test Firestore connection
+        await db.collection('projects').limit(1).get();
+        updateConnectionStatus(true, 'Firebase Connection Test Successful');
+        showToast('Firebase is connected and working!', 'success');
+        
+      } catch (error) {
+        console.error('Firebase connection test failed:', error);
+        updateConnectionStatus(false, 'Firebase Connection Test Failed');
+        showToast('Firebase connection failed!', 'error');
+      }
+    }
+
+    // 🔥 প্রজেক্ট দেখানো
     function renderProjects() {
       const list = document.getElementById("projectsList");
       
@@ -1106,7 +1222,7 @@
           <div class="project-header">
             <div>
               <h3 class="project-title">${p.name}</h3>
-              <span class="project-status">Active</span>
+              <span class="project-status">${isFirebaseInitialized ? 'Cloud' : 'Local'}</span>
             </div>
           </div>
           ${imageHTML}
@@ -1124,11 +1240,10 @@
       });
     }
 
-    // 🔸 ছবি প্রিভিউ ফাংশন
+    // 🔥 ছবি প্রিভিউ ফাংশন
     function previewImage(event) {
       const file = event.target.files[0];
       if (file) {
-        // Check file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
           showToast("ছবির সাইজ 5MB এর কম হতে হবে!", "error");
           return;
@@ -1145,7 +1260,7 @@
       }
     }
 
-    // 🔸 ছবি সরান
+    // 🔥 ছবি সরান
     function removeImage() {
       currentImageFile = null;
       document.getElementById('imagePreview').src = '';
@@ -1154,7 +1269,7 @@
       document.getElementById('imageInput').value = '';
     }
 
-    // 🔸 প্রজেক্ট যোগ করা
+    // 🔥 প্রজেক্ট যোগ করা
     async function saveProject(event) {
       event.preventDefault();
       
@@ -1170,7 +1285,7 @@
       const id = document.getElementById('projectId').value;
 
       const projectData = { 
-        id: id,
+        id: id || generateId(),
         name, 
         link, 
         notes, 
@@ -1178,33 +1293,59 @@
       };
       
       try {
-        // Save to Firebase
-        const savedProject = await saveProjectToFirebase(projectData);
-        
-        // Update local projects array
-        const index = projects.findIndex(p => p.id === savedProject.id);
-        if (index >= 0) {
-          projects[index] = savedProject;
-          showToast("প্রজেক্ট আপডেট করা হয়েছে!", "success");
+        if (isFirebaseInitialized && navigator.onLine) {
+          // Save to Firebase
+          const savedProject = await saveProjectToFirebase(projectData);
+          projectData.id = savedProject.id;
         } else {
-          projects.unshift(savedProject);
-          showToast("নতুন প্রজেক্ট যোগ করা হয়েছে!", "success");
+          // Save to local storage
+          if (currentImageFile) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              projectData.image = e.target.result;
+              completeSave(projectData);
+            };
+            reader.readAsDataURL(currentImageFile);
+            return;
+          }
         }
-        
-        closeModal();
-        renderProjects();
-        updateStats();
+
+        completeSave(projectData);
         
       } catch (error) {
         console.error("Save failed:", error);
-        showToast("প্রজেক্ট সংরক্ষণ করা যায়নি!", "error");
+        showToast("প্রজেক্ট সংরক্ষণ করা যায়নি! Local এ save করা হয়েছে।", "warning");
+        completeSave(projectData, true);
       } finally {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
       }
     }
 
-    // 🔸 এডিট করা
+    function completeSave(projectData, isLocal = false) {
+      const index = projects.findIndex(p => p.id === projectData.id);
+      if (index >= 0) {
+        projects[index] = projectData;
+        showToast("প্রজেক্ট আপডেট করা হয়েছে!" + (isLocal ? " (Local)" : ""), "success");
+      } else {
+        projects.unshift(projectData);
+        showToast("নতুন প্রজেক্ট যোগ করা হয়েছে!" + (isLocal ? " (Local)" : ""), "success");
+      }
+      
+      if (isLocal) {
+        saveToLocalStorage();
+      }
+      
+      closeModal();
+      renderProjects();
+      updateStats();
+    }
+
+    function generateId() {
+      return 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // 🔥 এডিট করা
     function editProject(id) {
       const p = projects.find(x => x.id === id);
       if (!p) return;
@@ -1215,7 +1356,6 @@
       document.getElementById('projectNotes').value = p.notes || '';
       document.getElementById('reminderType').value = p.reminder || 'none';
       
-      // ছবি সেট করা
       if (p.image) {
         document.getElementById('imagePreview').src = p.image;
         document.getElementById('imagePreview').style.display = 'block';
@@ -1224,18 +1364,26 @@
         removeImage();
       }
       
-      currentImageFile = null; // Reset current file
+      currentImageFile = null;
       isEditing = true;
       document.getElementById('modalTitle').textContent = "প্রজেক্ট এডিট করুন";
       openModal();
     }
 
-    // 🔸 ডিলিট
+    // 🔥 ডিলিট
     async function deleteProject(id) {
       if (confirm("আপনি কি নিশ্চিত যে এই প্রজেক্টটি ডিলিট করতে চান?")) {
         try {
-          await deleteProjectFromFirebase(id);
+          if (isFirebaseInitialized && navigator.onLine && !id.startsWith('local_')) {
+            await deleteProjectFromFirebase(id);
+          }
+          
           projects = projects.filter(p => p.id !== id);
+          
+          if (!isFirebaseInitialized || id.startsWith('local_')) {
+            saveToLocalStorage();
+          }
+          
           renderProjects();
           updateStats();
           showToast("প্রজেক্ট ডিলিট করা হয়েছে!", "success");
@@ -1246,7 +1394,7 @@
       }
     }
 
-    // 🔸 Modal control
+    // 🔥 Modal control
     function openModal() {
       document.getElementById('modal').classList.add('active');
     }
@@ -1261,7 +1409,7 @@
       currentImageFile = null;
     }
 
-    // 🔸 থিম টগল
+    // 🔥 থিম টগল
     function toggleTheme() {
       document.body.classList.toggle('dark-mode');
       const themeIcon = document.querySelector('.theme-toggle i');
@@ -1274,23 +1422,19 @@
       }
     }
 
-    // 🔸 স্ট্যাট আপডেট
+    // 🔥 স্ট্যাট আপডেট
     function updateStats() {
       document.getElementById('totalProjects').textContent = projects.length;
       document.getElementById('activeReminders').textContent = projects.filter(p => p.reminder !== 'none').length;
       document.getElementById('projectsWithImages').textContent = projects.filter(p => p.image).length;
-      
-      // Calculate approximate storage used (rough estimate)
-      const storageUsed = (projects.length * 0.5).toFixed(1); // 0.5MB per project estimate
-      document.getElementById('storageUsed').textContent = `${storageUsed} MB`;
     }
 
-    // 🔸 প্রজেক্ট রিফ্রেশ
+    // 🔥 প্রজেক্ট রিফ্রেশ
     function refreshProjects() {
       loadProjects();
     }
 
-    // 🔸 টোস্ট নোটিফিকেশন
+    // 🔥 টোস্ট নোটিফিকেশন
     function showToast(message, type = "success") {
       const toast = document.getElementById('toast');
       const toastMessage = document.getElementById('toastMessage');
@@ -1299,7 +1443,6 @@
       toastMessage.textContent = message;
       toast.className = 'toast';
       
-      // Set icon based on type
       if (type === "error") {
         toast.classList.add('error');
         toastIcon.className = 'fas fa-exclamation-circle';
@@ -1320,7 +1463,7 @@
       }, 3000);
     }
 
-    // 🔸 হেল্পার ফাংশন
+    // 🔥 হেল্পার ফাংশন
     function truncateText(text, maxLength) {
       if (!text) return '';
       if (text.length <= maxLength) return text;
@@ -1337,7 +1480,7 @@
       return reminderTexts[reminder] || reminder;
     }
 
-    // 🔸 ইনিশিয়ালাইজেশন
+    // 🔥 ইনিশিয়ালাইজেশন
     document.addEventListener('DOMContentLoaded', function() {
       // Load saved theme
       const savedTheme = localStorage.getItem('theme');
@@ -1345,6 +1488,10 @@
         document.body.classList.add('dark-mode');
         document.querySelector('.theme-toggle i').className = 'fas fa-sun';
       }
+      
+      // Start monitoring
+      monitorFirebaseConnection();
+      monitorInternetConnection();
       
       // Load projects
       loadProjects();
@@ -1357,19 +1504,21 @@
       });
 
       // Real-time updates from Firebase
-      db.collection('projects')
-        .orderBy('createdAt', 'desc')
-        .onSnapshot((snapshot) => {
-          projects = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-          renderProjects();
-          updateStats();
-        }, (error) => {
-          console.error("Real-time update error:", error);
-          updateFirebaseStatus(false);
-        });
+      if (isFirebaseInitialized) {
+        db.collection('projects')
+          .orderBy('createdAt', 'desc')
+          .onSnapshot((snapshot) => {
+            projects = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            }));
+            renderProjects();
+            updateStats();
+          }, (error) => {
+            console.error("Real-time update error:", error);
+            updateConnectionStatus(false, 'Real-time Sync Failed');
+          });
+      }
     });
   </script>
 </body>
