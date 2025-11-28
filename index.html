@@ -5,6 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Airdrop Project Manager (Shared)</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTLfmoUEvVlrtZ2Ee30MDLfSzmuFIOqmo",
+      authDomain: "airdrop-b2c72.firebaseapp.com",
+      projectId: "airdrop-b2c72",
+      storageBucket: "airdrop-b2c72.firebasestorage.app",
+      messagingSenderId: "341441770422",
+      appId: "1:341441770422:web:4f090c38e9fb548b71c717",
+      measurementId: "G-9J7HSQCWWN"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    // Make Firebase available globally
+    window.firebase = {
+      db,
+      collection,
+      doc,
+      setDoc,
+      getDocs,
+      deleteDoc,
+      onSnapshot
+    };
+    
+    console.log("Firebase initialized successfully!");
+  </script>
+
   <style>
     :root {
       --primary: #6366f1;
@@ -459,6 +495,25 @@
       background: var(--danger);
     }
 
+    .toast.info {
+      background: var(--primary);
+    }
+
+    /* Loading spinner */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       header {
@@ -559,7 +614,7 @@
               </select>
             </div>
             <div class="form-actions">
-              <button type="submit">
+              <button type="submit" id="submitBtn">
                 <i class="fas fa-check"></i> সেভ করুন
               </button>
               <button type="button" class="outline" onclick="closeModal()">
@@ -579,48 +634,206 @@
   </div>
 
   <script>
-    // 🔹 তোমার JSONBin API সেটআপ
-    const BIN_ID = "6927bb28d0ea881f40029c3e";
-    const API_KEY = "$2a$10$oGg8RSUOeo1gxuEBtwe7K.XBhkAEYb8hxn31SZ/lovkudlLPfmK82";
-    const JSON_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-
     let projects = [];
     let isEditing = false;
     let currentImage = null;
 
-    // 🔸 ডেটা লোড
+    // 🔸 Firebase functions
     async function loadProjects() {
       try {
         showToast("প্রজেক্ট লোড হচ্ছে...", "info");
-        const res = await fetch(JSON_URL, {
-          headers: { "X-Master-Key": API_KEY }
+        
+        if (!window.firebase) {
+          throw new Error("Firebase is not initialized yet");
+        }
+
+        const { db, collection, getDocs } = window.firebase;
+        
+        const querySnapshot = await getDocs(collection(db, "projects"));
+        projects = [];
+        
+        querySnapshot.forEach((doc) => {
+          projects.push({
+            id: doc.id,
+            ...doc.data()
+          });
         });
-        const data = await res.json();
-        projects = data.record?.projects || [];
+        
         renderProjects();
         updateStats();
         showToast("প্রজেক্ট সফলভাবে লোড হয়েছে!", "success");
       } catch (err) {
         showToast("ডেটা লোড করা যায়নি!", "error");
-        console.error(err);
+        console.error("Firebase load error:", err);
       }
     }
 
-    // 🔸 সার্ভারে সেভ
-    async function saveToServer() {
+    async function saveProject(event) {
+      event.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<div class="loading"></div> সেভ হচ্ছে...';
+      submitBtn.disabled = true;
+
       try {
-        await fetch(JSON_URL, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Master-Key": API_KEY
-          },
-          body: JSON.stringify({ projects })
+        const { db, doc, setDoc } = window.firebase;
+        
+        const name = document.getElementById('projectName').value;
+        const link = document.getElementById('projectLink').value;
+        const notes = document.getElementById('projectNotes').value;
+        const reminder = document.getElementById('reminderType').value;
+        const id = document.getElementById('projectId').value || Date.now().toString();
+
+        const projectData = { 
+          name, 
+          link, 
+          notes, 
+          reminder,
+          image: currentImage,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        await setDoc(doc(db, "projects", id), projectData);
+
+        if (isEditing) {
+          showToast("প্রজেক্ট আপডেট করা হয়েছে!", "success");
+        } else {
+          showToast("নতুন প্রজেক্ট যোগ করা হয়েছে!", "success");
+        }
+
+        closeModal();
+        await loadProjects(); // Reload to get the latest data
+      } catch (err) {
+        showToast("প্রজেক্ট সেভ করা যায়নি!", "error");
+        console.error("Firebase save error:", err);
+      } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    }
+
+    async function deleteProject(id) {
+      if (confirm("আপনি কি নিশ্চিত যে এই প্রজেক্টটি ডিলিট করতে চান?")) {
+        try {
+          const { db, doc, deleteDoc } = window.firebase;
+          await deleteDoc(doc(db, "projects", id));
+          
+          projects = projects.filter(p => p.id !== id);
+          renderProjects();
+          updateStats();
+          showToast("প্রজেক্ট ডিলিট করা হয়েছে!", "success");
+        } catch (err) {
+          showToast("প্রজেক্ট ডিলিট করা যায়নি!", "error");
+          console.error("Firebase delete error:", err);
+        }
+      }
+    }
+
+    // 🔸 Real-time listener (optional)
+    function setupRealTimeListener() {
+      try {
+        const { db, collection, onSnapshot } = window.firebase;
+        
+        onSnapshot(collection(db, "projects"), (snapshot) => {
+          console.log("Real-time update received");
+          loadProjects(); // Reload when data changes
         });
       } catch (err) {
-        showToast("সেভে সমস্যা হয়েছে!", "error");
-        console.error(err);
+        console.log("Real-time listener not available:", err);
       }
+    }
+
+    // 🔸 ছবি প্রিভিউ ফাংশন
+    function previewImage(event) {
+      const file = event.target.files[0];
+      if (file) {
+        // Check file size (max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+          showToast("ছবির সাইজ 2MB এর কম হতে হবে!", "error");
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentImage = e.target.result;
+          document.getElementById('imagePreview').src = currentImage;
+          document.getElementById('imagePreview').style.display = 'block';
+          document.getElementById('removeImage').style.display = 'inline-block';
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // 🔸 ছবি সরান
+    function removeImage() {
+      currentImage = null;
+      document.getElementById('imagePreview').src = '';
+      document.getElementById('imagePreview').style.display = 'none';
+      document.getElementById('removeImage').style.display = 'none';
+      document.getElementById('imageInput').value = '';
+    }
+
+    // 🔸 এডিট করা
+    function editProject(id) {
+      const p = projects.find(x => x.id === id);
+      if (!p) return;
+      
+      document.getElementById('projectId').value = p.id;
+      document.getElementById('projectName').value = p.name;
+      document.getElementById('projectLink').value = p.link || '';
+      document.getElementById('projectNotes').value = p.notes || '';
+      document.getElementById('reminderType').value = p.reminder || 'none';
+      
+      // ছবি সেট করা
+      if (p.image) {
+        currentImage = p.image;
+        document.getElementById('imagePreview').src = p.image;
+        document.getElementById('imagePreview').style.display = 'block';
+        document.getElementById('removeImage').style.display = 'inline-block';
+      } else {
+        removeImage();
+      }
+      
+      isEditing = true;
+      document.getElementById('modalTitle').textContent = "প্রজেক্ট এডিট করুন";
+      openModal();
+    }
+
+    // 🔸 Modal control
+    function openModal() {
+      document.getElementById('modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+      document.getElementById('projectForm').reset();
+      document.getElementById('projectId').value = "";
+      document.getElementById('modalTitle').textContent = "নতুন প্রজেক্ট";
+      removeImage();
+      isEditing = false;
+      currentImage = null;
+    }
+
+    // 🔸 থিম টগল
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      const themeIcon = document.querySelector('.theme-toggle i');
+      if (document.body.classList.contains('dark-mode')) {
+        themeIcon.className = 'fas fa-sun';
+        localStorage.setItem('theme', 'dark');
+      } else {
+        themeIcon.className = 'fas fa-moon';
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    // 🔸 স্ট্যাট আপডেট
+    function updateStats() {
+      document.getElementById('totalProjects').textContent = projects.length;
+      document.getElementById('activeReminders').textContent = projects.filter(p => p.reminder !== 'none').length;
+      document.getElementById('projectsWithImages').textContent = projects.filter(p => p.image).length;
     }
 
     // 🔸 প্রজেক্ট দেখানো
@@ -645,7 +858,7 @@
         
         let imageHTML = '';
         if (p.image) {
-          imageHTML = `<div class="project-image"><img src="${p.image}" alt="${p.name}"></div>`;
+          imageHTML = `<div class="project-image"><img src="${p.image}" alt="${p.name}" loading="lazy"></div>`;
         } else {
           imageHTML = `<div class="project-image"><i class="fas fa-image"></i> কোন ছবি নেই</div>`;
         }
@@ -655,7 +868,7 @@
           <h3>${p.name}</h3>
           ${p.link ? `<a href="${p.link}" target="_blank" class="project-link"><i class="fas fa-external-link-alt"></i> ${truncateText(p.link, 30)}</a>` : ""}
           ${p.notes ? `<p class="project-notes">${truncateText(p.notes, 100)}</p>` : ""}
-          ${p.reminder !== "none" ? `<span class="project-reminder"><i class="fas fa-bell"></i> ${getReminderText(p.reminder)}</span>` : ""}
+          ${p.reminder && p.reminder !== "none" ? `<span class="project-reminder"><i class="fas fa-bell"></i> ${getReminderText(p.reminder)}</span>` : ""}
           <div class="project-actions">
             <button class="outline" onclick="editProject('${p.id}')"><i class="fas fa-edit"></i> এডিট</button>
             <button class="danger" onclick="deleteProject('${p.id}')"><i class="fas fa-trash"></i> ডিলিট</button>
@@ -665,143 +878,24 @@
       });
     }
 
-    // 🔸 ছবি প্রিভিউ ফাংশন
-    function previewImage(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          currentImage = e.target.result;
-          document.getElementById('imagePreview').src = currentImage;
-          document.getElementById('imagePreview').style.display = 'block';
-          document.getElementById('removeImage').style.display = 'inline-block';
-        }
-        reader.readAsDataURL(file);
-      }
-    }
-
-    // 🔸 ছবি সরান
-    function removeImage() {
-      currentImage = null;
-      document.getElementById('imagePreview').src = '';
-      document.getElementById('imagePreview').style.display = 'none';
-      document.getElementById('removeImage').style.display = 'none';
-      document.getElementById('imageInput').value = '';
-    }
-
-    // 🔸 প্রজেক্ট যোগ করা
-    function saveProject(event) {
-      event.preventDefault();
-      const name = document.getElementById('projectName').value;
-      const link = document.getElementById('projectLink').value;
-      const notes = document.getElementById('projectNotes').value;
-      const reminder = document.getElementById('reminderType').value;
-      const id = document.getElementById('projectId').value || Date.now().toString();
-
-      const index = projects.findIndex(p => p.id === id);
-      const newProject = { 
-        id, 
-        name, 
-        link, 
-        notes, 
-        reminder,
-        image: currentImage || (index >= 0 ? projects[index].image : null)
-      };
-      
-      if (index >= 0) {
-        projects[index] = newProject;
-        showToast("প্রজেক্ট আপডেট করা হয়েছে!", "success");
-      } else {
-        projects.push(newProject);
-        showToast("নতুন প্রজেক্ট যোগ করা হয়েছে!", "success");
-      }
-
-      saveToServer();
-      closeModal();
-      renderProjects();
-      updateStats();
-    }
-
-    // 🔸 এডিট করা
-    function editProject(id) {
-      const p = projects.find(x => x.id === id);
-      if (!p) return;
-      
-      document.getElementById('projectId').value = p.id;
-      document.getElementById('projectName').value = p.name;
-      document.getElementById('projectLink').value = p.link;
-      document.getElementById('projectNotes').value = p.notes;
-      document.getElementById('reminderType').value = p.reminder;
-      
-      // ছবি সেট করা
-      if (p.image) {
-        currentImage = p.image;
-        document.getElementById('imagePreview').src = p.image;
-        document.getElementById('imagePreview').style.display = 'block';
-        document.getElementById('removeImage').style.display = 'inline-block';
-      } else {
-        removeImage();
-      }
-      
-      isEditing = true;
-      document.getElementById('modalTitle').textContent = "প্রজেক্ট এডিট করুন";
-      openModal();
-    }
-
-    // 🔸 ডিলিট
-    function deleteProject(id) {
-      if (confirm("আপনি কি নিশ্চিত যে এই প্রজেক্টটি ডিলিট করতে চান?")) {
-        projects = projects.filter(p => p.id !== id);
-        saveToServer();
-        renderProjects();
-        updateStats();
-        showToast("প্রজেক্ট ডিলিট করা হয়েছে!", "success");
-      }
-    }
-
-    // 🔸 Modal control
-    function openModal() {
-      document.getElementById('modal').classList.add('active');
-    }
-
-    function closeModal() {
-      document.getElementById('modal').classList.remove('active');
-      document.getElementById('projectForm').reset();
-      document.getElementById('projectId').value = "";
-      document.getElementById('modalTitle').textContent = "নতুন প্রজেক্ট";
-      removeImage();
-      isEditing = false;
-      currentImage = null;
-    }
-
-    // 🔸 থিম টগল
-    function toggleTheme() {
-      document.body.classList.toggle('dark-mode');
-      const themeIcon = document.querySelector('.theme-toggle i');
-      if (document.body.classList.contains('dark-mode')) {
-        themeIcon.className = 'fas fa-sun';
-      } else {
-        themeIcon.className = 'fas fa-moon';
-      }
-    }
-
-    // 🔸 স্ট্যাট আপডেট
-    function updateStats() {
-      document.getElementById('totalProjects').textContent = projects.length;
-      document.getElementById('activeReminders').textContent = projects.filter(p => p.reminder !== 'none').length;
-      document.getElementById('projectsWithImages').textContent = projects.filter(p => p.image).length;
-    }
-
     // 🔸 টোস্ট নোটিফিকেশন
     function showToast(message, type = "success") {
       const toast = document.getElementById('toast');
       const toastMessage = document.getElementById('toastMessage');
+      const toastIcon = toast.querySelector('i');
       
       toastMessage.textContent = message;
       toast.className = 'toast';
       
+      // Set icon based on type
       if (type === "error") {
         toast.classList.add('error');
+        toastIcon.className = 'fas fa-exclamation-circle';
+      } else if (type === "info") {
+        toast.classList.add('info');
+        toastIcon.className = 'fas fa-info-circle';
+      } else {
+        toastIcon.className = 'fas fa-check-circle';
       }
       
       toast.classList.add('show');
@@ -813,6 +907,7 @@
 
     // 🔸 হেল্পার ফাংশন
     function truncateText(text, maxLength) {
+      if (!text) return '';
       if (text.length <= maxLength) return text;
       return text.substring(0, maxLength) + '...';
     }
@@ -829,8 +924,22 @@
 
     // 🔸 ইনিশিয়ালাইজেশন
     document.addEventListener('DOMContentLoaded', function() {
-      loadProjects();
-      
+      // Load saved theme
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.querySelector('.theme-toggle i').className = 'fas fa-sun';
+      }
+
+      // Wait for Firebase to initialize
+      const checkFirebase = setInterval(() => {
+        if (window.firebase) {
+          clearInterval(checkFirebase);
+          loadProjects();
+          setupRealTimeListener();
+        }
+      }, 100);
+
       // Close modal when clicking outside
       document.getElementById('modal').addEventListener('click', function(e) {
         if (e.target === this) {
