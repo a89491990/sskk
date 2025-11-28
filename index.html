@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Airdrop Project Manager (Shared)</title>
+  <title>Airdrop Project Manager (Firebase)</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- Firebase SDK -->
@@ -11,6 +11,7 @@
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
 
     // Your web app's Firebase configuration
     const firebaseConfig = {
@@ -26,6 +27,7 @@
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const analytics = getAnalytics(app);
     
     // Make Firebase available globally
     window.firebase = {
@@ -39,6 +41,12 @@
     };
     
     console.log("Firebase initialized successfully!");
+    
+    // Load projects after Firebase is ready
+    window.firebaseReady = true;
+    if (window.loadProjects) {
+      window.loadProjects();
+    }
   </script>
 
   <style>
@@ -499,6 +507,10 @@
       background: var(--primary);
     }
 
+    .toast.warning {
+      background: var(--warning);
+    }
+
     /* Loading spinner */
     .loading {
       display: inline-block;
@@ -512,6 +524,23 @@
 
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      color: white;
+      font-size: 1.2rem;
+      flex-direction: column;
+      gap: 20px;
     }
 
     /* Responsive */
@@ -563,7 +592,11 @@
     </div>
 
     <div id="projectsList" class="projects-grid">
-      <!-- Projects will be loaded here -->
+      <div class="empty-state">
+        <i class="fas fa-spinner loading"></i>
+        <h3>লোড হচ্ছে...</h3>
+        <p>প্রজেক্ট গুলো লোড হচ্ছে</p>
+      </div>
     </div>
 
     <!-- Modal -->
@@ -631,9 +664,16 @@
       <i class="fas fa-check-circle"></i>
       <span id="toastMessage">প্রজেক্ট সফলভাবে সংরক্ষিত হয়েছে!</span>
     </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+      <div class="loading"></div>
+      <p>লোড হচ্ছে...</p>
+    </div>
   </div>
 
   <script>
+    // Global variables
     let projects = [];
     let isEditing = false;
     let currentImage = null;
@@ -641,10 +681,11 @@
     // 🔸 Firebase functions
     async function loadProjects() {
       try {
-        showToast("প্রজেক্ট লোড হচ্ছে...", "info");
+        showLoading(true);
         
+        // Wait for Firebase to be ready
         if (!window.firebase) {
-          throw new Error("Firebase is not initialized yet");
+          await waitForFirebase();
         }
 
         const { db, collection, getDocs } = window.firebase;
@@ -653,9 +694,16 @@
         projects = [];
         
         querySnapshot.forEach((doc) => {
+          const data = doc.data();
           projects.push({
             id: doc.id,
-            ...doc.data()
+            name: data.name || '',
+            link: data.link || '',
+            notes: data.notes || '',
+            reminder: data.reminder || 'none',
+            image: data.image || null,
+            createdAt: data.createdAt || new Date().toISOString(),
+            updatedAt: data.updatedAt || new Date().toISOString()
           });
         });
         
@@ -663,9 +711,33 @@
         updateStats();
         showToast("প্রজেক্ট সফলভাবে লোড হয়েছে!", "success");
       } catch (err) {
-        showToast("ডেটা লোড করা যায়নি!", "error");
         console.error("Firebase load error:", err);
+        showToast("ডেটা লোড করা যায়নি! ইন্টারনেট চেক করুন", "error");
+        
+        // Fallback: Show empty state
+        projects = [];
+        renderProjects();
+        updateStats();
+      } finally {
+        showLoading(false);
       }
+    }
+
+    async function waitForFirebase() {
+      return new Promise((resolve) => {
+        const checkFirebase = setInterval(() => {
+          if (window.firebase) {
+            clearInterval(checkFirebase);
+            resolve();
+          }
+        }, 100);
+        
+        // Timeout after 10 seconds
+        setTimeout(() => {
+          clearInterval(checkFirebase);
+          resolve();
+        }, 10000);
+      });
     }
 
     async function saveProject(event) {
@@ -677,23 +749,35 @@
       submitBtn.disabled = true;
 
       try {
+        if (!window.firebase) {
+          throw new Error("Firebase is not ready");
+        }
+
         const { db, doc, setDoc } = window.firebase;
         
-        const name = document.getElementById('projectName').value;
-        const link = document.getElementById('projectLink').value;
-        const notes = document.getElementById('projectNotes').value;
+        const name = document.getElementById('projectName').value.trim();
+        const link = document.getElementById('projectLink').value.trim();
+        const notes = document.getElementById('projectNotes').value.trim();
         const reminder = document.getElementById('reminderType').value;
-        const id = document.getElementById('projectId').value || Date.now().toString();
+        const id = document.getElementById('projectId').value || generateId();
+
+        if (!name) {
+          throw new Error("প্রজেক্টের নাম দিতে হবে");
+        }
 
         const projectData = { 
           name, 
-          link, 
-          notes, 
+          link: link || '', 
+          notes: notes || '', 
           reminder,
           image: currentImage,
-          createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
+
+        // Add createdAt for new projects
+        if (!document.getElementById('projectId').value) {
+          projectData.createdAt = new Date().toISOString();
+        }
 
         await setDoc(doc(db, "projects", id), projectData);
 
@@ -706,8 +790,8 @@
         closeModal();
         await loadProjects(); // Reload to get the latest data
       } catch (err) {
-        showToast("প্রজেক্ট সেভ করা যায়নি!", "error");
         console.error("Firebase save error:", err);
+        showToast(err.message || "প্রজেক্ট সেভ করা যায়নি!", "error");
       } finally {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
@@ -717,31 +801,19 @@
     async function deleteProject(id) {
       if (confirm("আপনি কি নিশ্চিত যে এই প্রজেক্টটি ডিলিট করতে চান?")) {
         try {
+          if (!window.firebase) {
+            throw new Error("Firebase is not ready");
+          }
+
           const { db, doc, deleteDoc } = window.firebase;
           await deleteDoc(doc(db, "projects", id));
           
-          projects = projects.filter(p => p.id !== id);
-          renderProjects();
-          updateStats();
           showToast("প্রজেক্ট ডিলিট করা হয়েছে!", "success");
+          await loadProjects(); // Reload the list
         } catch (err) {
-          showToast("প্রজেক্ট ডিলিট করা যায়নি!", "error");
           console.error("Firebase delete error:", err);
+          showToast("প্রজেক্ট ডিলিট করা যায়নি!", "error");
         }
-      }
-    }
-
-    // 🔸 Real-time listener (optional)
-    function setupRealTimeListener() {
-      try {
-        const { db, collection, onSnapshot } = window.firebase;
-        
-        onSnapshot(collection(db, "projects"), (snapshot) => {
-          console.log("Real-time update received");
-          loadProjects(); // Reload when data changes
-        });
-      } catch (err) {
-        console.log("Real-time listener not available:", err);
       }
     }
 
@@ -755,12 +827,21 @@
           return;
         }
         
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+          showToast("শুধুমাত্র ছবি ফাইল আপলোড করতে পারবেন!", "error");
+          return;
+        }
+        
         const reader = new FileReader();
         reader.onload = function(e) {
           currentImage = e.target.result;
           document.getElementById('imagePreview').src = currentImage;
           document.getElementById('imagePreview').style.display = 'block';
           document.getElementById('removeImage').style.display = 'inline-block';
+        }
+        reader.onerror = function() {
+          showToast("ছবি লোড করা যায়নি!", "error");
         }
         reader.readAsDataURL(file);
       }
@@ -832,7 +913,7 @@
     // 🔸 স্ট্যাট আপডেট
     function updateStats() {
       document.getElementById('totalProjects').textContent = projects.length;
-      document.getElementById('activeReminders').textContent = projects.filter(p => p.reminder !== 'none').length;
+      document.getElementById('activeReminders').textContent = projects.filter(p => p.reminder && p.reminder !== 'none').length;
       document.getElementById('projectsWithImages').textContent = projects.filter(p => p.image).length;
     }
 
@@ -851,8 +932,13 @@
         return;
       }
       
+      // Sort projects by creation date (newest first)
+      const sortedProjects = [...projects].sort((a, b) => {
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      });
+      
       list.innerHTML = "";
-      projects.forEach(p => {
+      sortedProjects.forEach(p => {
         const div = document.createElement("div");
         div.className = "project-card";
         
@@ -894,6 +980,9 @@
       } else if (type === "info") {
         toast.classList.add('info');
         toastIcon.className = 'fas fa-info-circle';
+      } else if (type === "warning") {
+        toast.classList.add('warning');
+        toastIcon.className = 'fas fa-exclamation-triangle';
       } else {
         toastIcon.className = 'fas fa-check-circle';
       }
@@ -902,7 +991,13 @@
       
       setTimeout(() => {
         toast.classList.remove('show');
-      }, 3000);
+      }, 4000);
+    }
+
+    // 🔸 লোডিং স্টেট
+    function showLoading(show) {
+      const overlay = document.getElementById('loadingOverlay');
+      overlay.style.display = show ? 'flex' : 'none';
     }
 
     // 🔸 হেল্পার ফাংশন
@@ -922,6 +1017,10 @@
       return reminderTexts[reminder] || reminder;
     }
 
+    function generateId() {
+      return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    }
+
     // 🔸 ইনিশিয়ালাইজেশন
     document.addEventListener('DOMContentLoaded', function() {
       // Load saved theme
@@ -931,14 +1030,18 @@
         document.querySelector('.theme-toggle i').className = 'fas fa-sun';
       }
 
-      // Wait for Firebase to initialize
-      const checkFirebase = setInterval(() => {
+      // Load projects when Firebase is ready
+      const initApp = () => {
         if (window.firebase) {
-          clearInterval(checkFirebase);
           loadProjects();
           setupRealTimeListener();
+        } else {
+          // If Firebase takes time, wait for it
+          setTimeout(initApp, 100);
         }
-      }, 100);
+      };
+
+      initApp();
 
       // Close modal when clicking outside
       document.getElementById('modal').addEventListener('click', function(e) {
@@ -946,7 +1049,33 @@
           closeModal();
         }
       });
+
+      // Escape key to close modal
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeModal();
+        }
+      });
     });
+
+    // 🔸 Real-time listener (optional enhancement)
+    function setupRealTimeListener() {
+      try {
+        const { db, collection, onSnapshot } = window.firebase;
+        
+        onSnapshot(collection(db, "projects"), (snapshot) => {
+          console.log("Real-time update received");
+          loadProjects(); // Reload when data changes
+        }, (error) => {
+          console.log("Real-time listener error:", error);
+        });
+      } catch (err) {
+        console.log("Real-time listener not available:", err);
+      }
+    }
+
+    // Make loadProjects available globally
+    window.loadProjects = loadProjects;
   </script>
 </body>
 </html>
