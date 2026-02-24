@@ -1,92 +1,628 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Moro: The Seismic Warrior</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser-arcade-physics.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>মরো - 3D ট্রপিক্যাল ফাইটার</title>
     <style>
-        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        canvas { border: 2px solid #ff4d4d; box-shadow: 0 0 20px #ff4d4d; }
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 100;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        #health-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            z-index: 100;
+        }
+        
+        .health-bar {
+            width: 100%;
+            height: 30px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid #ffd700;
+            margin-bottom: 10px;
+        }
+        
+        .health-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #ff4444, #ff8888);
+            transition: width 0.3s;
+        }
+        
+        .health-text {
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px black;
+        }
+        
+        #crystal-energy {
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            color: #ffd700;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #9c27b0;
+            z-index: 100;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid #9c27b0;
+        }
+        
+        #controls {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            color: white;
+            text-align: right;
+            z-index: 100;
+            background: rgba(0,0,0,0.3);
+            padding: 15px 25px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            line-height: 1.8;
+        }
+        
+        #controls h3 {
+            margin: 0 0 10px 0;
+            color: #ffd700;
+        }
+        
+        #gameover {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 200;
+            display: none;
+            text-shadow: 0 0 20px red;
+            background: rgba(0,0,0,0.7);
+            padding: 30px 60px;
+            border-radius: 20px;
+            border: 3px solid #ffd700;
+        }
+        
+        #gameover button {
+            margin-top: 20px;
+            padding: 10px 30px;
+            font-size: 24px;
+            background: #ffd700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        #gameover button:hover {
+            background: #ffed4a;
+        }
+        
+        .combo {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffd700;
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 0 0 10px orange;
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
-
-<script>
-const config = {
-    type: Phaser.AUTO,
-    width: 1000,
-    height: 500,
-    physics: {
-        default: 'arcade',
-        arcade: { gravity: { y: 1200 }, debug: false } // Debug true করলে হিটবক্স দেখা যাবে
-    },
-    scene: { preload: preload, create: create, update: update }
-};
-
-const game = new Phaser.Game(config);
-let player;
-let cursors;
-let spaceKey;
-
-function preload() {
-    // এখানে আপনার ক্যারেক্টারের ছবিগুলো লোড হবে
-    // বর্তমানে আমি ডামি হিসেবে একটি স্কিলড বক্স ব্যবহার করছি
-    this.load.image('background', 'https://labs.phaser.io/assets/skies/space3.png');
-}
-
-function create() {
-    this.add.image(500, 250, 'background').setScale(2);
-
-    // মোরো ক্যারেক্টার তৈরি (Physics Body সহ)
-    player = this.physics.add.sprite(100, 400, null);
-    player.setSize(80, 120); // প্রফেশনাল হিটবক্স সাইজ
-    player.setCollideWorldBounds(true);
+    <div id="info">
+        <h1>🌊 মরো - ট্রপিক্যাল গোলেম</h1>
+    </div>
     
-    // ক্যারেক্টারকে মোরোর মতো কালার দেওয়া (টেস্ট করার জন্য)
-    player.setTint(0x8B4513); 
-
-    // কন্ট্রোল সেটআপ
-    cursors = this.input.keyboard.createCursorKeys();
-    spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-
-    // ফ্লোর বা মাটি তৈরি
-    let platforms = this.physics.add.staticGroup();
-    let ground = this.add.rectangle(500, 490, 1000, 20, 0x666666);
-    platforms.add(ground);
-    this.physics.add.collider(player, platforms);
-}
-
-function update() {
-    // মুভমেন্ট লজিক - প্রফেশনাল স্মুথনেস
-    if (cursors.left.isDown) {
-        player.setVelocityX(-300);
-        player.setFlipX(true); // বামে ঘুরবে
-    } else if (cursors.right.isDown) {
-        player.setVelocityX(300);
-        player.setFlipX(false); // ডানে ঘুরবে
-    } else {
-        player.setVelocityX(0);
-    }
-
-    // জাম্পিং
-    if (cursors.up.isDown && player.body.touching.down) {
-        player.setVelocityY(-600);
-    }
-
-    // অ্যাটাক বা ঘুষি (Space Bar)
-    if (Phaser.Input.Keyboard.JustDown(spaceKey)) {
-        performAttack(this);
-    }
-}
-
-function performAttack(scene) {
-    // প্রফেশনাল অ্যাটাক ইফেক্ট (Shake screen)
-    scene.cameras.main.shake(100, 0.01);
+    <div id="health-container">
+        <div class="health-bar">
+            <div id="playerHealth" class="health-fill"></div>
+        </div>
+        <div id="enemyHealth" class="health-bar">
+            <div id="enemyHealthFill" class="health-fill" style="background: linear-gradient(90deg, #44ff44, #88ff88);"></div>
+        </div>
+        <div class="health-text">খেলোয়াড় | শত্রু</div>
+    </div>
     
-    // এখানে মোরোর হাতের অ্যানিমেশন ট্রিগার হবে
-    player.setTint(0xff0000); // অ্যাটাকের সময় রঙ পরিবর্তন
-    setTimeout(() => player.setTint(0x8B4513), 200);
-}
-</script>
+    <div id="crystal-energy">💜 ক্রিস্টাল: <span id="crystalValue">100</span>%</div>
+    
+    <div id="controls">
+        <h3>🎮 কন্ট্রোল</h3>
+        <p>⬅️ ➡️ = মুভ | Space = জাম্প</p>
+        <p>A = পাঞ্চ | S = ক্রিস্টাল ব্লাস্ট</p>
+        <p>D = স্প্ল্যাশ | Mouse = ক্যামেরা</p>
+    </div>
+    
+    <div id="gameover">
+        <div>গেম ওভার!</div>
+        <div style="font-size: 24px; margin: 20px 0;">মরো বিশ্রাম নিচ্ছে...</div>
+        <button onclick="location.reload()">আবার খেলুন</button>
+    </div>
+    
+    <div class="combo" id="comboDisplay"></div>
+
+    <!-- Three.js লাইব্রেরি -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'https://unpkg.com/three@0.128.0/examples/jsm/controls/OrbitControls.js';
+        
+        // সিন, ক্যামেরা, রেন্ডারার সেটআপ
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // স্কাই ব্লু
+        scene.fog = new THREE.Fog(0x87CEEB, 10, 50);
+        
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(5, 3, 10);
+        camera.lookAt(0, 1, 0);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+        
+        // কন্ট্রোলস
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.target.set(0, 1.5, 0);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxPolarAngle = Math.PI / 2.2;
+        controls.minDistance = 5;
+        controls.maxDistance = 15;
+        
+        // লাইটিং
+        // অ্যাম্বিয়েন্ট লাইট
+        const ambientLight = new THREE.AmbientLight(0x404060);
+        scene.add(ambientLight);
+        
+        // প্রধান সূর্যের আলো
+        const sunLight = new THREE.DirectionalLight(0xfff5d1, 1.2);
+        sunLight.position.set(10, 20, 5);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 1024;
+        sunLight.shadow.mapSize.height = 1024;
+        const d = 15;
+        sunLight.shadow.camera.left = -d;
+        sunLight.shadow.camera.right = d;
+        sunLight.shadow.camera.top = d;
+        sunLight.shadow.camera.bottom = -d;
+        sunLight.shadow.camera.near = 1;
+        sunLight.shadow.camera.far = 25;
+        scene.add(sunLight);
+        
+        // ফিল লাইট
+        const fillLight = new THREE.DirectionalLight(0x4466ff, 0.5);
+        fillLight.position.set(-5, 5, 10);
+        scene.add(fillLight);
+        
+        // ক্রিস্টালের জন্য বেগুনি আলো
+        const crystalLight = new THREE.PointLight(0x9c27b0, 2, 5);
+        crystalLight.position.set(0, 1.5, 0);
+        scene.add(crystalLight);
+        
+        // ব্যাকগ্রাউন্ড - ট্রপিক্যাল আইল্যান্ড
+        function createIsland() {
+            // সমুদ্র
+            const oceanGeometry = new THREE.PlaneGeometry(100, 100);
+            const oceanMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1e88e5, 
+                emissive: 0x0a3d5e,
+                transparent: true,
+                opacity: 0.9
+            });
+            const ocean = new THREE.Mesh(oceanGeometry, oceanMaterial);
+            ocean.rotation.x = -Math.PI / 2;
+            ocean.position.y = -0.5;
+            ocean.receiveShadow = true;
+            scene.add(ocean);
+            
+            // দ্বীপ
+            const islandGeo = new THREE.ConeGeometry(8, 1, 32);
+            const islandMat = new THREE.MeshStandardMaterial({ color: 0xf4a460 });
+            const island = new THREE.Mesh(islandGeo, islandMat);
+            island.position.set(0, 0, 0);
+            island.receiveShadow = true;
+            island.castShadow = true;
+            scene.add(island);
+            
+            // পাম গাছ
+            for (let i = 0; i < 5; i++) {
+                const angle = (i / 5) * Math.PI * 2;
+                const x = Math.cos(angle) * 3;
+                const z = Math.sin(angle) * 3;
+                
+                // গাছের কাণ্ড
+                const trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 3);
+                const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+                const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+                trunk.position.set(x, 1.5, z);
+                trunk.castShadow = true;
+                trunk.receiveShadow = true;
+                scene.add(trunk);
+                
+                // পাতা
+                for (let j = 0; j < 4; j++) {
+                    const leafGeo = new THREE.ConeGeometry(0.8, 1.5, 8);
+                    const leafMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32 });
+                    const leaf = new THREE.Mesh(leafGeo, leafMat);
+                    leaf.position.set(
+                        x + Math.cos(angle + j * Math.PI/2) * 0.8,
+                        3 + j * 0.2,
+                        z + Math.sin(angle + j * Math.PI/2) * 0.8
+                    );
+                    leaf.rotation.x = 0.3;
+                    leaf.rotation.z = angle + j * Math.PI/2;
+                    leaf.castShadow = true;
+                    leaf.receiveShadow = true;
+                    scene.add(leaf);
+                }
+            }
+            
+            // ছোট ছোট ঢেউ
+            for (let i = 0; i < 20; i++) {
+                const waveGeo = new THREE.SphereGeometry(0.2 + Math.random() * 0.3, 8);
+                const waveMat = new THREE.MeshStandardMaterial({ color: 0x88ccff, transparent: true, opacity: 0.6 });
+                const wave = new THREE.Mesh(waveGeo, waveMat);
+                wave.position.set(
+                    (Math.random() - 0.5) * 20,
+                    -0.3,
+                    (Math.random() - 0.5) * 20
+                );
+                scene.add(wave);
+            }
+        }
+        
+        createIsland();
+        
+        // মরো ক্যারেক্টার তৈরি
+        function createMoro() {
+            const group = new THREE.Group();
+            
+            // বডি (কাঠ)
+            const bodyGeo = new THREE.CylinderGeometry(0.8, 0.8, 1.5, 8);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x8b4513, roughness: 0.7 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.75;
+            body.castShadow = true;
+            body.receiveShadow = true;
+            group.add(body);
+            
+            // স্টোন আর্মার
+            const stoneGeo = new THREE.BoxGeometry(1.0, 0.4, 0.6);
+            const stoneMat = new THREE.MeshStandardMaterial({ color: 0x696969, roughness: 0.8 });
+            const chest = new THREE.Mesh(stoneGeo, stoneMat);
+            chest.position.set(0, 0.8, 0.3);
+            chest.castShadow = true;
+            chest.receiveShadow = true;
+            group.add(chest);
+            
+            // হেড
+            const headGeo = new THREE.SphereGeometry(0.6, 16);
+            const headMat = new THREE.MeshStandardMaterial({ color: 0xdeb887 });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 1.7;
+            head.castShadow = true;
+            head.receiveShadow = true;
+            group.add(head);
+            
+            // খড়ের টুপি
+            const hatBaseGeo = new THREE.CylinderGeometry(1.0, 1.2, 0.2, 8);
+            const hatBaseMat = new THREE.MeshStandardMaterial({ color: 0xf4a460 });
+            const hatBase = new THREE.Mesh(hatBaseGeo, hatBaseMat);
+            hatBase.position.y = 2.0;
+            hatBase.castShadow = true;
+            hatBase.receiveShadow = true;
+            group.add(hatBase);
+            
+            const hatTopGeo = new THREE.ConeGeometry(0.6, 0.6, 8);
+            const hatTopMat = new THREE.MeshStandardMaterial({ color: 0xcd853f });
+            const hatTop = new THREE.Mesh(hatTopGeo, hatTopMat);
+            hatTop.position.y = 2.3;
+            hatTop.castShadow = true;
+            hatTop.receiveShadow = true;
+            group.add(hatTop);
+            
+            // চোখ (বন্ধ - হাসি)
+            const eyeLeft = new THREE.Mesh(
+                new THREE.TorusGeometry(0.15, 0.05, 8, 16, Math.PI),
+                new THREE.MeshStandardMaterial({ color: 0x000000 })
+            );
+            eyeLeft.position.set(-0.25, 1.8, 0.5);
+            eyeLeft.rotation.x = 0.2;
+            eyeLeft.rotation.z = 0.2;
+            group.add(eyeLeft);
+            
+            const eyeRight = new THREE.Mesh(
+                new THREE.TorusGeometry(0.15, 0.05, 8, 16, Math.PI),
+                new THREE.MeshStandardMaterial({ color: 0x000000 })
+            );
+            eyeRight.position.set(0.25, 1.8, 0.5);
+            eyeRight.rotation.x = 0.2;
+            eyeRight.rotation.z = -0.2;
+            group.add(eyeRight);
+            
+            // হাসি
+            const smile = new THREE.Mesh(
+                new THREE.TorusGeometry(0.3, 0.05, 8, 16, Math.PI),
+                new THREE.MeshStandardMaterial({ color: 0x000000 })
+            );
+            smile.position.set(0, 1.6, 0.5);
+            smile.rotation.x = 0.3;
+            smile.rotation.y = 0;
+            smile.rotation.z = 0;
+            smile.scale.set(1, 0.5, 1);
+            group.add(smile);
+            
+            // ক্রিস্টাল
+            const crystalGeo = new THREE.OctahedronGeometry(0.3);
+            const crystalMat = new THREE.MeshStandardMaterial({ 
+                color: 0x9c27b0, 
+                emissive: 0x4a0072,
+                transparent: true,
+                opacity: 0.9
+            });
+            const crystal = new THREE.Mesh(crystalGeo, crystalMat);
+            crystal.position.set(0, 0.8, 0.5);
+            crystal.castShadow = true;
+            crystal.receiveShadow = true;
+            group.add(crystal);
+            
+            // হাত
+            const armGeo = new THREE.CylinderGeometry(0.2, 0.2, 1.0);
+            const armMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+            
+            // বাম হাত
+            const leftArm = new THREE.Mesh(armGeo, armMat);
+            leftArm.position.set(-0.8, 1.1, 0);
+            leftArm.rotation.z = 0.2;
+            leftArm.castShadow = true;
+            leftArm.receiveShadow = true;
+            group.add(leftArm);
+            
+            // ডান হাত
+            const rightArm = new THREE.Mesh(armGeo, armMat);
+            rightArm.position.set(0.8, 1.1, 0);
+            rightArm.rotation.z = -0.2;
+            rightArm.castShadow = true;
+            rightArm.receiveShadow = true;
+            group.add(rightArm);
+            
+            return group;
+        }
+        
+        // প্লেয়ার তৈরি
+        const player = createMoro();
+        player.position.set(0, 0.5, 0);
+        player.scale.set(0.8, 0.8, 0.8);
+        scene.add(player);
+        
+        // শত্রু তৈরি (লাল সংস্করণ)
+        const enemy = createMoro();
+        enemy.position.set(3, 0.5, 2);
+        enemy.scale.set(0.8, 0.8, 0.8);
+        
+        // শত্রুর রং পরিবর্তন
+        enemy.traverse((child) => {
+            if (child.isMesh) {
+                if (child.material.color.getHex() === 0x8b4513) {
+                    child.material.color.setHex(0x4a2c1a);
+                }
+                if (child.material.color.getHex() === 0x9c27b0) {
+                    child.material.color.setHex(0xff4444);
+                    child.material.emissive.setHex(0x440000);
+                }
+            }
+        });
+        scene.add(enemy);
+        
+        // গেম স্টেট
+        let playerHealth = 100;
+        let enemyHealth = 100;
+        let crystalEnergy = 100;
+        let combo = 0;
+        let gameActive = true;
+        
+        // কী কন্ট্রোল
+        const keys = {};
+        window.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
+        window.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
+        
+        // মাউস ক্লিক
+        window.addEventListener('mousedown', (e) => {
+            if (!gameActive) return;
+            
+            if (e.button === 0) { // বাম ক্লিক = পাঞ্চ
+                attack();
+            }
+        });
+        
+        function attack() {
+            if (!gameActive) return;
+            
+            const distance = player.position.distanceTo(enemy.position);
+            if (distance < 2.5) {
+                // ড্যামেজ
+                enemyHealth -= 10;
+                combo++;
+                
+                // অ্যানিমেশন
+                player.children[8].rotation.x = -1; // ডান হাত পাঞ্চ
+                setTimeout(() => {
+                    player.children[8].rotation.x = 0;
+                }, 200);
+                
+                // ক্রিস্টাল ফ্ল্যাশ
+                crystalLight.intensity = 5;
+                setTimeout(() => {
+                    crystalLight.intensity = 2;
+                }, 200);
+                
+                // কম্বো আপডেট
+                document.getElementById('comboDisplay').textContent = `⚡ ${combo}x COMBO!`;
+                
+                if (enemyHealth <= 0) {
+                    enemyHealth = 0;
+                    document.getElementById('gameover').style.display = 'block';
+                    document.getElementById('gameover').innerHTML = '<div>🎉 আপনি জিতেছেন!</div><div style="font-size:24px;margin:20px 0;">শত্রু পরাজিত!</div><button onclick="location.reload()">আবার খেলুন</button>';
+                    gameActive = false;
+                }
+            }
+        }
+        
+        function specialAttack() {
+            if (!gameActive || crystalEnergy < 30) return;
+            
+            crystalEnergy -= 30;
+            const distance = player.position.distanceTo(enemy.position);
+            if (distance < 4) {
+                enemyHealth -= 25;
+                
+                // ক্রিস্টাল বিস্ফোরণ ইফেক্ট
+                crystalLight.intensity = 10;
+                setTimeout(() => {
+                    crystalLight.intensity = 2;
+                }, 300);
+            }
+            
+            if (enemyHealth <= 0) {
+                enemyHealth = 0;
+                document.getElementById('gameover').style.display = 'block';
+                document.getElementById('gameover').innerHTML = '<div>🎉 আপনি জিতেছেন!</div><div style="font-size:24px;margin:20px 0;">ক্রিস্টাল ব্লাস্ট বিজয়ী!</div><button onclick="location.reload()">আবার খেলুন</button>';
+                gameActive = false;
+            }
+        }
+        
+        // অ্যানিমেশন লুপ
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (gameActive) {
+                time += 0.01;
+                
+                // প্লেয়ার কন্ট্রোল
+                if (keys['a'] || keys['arrowleft']) {
+                    player.position.x -= 0.1;
+                }
+                if (keys['d'] || keys['arrowright']) {
+                    player.position.x += 0.1;
+                }
+                if (keys['w'] || keys['arrowup']) {
+                    player.position.z -= 0.1;
+                }
+                if (keys['s'] || keys['arrowdown']) {
+                    player.position.z += 0.1;
+                }
+                
+                // স্পেশাল অ্যাটাক
+                if (keys['s']) {
+                    specialAttack();
+                }
+                
+                // জাম্প
+                if (keys[' '] && player.position.y <= 0.5) {
+                    player.position.y = 1.5;
+                    setTimeout(() => {
+                        player.position.y = 0.5;
+                    }, 500);
+                }
+                
+                // সীমার মধ্যে রাখা
+                player.position.x = Math.max(-5, Math.min(5, player.position.x));
+                player.position.z = Math.max(-5, Math.min(5, player.position.z));
+                
+                // প্লেয়ার সবসময় শত্রুর দিকে তাকিয়ে থাকে
+                player.lookAt(enemy.position);
+                
+                // শত্রু AI
+                const enemySpeed = 0.03;
+                const direction = new THREE.Vector3().subVectors(player.position, enemy.position).normalize();
+                enemy.position.x += direction.x * enemySpeed;
+                enemy.position.z += direction.z * enemySpeed;
+                
+                // শত্রু অ্যাটাক
+                if (player.position.distanceTo(enemy.position) < 2) {
+                    if (Math.random() < 0.01) {
+                        playerHealth -= 5;
+                        
+                        if (playerHealth <= 0) {
+                            playerHealth = 0;
+                            document.getElementById('gameover').style.display = 'block';
+                            gameActive = false;
+                        }
+                    }
+                }
+                
+                // ক্রিস্টাল রিচার্জ
+                crystalEnergy = Math.min(100, crystalEnergy + 0.1);
+                
+                // আইডল অ্যানিমেশন
+                player.position.y = 0.5 + Math.sin(time * 3) * 0.05;
+                enemy.position.y = 0.5 + Math.sin(time * 3 + 2) * 0.05;
+                
+                // ক্রিস্টাল ঘূর্ণন
+                const crystal = player.children[6];
+                if (crystal) crystal.rotation.y += 0.02;
+            }
+            
+            // UI আপডেট
+            document.getElementById('playerHealth').style.width = playerHealth + '%';
+            document.getElementById('enemyHealthFill').style.width = enemyHealth + '%';
+            document.getElementById('crystalValue').textContent = Math.floor(crystalEnergy);
+            
+            // কন্ট্রোল আপডেট
+            controls.update();
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // রিসাইজ হ্যান্ডলার
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
 </html>
