@@ -1,130 +1,92 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Moro Fighting Game | SeismicSys</title>
+    <meta charset="UTF-8">
+    <title>Moro: The Seismic Warrior</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser-arcade-physics.min.js"></script>
     <style>
-        body { margin: 0; background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; color: white; font-family: sans-serif; }
-        canvas { border: 4px solid #d32f2f; background: url('https://img.freepik.com/free-vector/beach-landscape-with-palm-trees_23-2148154563.jpg'); background-size: cover; }
-        .instructions { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px; }
+        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        canvas { border: 2px solid #ff4d4d; box-shadow: 0 0 20px #ff4d4d; }
     </style>
 </head>
 <body>
 
-<div class="instructions">
-    <b>Moro Controls:</b><br>
-    Move: A / D <br>
-    Jump: W <br>
-    Attack: Space Bar
-</div>
-
-<canvas id="gameCanvas"></canvas>
-
 <script>
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-
-canvas.width = 800;
-canvas.height = 400;
-
-const gravity = 0.8;
-
-// Moro Character Class
-class Moro {
-    constructor() {
-        this.position = { x: 100, y: 100 };
-        this.velocity = { x: 0, y: 0 };
-        this.width = 80;
-        this.height = 100;
-        this.isAttacking = false;
-        this.health = 100;
-    }
-
-    draw() {
-        // Moro-র শরীর (ব্রাউন কালার আপনার ছবির মতো)
-        ctx.fillStyle = '#8B4513'; 
-        ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
-
-        // হ্যাট (আপনার ছবির সেই খড়ের টুপি)
-        ctx.fillStyle = '#F0E68C';
-        ctx.fillRect(this.position.x - 10, this.position.y - 15, this.width + 20, 20);
-        ctx.fillStyle = '#d32f2f'; // টুপির লাল ফিতা
-        ctx.fillRect(this.position.x - 10, this.position.y - 5, this.width + 20, 5);
-
-        // চোখ (হাসি মাখা মুখ)
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(this.position.x + 25, this.position.y + 25, 5, 0, Math.PI);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(this.position.x + 55, this.position.y + 25, 5, 0, Math.PI);
-        ctx.stroke();
-
-        // অ্যাটাক অ্যানিমেশন (একটি হাত বের হবে)
-        if (this.isAttacking) {
-            ctx.fillStyle = '#A0522D';
-            ctx.fillRect(this.position.x + this.width, this.position.y + 20, 40, 20);
-        }
-    }
-
-    update() {
-        this.draw();
-        this.position.x += this.velocity.x;
-        this.position.y += this.velocity.y;
-
-        // গ্রাভিটি চেক
-        if (this.position.y + this.height + this.velocity.y >= canvas.height) {
-            this.velocity.y = 0;
-        } else {
-            this.velocity.y += gravity;
-        }
-    }
-
-    attack() {
-        this.isAttacking = true;
-        setTimeout(() => { this.isAttacking = false; }, 200);
-    }
-}
-
-const player = new Moro();
-
-const keys = {
-    a: { pressed: false },
-    d: { pressed: false },
-    w: { pressed: false }
+const config = {
+    type: Phaser.AUTO,
+    width: 1000,
+    height: 500,
+    physics: {
+        default: 'arcade',
+        arcade: { gravity: { y: 1200 }, debug: false } // Debug true করলে হিটবক্স দেখা যাবে
+    },
+    scene: { preload: preload, create: create, update: update }
 };
 
-function animate() {
-    window.requestAnimationFrame(animate);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    player.update();
+const game = new Phaser.Game(config);
+let player;
+let cursors;
+let spaceKey;
 
-    player.velocity.x = 0;
-    if (keys.a.pressed) player.velocity.x = -5;
-    else if (keys.d.pressed) player.velocity.x = 5;
-
-    if (keys.w.pressed && player.position.y > 200) player.velocity.y = -15;
+function preload() {
+    // এখানে আপনার ক্যারেক্টারের ছবিগুলো লোড হবে
+    // বর্তমানে আমি ডামি হিসেবে একটি স্কিলড বক্স ব্যবহার করছি
+    this.load.image('background', 'https://labs.phaser.io/assets/skies/space3.png');
 }
 
-animate();
+function create() {
+    this.add.image(500, 250, 'background').setScale(2);
 
-// Controls
-window.addEventListener('keydown', (event) => {
-    switch (event.key) {
-        case 'd': keys.d.pressed = true; break;
-        case 'a': keys.a.pressed = true; break;
-        case 'w': keys.w.pressed = true; break;
-        case ' ': player.attack(); break;
-    }
-});
+    // মোরো ক্যারেক্টার তৈরি (Physics Body সহ)
+    player = this.physics.add.sprite(100, 400, null);
+    player.setSize(80, 120); // প্রফেশনাল হিটবক্স সাইজ
+    player.setCollideWorldBounds(true);
+    
+    // ক্যারেক্টারকে মোরোর মতো কালার দেওয়া (টেস্ট করার জন্য)
+    player.setTint(0x8B4513); 
 
-window.addEventListener('keyup', (event) => {
-    switch (event.key) {
-        case 'd': keys.d.pressed = false; break;
-        case 'a': keys.a.pressed = false; break;
-        case 'w': keys.w.pressed = false; break;
+    // কন্ট্রোল সেটআপ
+    cursors = this.input.keyboard.createCursorKeys();
+    spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+    // ফ্লোর বা মাটি তৈরি
+    let platforms = this.physics.add.staticGroup();
+    let ground = this.add.rectangle(500, 490, 1000, 20, 0x666666);
+    platforms.add(ground);
+    this.physics.add.collider(player, platforms);
+}
+
+function update() {
+    // মুভমেন্ট লজিক - প্রফেশনাল স্মুথনেস
+    if (cursors.left.isDown) {
+        player.setVelocityX(-300);
+        player.setFlipX(true); // বামে ঘুরবে
+    } else if (cursors.right.isDown) {
+        player.setVelocityX(300);
+        player.setFlipX(false); // ডানে ঘুরবে
+    } else {
+        player.setVelocityX(0);
     }
-});
+
+    // জাম্পিং
+    if (cursors.up.isDown && player.body.touching.down) {
+        player.setVelocityY(-600);
+    }
+
+    // অ্যাটাক বা ঘুষি (Space Bar)
+    if (Phaser.Input.Keyboard.JustDown(spaceKey)) {
+        performAttack(this);
+    }
+}
+
+function performAttack(scene) {
+    // প্রফেশনাল অ্যাটাক ইফেক্ট (Shake screen)
+    scene.cameras.main.shake(100, 0.01);
+    
+    // এখানে মোরোর হাতের অ্যানিমেশন ট্রিগার হবে
+    player.setTint(0xff0000); // অ্যাটাকের সময় রঙ পরিবর্তন
+    setTimeout(() => player.setTint(0x8B4513), 200);
+}
 </script>
 </body>
 </html>
