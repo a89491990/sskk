@@ -1,13 +1,23 @@
-{
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
-    }
-  ]
-}
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
+from functools import wraps
+import sqlite3
+import json
+import hashlib
+import os
+from datetime import datetime
+import requests
+
+app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
+
+# Remote database URL (use PostgreSQL on Vercel)
+import psycopg2
+import os
+
+def get_db():
+    # Vercel PostgreSQL connection
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    return conn
+
+# Similar routes as before but using PostgreSQL
+# ... (rest of the routes)
