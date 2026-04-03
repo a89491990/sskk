@@ -1,39 +1,81 @@
-
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
-.wrap{font-family:'DM Sans',sans-serif;padding:2rem 1rem 2.5rem;max-width:480px;margin:0 auto;}
-.flag-row{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:2rem;}
-.flag-box{display:flex;flex-direction:column;align-items:center;gap:6px;}
-.flag-circle{width:56px;height:56px;border-radius:50%;border:0.5px solid var(--color-border-secondary);display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--color-background-secondary);}
-.flag-lbl{font-size:11px;font-weight:500;color:var(--color-text-secondary);letter-spacing:0.08em;text-transform:uppercase;}
-.arrow-line{display:flex;align-items:center;flex:1;max-width:60px;}
-.arrow-svg{width:100%;height:16px;}
-.input-area{background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.wrap{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  padding:2rem 1rem 2.5rem;
+  max-width:480px;
+  margin:0 auto;
+}
+.flag-row{display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:2rem;}
+.flag-box{display:flex;flex-direction:column;align-items:center;gap:7px;}
+.flag-circle{width:58px;height:58px;border-radius:50%;border:1px solid var(--color-border-secondary);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.flag-lbl{font-size:11px;font-weight:600;color:var(--color-text-secondary);letter-spacing:0.09em;text-transform:uppercase;}
+.arrow-wrap{display:flex;align-items:center;padding-bottom:18px;}
+.current-row{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin-bottom:.6rem;font-size:13px;}
+.current-label{color:var(--color-text-secondary);display:flex;align-items:center;gap:6px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:blink 1.5s infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.current-val{font-weight:700;font-size:14px;color:var(--color-text-primary);font-variant-numeric:tabular-nums;letter-spacing:.02em;}
+.input-area{background:var(--color-background-secondary);border:1px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:1.1rem 1.3rem;margin-bottom:1rem;}
 .input-row{display:flex;align-items:center;gap:10px;}
-.utc-label{font-size:12px;font-weight:500;color:var(--color-text-secondary);letter-spacing:0.07em;text-transform:uppercase;white-space:nowrap;}
-.utc-field{flex:1;background:transparent;border:none;outline:none;font-family:'Syne',sans-serif;font-size:28px;font-weight:700;color:var(--color-text-primary);letter-spacing:0.01em;min-width:0;width:100%;}
-.utc-field::placeholder{color:var(--color-border-primary);}
-.now-btn{background:var(--color-background-info);color:var(--color-text-info);border:none;border-radius:var(--border-radius-md);padding:7px 13px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:opacity .15s;}
+.utc-tag{font-size:11px;font-weight:700;color:var(--color-text-secondary);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
+.utc-field{
+  flex:1;background:transparent;border:none;outline:none;
+  font-size:30px;font-weight:800;
+  color:var(--color-text-primary);
+  letter-spacing:.01em;min-width:0;
+  font-variant-numeric:tabular-nums;
+}
+.utc-field::placeholder{color:var(--color-border-secondary);}
+.now-btn{
+  background:var(--color-background-info);color:var(--color-text-info);
+  border:none;border-radius:var(--border-radius-md);
+  padding:8px 14px;font-size:12px;font-weight:600;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  transition:opacity .15s;
+}
 .now-btn:hover{opacity:.8;}
-.result-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:1.5rem;margin-bottom:1rem;}
-.result-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.5rem;}
-.bd-badge{background:var(--color-background-success);color:var(--color-text-success);font-size:11px;font-weight:500;padding:3px 10px;border-radius:100px;letter-spacing:0.05em;}
-.copy-btn{background:transparent;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);border-radius:var(--border-radius-md);padding:4px 12px;font-size:12px;cursor:pointer;transition:background .15s,color .15s;}
+.result-card{
+  background:var(--color-background-primary);
+  border:1px solid var(--color-border-secondary);
+  border-radius:var(--border-radius-lg);
+  padding:1.4rem;
+  margin-bottom:1rem;
+}
+.result-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.bd-badge{
+  background:var(--color-background-success);color:var(--color-text-success);
+  font-size:11px;font-weight:700;padding:4px 11px;
+  border-radius:100px;letter-spacing:.06em;
+}
+.copy-btn{
+  background:transparent;border:1px solid var(--color-border-secondary);
+  color:var(--color-text-secondary);border-radius:var(--border-radius-md);
+  padding:5px 13px;font-size:12px;font-weight:500;cursor:pointer;
+  transition:background .15s,color .15s;
+}
 .copy-btn:hover{background:var(--color-background-secondary);}
-.copy-btn.ok{background:var(--color-background-success);color:var(--color-text-success);border-color:var(--color-border-success);}
-.bd-time{font-family:'Syne',sans-serif;font-size:48px;font-weight:800;color:var(--color-text-primary);line-height:1;letter-spacing:-0.03em;}
-.bd-ampm{font-size:20px;font-weight:400;color:var(--color-text-secondary);margin-left:6px;}
-.bd-meta{font-size:13px;color:var(--color-text-secondary);margin-top:8px;}
-.offset-row{display:flex;align-items:center;gap:8px;margin-top:1rem;padding-top:1rem;border-top:0.5px solid var(--color-border-tertiary);}
-.offset-pill{background:var(--color-background-warning);color:var(--color-text-warning);font-size:12px;font-weight:500;padding:3px 10px;border-radius:100px;}
+.copy-btn.ok{background:var(--color-background-success);color:var(--color-text-success);}
+.time-row{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+.bd-time{
+  font-size:52px;font-weight:800;
+  color:var(--color-text-primary);
+  line-height:1;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+}
+.bd-ampm{font-size:18px;font-weight:500;color:var(--color-text-secondary);margin-left:4px;}
+.bd-meta{font-size:13px;color:var(--color-text-secondary);margin-top:4px;}
+.offset-row{
+  display:flex;align-items:center;gap:8px;
+  margin-top:1rem;padding-top:1rem;
+  border-top:1px solid var(--color-border-tertiary);
+}
+.offset-pill{
+  background:var(--color-background-warning);color:var(--color-text-warning);
+  font-size:12px;font-weight:600;padding:3px 10px;border-radius:100px;
+}
 .offset-text{font-size:13px;color:var(--color-text-secondary);}
 .empty-state{text-align:center;padding:2rem 0;color:var(--color-text-tertiary);font-size:14px;}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--color-text-success);display:inline-block;margin-right:5px;animation:blink 1.5s infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-.current-row{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin-bottom:.75rem;font-size:13px;}
-.current-label{color:var(--color-text-secondary);}
-.current-val{font-weight:500;color:var(--color-text-primary);font-family:'Syne',sans-serif;font-size:14px;}
 </style>
 
 <div class="wrap">
@@ -41,36 +83,33 @@
   <div class="flag-row">
     <div class="flag-box">
       <div class="flag-circle">
-        <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
-          <rect width="56" height="56" fill="#4A90D9"/>
-          <rect x="4" y="8" width="48" height="40" rx="3" fill="#012169"/>
-          <rect x="4" y="8" width="48" height="40" rx="3" fill="none" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
-          <rect x="4" y="8" width="16" height="40" fill="#012169"/>
-          <rect x="4" y="8" width="48" height="13.3" fill="#CC0001"/>
-          <rect x="4" y="21.3" width="48" height="13.4" fill="#FFFFFF"/>
-          <rect x="4" y="34.7" width="48" height="13.3" fill="#CC0001"/>
-          <rect x="4" y="8" width="16" height="40" fill="#012169"/>
-          <line x1="4" y1="28" x2="20" y2="8" stroke="white" stroke-width="2.2"/>
-          <line x1="4" y1="28" x2="20" y2="48" stroke="white" stroke-width="2.2"/>
-          <line x1="20" y1="8" x2="52" y2="28" stroke="white" stroke-width="2.2"/>
-          <line x1="20" y1="48" x2="52" y2="28" stroke="white" stroke-width="2.2"/>
-          <circle cx="14" cy="28" r="6" fill="#CC0001"/>
-          <circle cx="14" cy="28" r="3.5" fill="white"/>
+        <svg width="58" height="58" viewBox="0 0 58 58" xmlns="http://www.w3.org/2000/svg">
+          <rect width="58" height="58" fill="#00247D"/>
+          <line x1="0" y1="0" x2="58" y2="58" stroke="white" stroke-width="7"/>
+          <line x1="58" y1="0" x2="0" y2="58" stroke="white" stroke-width="7"/>
+          <line x1="0" y1="0" x2="58" y2="58" stroke="#CF142B" stroke-width="4"/>
+          <line x1="58" y1="0" x2="0" y2="58" stroke="#CF142B" stroke-width="4"/>
+          <rect x="0" y="22" width="58" height="14" fill="white"/>
+          <rect x="22" y="0" width="14" height="58" fill="white"/>
+          <rect x="0" y="24.5" width="58" height="9" fill="#CF142B"/>
+          <rect x="24.5" y="0" width="9" height="58" fill="#CF142B"/>
         </svg>
       </div>
       <span class="flag-lbl">UTC</span>
     </div>
-    <div class="arrow-line">
-      <svg class="arrow-svg" viewBox="0 0 60 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <line x1="0" y1="8" x2="50" y2="8" stroke="var(--color-border-secondary)" stroke-width="1.5"/>
-        <polyline points="42,3 52,8 42,13" fill="none" stroke="var(--color-border-secondary)" stroke-width="1.5" stroke-linejoin="round"/>
+
+    <div class="arrow-wrap">
+      <svg width="48" height="14" viewBox="0 0 48 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="0" y1="7" x2="40" y2="7" stroke="var(--color-border-secondary)" stroke-width="1.5"/>
+        <polyline points="33,2 42,7 33,12" fill="none" stroke="var(--color-border-secondary)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
       </svg>
     </div>
+
     <div class="flag-box">
-      <div class="flag-circle" style="border:none;overflow:hidden;">
-        <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
-          <rect width="56" height="56" fill="#006A4E"/>
-          <circle cx="26" cy="28" r="14" fill="#F42A41"/>
+      <div class="flag-circle" style="border:none;">
+        <svg width="58" height="58" viewBox="0 0 58 58" xmlns="http://www.w3.org/2000/svg">
+          <rect width="58" height="58" fill="#006A4E"/>
+          <circle cx="27" cy="29" r="14" fill="#F42A41"/>
         </svg>
       </div>
       <span class="flag-lbl">Bangladesh</span>
@@ -82,20 +121,20 @@
     <span class="current-val" id="liveUtc">—</span>
   </div>
   <div class="current-row">
-    <span class="current-label"><span class="live-dot"></span>Current BD time</span>
+    <span class="current-label"><span class="live-dot"></span>Current BD Time</span>
     <span class="current-val" id="liveBd">—</span>
   </div>
 
   <div class="input-area">
     <div class="input-row">
-      <span class="utc-label">UTC</span>
-      <input class="utc-field" id="utcIn" type="text" placeholder="00:00" maxlength="5" spellcheck="false" autocomplete="off"/>
+      <span class="utc-tag">UTC</span>
+      <input class="utc-field" id="utcIn" type="text" placeholder="00:00" maxlength="5" spellcheck="false" autocomplete="off" inputmode="numeric"/>
       <button class="now-btn" id="nowBtn">Use now</button>
     </div>
   </div>
 
   <div id="resultArea">
-    <div class="empty-state">উপরে একটি UTC সময় দিন</div>
+    <div class="empty-state">উপরে UTC সময় লিখুন</div>
   </div>
 
 </div>
@@ -109,16 +148,14 @@ function parseT(v){
   if(h>23||mn>59)return null;
   return{h,mn};
 }
-
 function convert(h,mn){
   const now=new Date();
   const base=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate(),h,mn,0));
   const fmt=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Dhaka',hour:'numeric',minute:'2-digit',hour12:true});
   const dateFmt=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Dhaka',weekday:'long',month:'long',day:'numeric'});
-  const raw=fmt.format(base).split(' ');
-  return{time:raw[0],ampm:raw[1]||'',date:dateFmt.format(base)};
+  const parts=fmt.format(base).split(' ');
+  return{time:parts[0],ampm:parts[1]||'',date:dateFmt.format(base)};
 }
-
 function render(h,mn){
   const r=convert(h,mn);
   const utcStr=h.toString().padStart(2,'0')+':'+mn.toString().padStart(2,'0');
@@ -129,12 +166,14 @@ function render(h,mn){
         <span class="bd-badge">BST · GMT+6</span>
         <button class="copy-btn" id="copyBtn">Copy</button>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:14px;">
-        <svg width="32" height="22" viewBox="0 0 32 22" xmlns="http://www.w3.org/2000/svg" style="border-radius:3px;flex-shrink:0;">
-          <rect width="32" height="22" fill="#006A4E"/>
-          <circle cx="15" cy="11" r="7" fill="#F42A41"/>
+      <div class="time-row">
+        <svg width="34" height="23" viewBox="0 0 34 23" xmlns="http://www.w3.org/2000/svg" style="border-radius:3px;flex-shrink:0;">
+          <rect width="34" height="23" fill="#006A4E"/>
+          <circle cx="16" cy="11.5" r="7.5" fill="#F42A41"/>
         </svg>
-        <span class="bd-time">${r.time}<span class="bd-ampm">${r.ampm}</span></span>
+        <div>
+          <div class="bd-time">${r.time}<span class="bd-ampm">${r.ampm}</span></div>
+        </div>
       </div>
       <div class="bd-meta">${r.date} &nbsp;·&nbsp; Bangladesh Standard Time</div>
       <div class="offset-row">
@@ -148,31 +187,28 @@ function render(h,mn){
     setTimeout(()=>{this.textContent='Copy';this.classList.remove('ok');},1800);
   });
 }
-
 document.getElementById('utcIn').addEventListener('input',function(){
   let v=this.value.replace(/[^0-9:]/g,'');
   if(v.length===2&&!v.includes(':')&&this._prev&&this._prev.length<2){v=v+':';}
   this._prev=v;this.value=v;
   const p=parseT(v);
   if(p){render(p.h,p.mn);}
-  else{document.getElementById('resultArea').innerHTML='<div class="empty-state">সঠিক UTC সময় দিন (HH:MM)</div>';}
+  else{document.getElementById('resultArea').innerHTML='<div class="empty-state">সঠিক সময় দিন (HH:MM)</div>';}
 });
-
 document.getElementById('nowBtn').addEventListener('click',function(){
   const now=new Date();
   const h=now.getUTCHours(),mn=now.getUTCMinutes();
   document.getElementById('utcIn').value=h.toString().padStart(2,'0')+':'+mn.toString().padStart(2,'0');
   render(h,mn);
 });
-
 function liveClock(){
   const now=new Date();
-  const uh=now.getUTCHours().toString().padStart(2,'0');
-  const um=now.getUTCMinutes().toString().padStart(2,'0');
-  const us=now.getUTCSeconds().toString().padStart(2,'0');
-  document.getElementById('liveUtc').textContent=uh+':'+um+':'+us+' UTC';
-  const bdFmt=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Dhaka',hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true});
-  document.getElementById('liveBd').textContent=bdFmt.format(now)+' BST';
+  document.getElementById('liveUtc').textContent=
+    now.getUTCHours().toString().padStart(2,'0')+':'+
+    now.getUTCMinutes().toString().padStart(2,'0')+':'+
+    now.getUTCSeconds().toString().padStart(2,'0')+' UTC';
+  document.getElementById('liveBd').textContent=
+    new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Dhaka',hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true}).format(now)+' BST';
 }
 liveClock();
 setInterval(liveClock,1000);
