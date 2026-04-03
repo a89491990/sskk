@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -21,19 +21,30 @@ export default function PremiumCalculator() {
 
   const calculate = () => {
     if (!prev || !operator) return;
+
     const a = parseFloat(prev);
     const b = parseFloat(display);
     let result = 0;
 
     switch (operator) {
-      case "+": result = a + b; break;
-      case "-": result = a - b; break;
-      case "*": result = a * b; break;
-      case "/": result = a / b; break;
+      case "+":
+        result = a + b;
+        break;
+      case "-":
+        result = a - b;
+        break;
+      case "*":
+        result = a * b;
+        break;
+      case "/":
+        result = a / b;
+        break;
+      default:
+        break;
     }
 
     const entry = `${a} ${operator} ${b} = ${result}`;
-    setHistory([entry, ...history.slice(0,5)]);
+    setHistory([entry, ...history.slice(0, 5)]);
 
     setDisplay(String(result));
     setPrev(null);
@@ -44,86 +55,181 @@ export default function PremiumCalculator() {
     const value = parseFloat(display);
     let result = value;
 
-    switch(type){
-      case "sqrt": result = Math.sqrt(value); break;
-      case "square": result = value*value; break;
-      case "sin": result = Math.sin(value); break;
-      case "cos": result = Math.cos(value); break;
-      case "tan": result = Math.tan(value); break;
+    switch (type) {
+      case "sqrt":
+        result = Math.sqrt(value);
+        break;
+      case "square":
+        result = value * value;
+        break;
+      case "sin":
+        result = Math.sin(value);
+        break;
+      case "cos":
+        result = Math.cos(value);
+        break;
+      case "tan":
+        result = Math.tan(value);
+        break;
+      default:
+        break;
     }
 
     setDisplay(String(result));
-  }
+  };
 
-  React.useEffect(()=>{
-    const key=(e)=>{
-      if(!isNaN(e.key)) handleNumber(e.key)
-      if(["+","-","*","/"].includes(e.key)) handleOperator(e.key)
-      if(e.key==="Enter") calculate()
-      if(e.key==="Escape") setDisplay("0")
-    }
+  const clear = () => {
+    setDisplay("0");
+    setPrev(null);
+    setOperator(null);
+  };
 
-    window.addEventListener("keydown",key)
-    return()=>window.removeEventListener("keydown",key)
-  })
+  useEffect(() => {
+    const key = (e) => {
+      if (!isNaN(e.key)) handleNumber(e.key);
+      if (["+", "-", "*", "/"].includes(e.key)) handleOperator(e.key);
+      if (e.key === "Enter") calculate();
+      if (e.key === "Escape") clear();
+    };
 
-  const Btn = ({children,onClick,className}) => (
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [display, prev, operator]);
+
+  const Btn = ({ children, onClick, className }) => (
     <Button
       onClick={onClick}
       className={`h-14 rounded-2xl text-lg hover:scale-105 transition ${className}`}
     >
       {children}
     </Button>
-  )
+  );
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-black">
-
-      <motion.div initial={{opacity:0,y:40}} animate={{opacity:1,y:0}}>
-
+      <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }}>
         <Card className="w-[360px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl">
           <CardContent className="p-4">
 
+            {/* Display */}
             <div className="text-right text-white text-4xl p-4 mb-2 bg-black/30 rounded-2xl">
               {display}
             </div>
 
+            {/* Scientific */}
             <div className="grid grid-cols-5 gap-2 mb-2">
-              <Btn onClick={()=>scientific("sqrt")}>√</Btn>
-              <Btn onClick={()=>scientific("square")}>x²</Btn>
-              <Btn onClick={()=>scientific("sin")}>sin</Btn>
-              <Btn onClick={()=>scientific("cos")}>cos</Btn>
-              <Btn onClick={()=>scientific("tan")}>tan</Btn>
+              <Btn onClick={() => scientific("sqrt")}>√</Btn>
+              <Btn onClick={() => scientific("square")}>x²</Btn>
+              <Btn onClick={() => scientific("sin")}>sin</Btn>
+              <Btn onClick={() => scientific("cos")}>cos</Btn>
+              <Btn onClick={() => scientific("tan")}>tan</Btn>
             </div>
 
+            {/* Calculator */}
             <div className="grid grid-cols-4 gap-2">
-              <Btn className="col-span-2" onClick={()=>setDisplay("0")}>AC</Btn>
-              <Btn onClick={()=>handleOperator("/")}>÷</Btn>
-              <Btn onClick={()=>handleOperator("*")}>×</Btn>
+              <Btn className="col-span-2" onClick={clear}>AC</Btn>
+              <Btn onClick={() => handleOperator("/")}>÷</Btn>
+              <Btn onClick={() => handleOperator("*")}>×</Btn>
 
-              {["7","8","9"].map(n=> <Btn key={n} onClick={()=>handleNumber(n)}>{n}</Btn>)}
-              <Btn onClick={()=>handleOperator("-")}>−</Btn>
+              {["7", "8", "9"].map((n) => (
+                <Btn key={n} onClick={() => handleNumber(n)}>
+                  {n}
+                </Btn>
+              ))}
+              <Btn onClick={() => handleOperator("-")}>−</Btn>
 
-              {["4","5","6"].map(n=> <Btn key={n} onClick={()=>handleNumber(n)}>{n}</Btn>)}
-              <Btn onClick={()=>handleOperator("+")}>+</Btn>
+              {["4", "5", "6"].map((n) => (
+                <Btn key={n} onClick={() => handleNumber(n)}>
+                  {n}
+                </Btn>
+              ))}
+              <Btn onClick={() => handleOperator("+")}>+</Btn>
 
-              {["1","2","3"].map(n=> <Btn key={n} onClick={()=>handleNumber(n)}>{n}</Btn>)}
-              <Btn className="row-span-2 bg-white text-black" onClick={calculate}>=</Btn>
+              {["1", "2", "3"].map((n) => (
+                <Btn key={n} onClick={() => handleNumber(n)}>
+                  {n}
+                </Btn>
+              ))}
 
-              <Btn className="col-span-2" onClick={()=>handleNumber("0")}>0</Btn>
-              <Btn onClick={()=>handleNumber(".")}>.</Btn>
+              <Btn
+                className="row-span-2 bg-white text-black"
+                onClick={calculate}
+              >
+                =
+              </Btn>
+
+              <Btn className="col-span-2" onClick={() => handleNumber("0")}>
+                0
+              </Btn>
+
+              <Btn onClick={() => handleNumber(".")}>
+                .
+              </Btn>
             </div>
 
+            {/* History */}
             <div className="text-white text-sm mt-4">
               <div className="opacity-70">History</div>
-              {history.map((h,i)=> <div key={i} className="opacity-60">{h}</div>)}
+              {history.map((h, i) => (
+                <div key={i} className="opacity-60">
+                  {h}
+                </div>
+              ))}
             </div>
 
           </CardContent>
         </Card>
-
       </motion.div>
-
     </div>
   );
+
+
+/* ===== Premium Features Added ===== */
+
+// Dark Mode Toggle
+const useDarkMode = () => {
+  const [dark, setDark] = useState(true);
+  useEffect(()=>{
+    document.documentElement.classList.toggle("dark", dark);
+  },[dark]);
+  return [dark,setDark];
+};
+
+// Sound
+const playSound = () => {
+  const audio = new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3");
+  audio.play();
+};
+
+// Memory
+const useMemory = () => {
+  const [memory,setMemory] = useState(0);
+  return {
+    memory,
+    add:(v)=>setMemory(memory+parseFloat(v)),
+    minus:(v)=>setMemory(memory-parseFloat(v)),
+    recall:()=>memory,
+    clear:()=>setMemory(0)
+  }
+};
+
+// Swipe (mobile)
+const useSwipe = (onUp,onDown) => {
+  useEffect(()=>{
+    let startY=0
+    const start=e=>startY=e.touches[0].clientY
+    const move=e=>{
+      const diff=startY-e.touches[0].clientY
+      if(diff>50) onUp()
+      if(diff<-50) onDown()
+    }
+    window.addEventListener("touchstart",start)
+    window.addEventListener("touchmove",move)
+    return ()=>{
+      window.removeEventListener("touchstart",start)
+      window.removeEventListener("touchmove",move)
+    }
+  },[])
+}
+
 }
