@@ -1,232 +1,179 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Premium Calculator</title>
 
 <style>
-body{
-margin:0;
-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-background:linear-gradient(135deg,#0f172a,#000);
-font-family:system-ui;
-}
-
-.calculator{
-width:320px;
-background:rgba(255,255,255,0.08);
-backdrop-filter:blur(20px);
-border-radius:20px;
-padding:15px;
-color:white;
-box-shadow:0 20px 40px rgba(0,0,0,0.5);
-}
-
-.display{
-font-size:32px;
-padding:15px;
-text-align:right;
-background:rgba(0,0,0,0.3);
-border-radius:15px;
-margin-bottom:10px;
-overflow:hidden;
-white-space:nowrap;
-text-overflow:ellipsis;
-animation:fadeIn .4s ease;
-}
-
-@keyframes fadeIn{
-from{opacity:0;transform:translateY(10px)}
-to{opacity:1;transform:translateY(0)}
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:8px;
-}
-
-button{
-height:55px;
-border:none;
-border-radius:15px;
-background:rgba(255,255,255,0.1);
-color:white;
-font-size:18px;
-cursor:pointer;
-transition:.2s;
-}
-
-button:hover{
-transform:scale(1.05);
-}
-
-.equal{
-background:white;
-color:black;
-}
-
-.history{
-margin-top:10px;
-font-size:12px;
-opacity:.7;
-}
-
-.toggle{
-position:absolute;
-top:20px;
-right:20px;
-}
-
-.dark{
-background:linear-gradient(135deg,#fff,#ddd);
-color:black;
-}
-
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+.wrap{font-family:'DM Sans',sans-serif;padding:2rem 1rem 2.5rem;max-width:480px;margin:0 auto;}
+.flag-row{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:2rem;}
+.flag-box{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.flag-circle{width:56px;height:56px;border-radius:50%;border:0.5px solid var(--color-border-secondary);display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--color-background-secondary);}
+.flag-lbl{font-size:11px;font-weight:500;color:var(--color-text-secondary);letter-spacing:0.08em;text-transform:uppercase;}
+.arrow-line{display:flex;align-items:center;flex:1;max-width:60px;}
+.arrow-svg{width:100%;height:16px;}
+.input-area{background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.input-row{display:flex;align-items:center;gap:10px;}
+.utc-label{font-size:12px;font-weight:500;color:var(--color-text-secondary);letter-spacing:0.07em;text-transform:uppercase;white-space:nowrap;}
+.utc-field{flex:1;background:transparent;border:none;outline:none;font-family:'Syne',sans-serif;font-size:28px;font-weight:700;color:var(--color-text-primary);letter-spacing:0.01em;min-width:0;width:100%;}
+.utc-field::placeholder{color:var(--color-border-primary);}
+.now-btn{background:var(--color-background-info);color:var(--color-text-info);border:none;border-radius:var(--border-radius-md);padding:7px 13px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:opacity .15s;}
+.now-btn:hover{opacity:.8;}
+.result-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.result-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.5rem;}
+.bd-badge{background:var(--color-background-success);color:var(--color-text-success);font-size:11px;font-weight:500;padding:3px 10px;border-radius:100px;letter-spacing:0.05em;}
+.copy-btn{background:transparent;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);border-radius:var(--border-radius-md);padding:4px 12px;font-size:12px;cursor:pointer;transition:background .15s,color .15s;}
+.copy-btn:hover{background:var(--color-background-secondary);}
+.copy-btn.ok{background:var(--color-background-success);color:var(--color-text-success);border-color:var(--color-border-success);}
+.bd-time{font-family:'Syne',sans-serif;font-size:48px;font-weight:800;color:var(--color-text-primary);line-height:1;letter-spacing:-0.03em;}
+.bd-ampm{font-size:20px;font-weight:400;color:var(--color-text-secondary);margin-left:6px;}
+.bd-meta{font-size:13px;color:var(--color-text-secondary);margin-top:8px;}
+.offset-row{display:flex;align-items:center;gap:8px;margin-top:1rem;padding-top:1rem;border-top:0.5px solid var(--color-border-tertiary);}
+.offset-pill{background:var(--color-background-warning);color:var(--color-text-warning);font-size:12px;font-weight:500;padding:3px 10px;border-radius:100px;}
+.offset-text{font-size:13px;color:var(--color-text-secondary);}
+.empty-state{text-align:center;padding:2rem 0;color:var(--color-text-tertiary);font-size:14px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--color-text-success);display:inline-block;margin-right:5px;animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.current-row{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin-bottom:.75rem;font-size:13px;}
+.current-label{color:var(--color-text-secondary);}
+.current-val{font-weight:500;color:var(--color-text-primary);font-family:'Syne',sans-serif;font-size:14px;}
 </style>
-</head>
 
-<body>
+<div class="wrap">
 
-<button class="toggle" onclick="toggleTheme()">🌙</button>
+  <div class="flag-row">
+    <div class="flag-box">
+      <div class="flag-circle">
+        <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+          <rect width="56" height="56" fill="#4A90D9"/>
+          <rect x="4" y="8" width="48" height="40" rx="3" fill="#012169"/>
+          <rect x="4" y="8" width="48" height="40" rx="3" fill="none" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+          <rect x="4" y="8" width="16" height="40" fill="#012169"/>
+          <rect x="4" y="8" width="48" height="13.3" fill="#CC0001"/>
+          <rect x="4" y="21.3" width="48" height="13.4" fill="#FFFFFF"/>
+          <rect x="4" y="34.7" width="48" height="13.3" fill="#CC0001"/>
+          <rect x="4" y="8" width="16" height="40" fill="#012169"/>
+          <line x1="4" y1="28" x2="20" y2="8" stroke="white" stroke-width="2.2"/>
+          <line x1="4" y1="28" x2="20" y2="48" stroke="white" stroke-width="2.2"/>
+          <line x1="20" y1="8" x2="52" y2="28" stroke="white" stroke-width="2.2"/>
+          <line x1="20" y1="48" x2="52" y2="28" stroke="white" stroke-width="2.2"/>
+          <circle cx="14" cy="28" r="6" fill="#CC0001"/>
+          <circle cx="14" cy="28" r="3.5" fill="white"/>
+        </svg>
+      </div>
+      <span class="flag-lbl">UTC</span>
+    </div>
+    <div class="arrow-line">
+      <svg class="arrow-svg" viewBox="0 0 60 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="0" y1="8" x2="50" y2="8" stroke="var(--color-border-secondary)" stroke-width="1.5"/>
+        <polyline points="42,3 52,8 42,13" fill="none" stroke="var(--color-border-secondary)" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="flag-box">
+      <div class="flag-circle" style="border:none;overflow:hidden;">
+        <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+          <rect width="56" height="56" fill="#006A4E"/>
+          <circle cx="26" cy="28" r="14" fill="#F42A41"/>
+        </svg>
+      </div>
+      <span class="flag-lbl">Bangladesh</span>
+    </div>
+  </div>
 
-<div class="calculator">
+  <div class="current-row">
+    <span class="current-label"><span class="live-dot"></span>Current UTC</span>
+    <span class="current-val" id="liveUtc">—</span>
+  </div>
+  <div class="current-row">
+    <span class="current-label"><span class="live-dot"></span>Current BD time</span>
+    <span class="current-val" id="liveBd">—</span>
+  </div>
 
-<div id="display" class="display">0</div>
+  <div class="input-area">
+    <div class="input-row">
+      <span class="utc-label">UTC</span>
+      <input class="utc-field" id="utcIn" type="text" placeholder="00:00" maxlength="5" spellcheck="false" autocomplete="off"/>
+      <button class="now-btn" id="nowBtn">Use now</button>
+    </div>
+  </div>
 
-<div class="grid">
-<button onclick="clearAll()">AC</button>
-<button onclick="operator('/')">÷</button>
-<button onclick="operator('*')">×</button>
-<button onclick="memoryRecall()">MR</button>
-
-<button onclick="press(7)">7</button>
-<button onclick="press(8)">8</button>
-<button onclick="press(9)">9</button>
-<button onclick="operator('-')">−</button>
-
-<button onclick="press(4)">4</button>
-<button onclick="press(5)">5</button>
-<button onclick="press(6)">6</button>
-<button onclick="operator('+')">+</button>
-
-<button onclick="press(1)">1</button>
-<button onclick="press(2)">2</button>
-<button onclick="press(3)">3</button>
-<button onclick="calculate()" class="equal">=</button>
-
-<button onclick="press(0)">0</button>
-<button onclick="press('.')">.</button>
-<button onclick="memoryAdd()">M+</button>
-<button onclick="memoryMinus()">M-</button>
-</div>
-
-<div class="history" id="history"></div>
+  <div id="resultArea">
+    <div class="empty-state">উপরে একটি UTC সময় দিন</div>
+  </div>
 
 </div>
 
 <script>
-
-let display="0"
-let prev=null
-let op=null
-let memory=0
-let history=[]
-
-function update(){
-document.getElementById("display").innerText=display
+function parseT(v){
+  v=v.trim();
+  const m=v.match(/^(\d{1,2}):?(\d{2})$/);
+  if(!m)return null;
+  const h=+m[1],mn=+m[2];
+  if(h>23||mn>59)return null;
+  return{h,mn};
 }
 
-function press(n){
-play()
-display=display=="0"?n:display+n
-update()
+function convert(h,mn){
+  const now=new Date();
+  const base=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate(),h,mn,0));
+  const fmt=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Dhaka',hour:'numeric',minute:'2-digit',hour12:true});
+  const dateFmt=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Dhaka',weekday:'long',month:'long',day:'numeric'});
+  const raw=fmt.format(base).split(' ');
+  return{time:raw[0],ampm:raw[1]||'',date:dateFmt.format(base)};
 }
 
-function operator(o){
-prev=display
-op=o
-display="0"
+function render(h,mn){
+  const r=convert(h,mn);
+  const utcStr=h.toString().padStart(2,'0')+':'+mn.toString().padStart(2,'0');
+  const copyText=r.time+' '+r.ampm+' BST (Bangladesh) = '+utcStr+' UTC';
+  document.getElementById('resultArea').innerHTML=`
+    <div class="result-card">
+      <div class="result-top">
+        <span class="bd-badge">BST · GMT+6</span>
+        <button class="copy-btn" id="copyBtn">Copy</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:14px;">
+        <svg width="32" height="22" viewBox="0 0 32 22" xmlns="http://www.w3.org/2000/svg" style="border-radius:3px;flex-shrink:0;">
+          <rect width="32" height="22" fill="#006A4E"/>
+          <circle cx="15" cy="11" r="7" fill="#F42A41"/>
+        </svg>
+        <span class="bd-time">${r.time}<span class="bd-ampm">${r.ampm}</span></span>
+      </div>
+      <div class="bd-meta">${r.date} &nbsp;·&nbsp; Bangladesh Standard Time</div>
+      <div class="offset-row">
+        <span class="offset-pill">+6 hours</span>
+        <span class="offset-text">UTC ${utcStr} → BD ${r.time} ${r.ampm}</span>
+      </div>
+    </div>`;
+  document.getElementById('copyBtn').addEventListener('click',function(){
+    navigator.clipboard.writeText(copyText).catch(()=>{});
+    this.textContent='Copied!';this.classList.add('ok');
+    setTimeout(()=>{this.textContent='Copy';this.classList.remove('ok');},1800);
+  });
 }
 
-function calculate(){
-if(!prev||!op) return
+document.getElementById('utcIn').addEventListener('input',function(){
+  let v=this.value.replace(/[^0-9:]/g,'');
+  if(v.length===2&&!v.includes(':')&&this._prev&&this._prev.length<2){v=v+':';}
+  this._prev=v;this.value=v;
+  const p=parseT(v);
+  if(p){render(p.h,p.mn);}
+  else{document.getElementById('resultArea').innerHTML='<div class="empty-state">সঠিক UTC সময় দিন (HH:MM)</div>';}
+});
 
-let a=parseFloat(prev)
-let b=parseFloat(display)
-let r=0
+document.getElementById('nowBtn').addEventListener('click',function(){
+  const now=new Date();
+  const h=now.getUTCHours(),mn=now.getUTCMinutes();
+  document.getElementById('utcIn').value=h.toString().padStart(2,'0')+':'+mn.toString().padStart(2,'0');
+  render(h,mn);
+});
 
-if(op=="+") r=a+b
-if(op=="-") r=a-b
-if(op=="*") r=a*b
-if(op=="/") r=a/b
-
-history.unshift(`${a} ${op} ${b} = ${r}`)
-history=history.slice(0,5)
-
-display=r.toString()
-update()
-
-renderHistory()
+function liveClock(){
+  const now=new Date();
+  const uh=now.getUTCHours().toString().padStart(2,'0');
+  const um=now.getUTCMinutes().toString().padStart(2,'0');
+  const us=now.getUTCSeconds().toString().padStart(2,'0');
+  document.getElementById('liveUtc').textContent=uh+':'+um+':'+us+' UTC';
+  const bdFmt=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Dhaka',hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true});
+  document.getElementById('liveBd').textContent=bdFmt.format(now)+' BST';
 }
-
-function clearAll(){
-display="0"
-update()
-}
-
-function renderHistory(){
-document.getElementById("history").innerHTML=
- history.map(h=>`<div>${h}</div>`).join("")
-}
-
-function toggleTheme(){
-document.body.classList.toggle("dark")
-}
-
-function play(){
-new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3").play()
-}
-
-function memoryAdd(){
-memory+=parseFloat(display)
-}
-
-function memoryMinus(){
-memory-=parseFloat(display)
-}
-
-function memoryRecall(){
-display=memory.toString()
-update()
-}
-
-// keyboard
-
-document.addEventListener("keydown",e=>{
-if(!isNaN(e.key)) press(e.key)
-if(["+","-","*","/"].includes(e.key)) operator(e.key)
-if(e.key==="Enter") calculate()
-})
-
-// swipe
-
-let start=0
-
-document.addEventListener("touchstart",e=>{
-start=e.touches[0].clientY
-})
-
-document.addEventListener("touchmove",e=>{
-let diff=start-e.touches[0].clientY
-if(diff>60) clearAll()
-})
-
+liveClock();
+setInterval(liveClock,1000);
 </script>
-
-</body>
-</html>
