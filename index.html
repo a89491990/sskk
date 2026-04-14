@@ -1,215 +1,777 @@
-<style>
-*{box-sizing:border-box;margin:0;padding:0;}
-.wrap{
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
-  padding:2rem 1rem 2.5rem;
-  max-width:480px;
-  margin:0 auto;
-}
-.flag-row{display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:2rem;}
-.flag-box{display:flex;flex-direction:column;align-items:center;gap:7px;}
-.flag-circle{width:58px;height:58px;border-radius:50%;border:1px solid var(--color-border-secondary);overflow:hidden;display:flex;align-items:center;justify-content:center;}
-.flag-lbl{font-size:11px;font-weight:600;color:var(--color-text-secondary);letter-spacing:0.09em;text-transform:uppercase;}
-.arrow-wrap{display:flex;align-items:center;padding-bottom:18px;}
-.current-row{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin-bottom:.6rem;font-size:13px;}
-.current-label{color:var(--color-text-secondary);display:flex;align-items:center;gap:6px;}
-.live-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:blink 1.5s infinite;flex-shrink:0;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.current-val{font-weight:700;font-size:14px;color:var(--color-text-primary);font-variant-numeric:tabular-nums;letter-spacing:.02em;}
-.input-area{background:var(--color-background-secondary);border:1px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:1.1rem 1.3rem;margin-bottom:1rem;}
-.input-row{display:flex;align-items:center;gap:10px;}
-.utc-tag{font-size:11px;font-weight:700;color:var(--color-text-secondary);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
-.utc-field{
-  flex:1;background:transparent;border:none;outline:none;
-  font-size:30px;font-weight:800;
-  color:var(--color-text-primary);
-  letter-spacing:.01em;min-width:0;
-  font-variant-numeric:tabular-nums;
-}
-.utc-field::placeholder{color:var(--color-border-secondary);}
-.now-btn{
-  background:var(--color-background-info);color:var(--color-text-info);
-  border:none;border-radius:var(--border-radius-md);
-  padding:8px 14px;font-size:12px;font-weight:600;
-  cursor:pointer;white-space:nowrap;flex-shrink:0;
-  transition:opacity .15s;
-}
-.now-btn:hover{opacity:.8;}
-.result-card{
-  background:var(--color-background-primary);
-  border:1px solid var(--color-border-secondary);
-  border-radius:var(--border-radius-lg);
-  padding:1.4rem;
-  margin-bottom:1rem;
-}
-.result-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
-.bd-badge{
-  background:var(--color-background-success);color:var(--color-text-success);
-  font-size:11px;font-weight:700;padding:4px 11px;
-  border-radius:100px;letter-spacing:.06em;
-}
-.copy-btn{
-  background:transparent;border:1px solid var(--color-border-secondary);
-  color:var(--color-text-secondary);border-radius:var(--border-radius-md);
-  padding:5px 13px;font-size:12px;font-weight:500;cursor:pointer;
-  transition:background .15s,color .15s;
-}
-.copy-btn:hover{background:var(--color-background-secondary);}
-.copy-btn.ok{background:var(--color-background-success);color:var(--color-text-success);}
-.time-row{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
-.bd-time{
-  font-size:52px;font-weight:800;
-  color:var(--color-text-primary);
-  line-height:1;letter-spacing:-.02em;
-  font-variant-numeric:tabular-nums;
-}
-.bd-ampm{font-size:18px;font-weight:500;color:var(--color-text-secondary);margin-left:4px;}
-.bd-meta{font-size:13px;color:var(--color-text-secondary);margin-top:4px;}
-.offset-row{
-  display:flex;align-items:center;gap:8px;
-  margin-top:1rem;padding-top:1rem;
-  border-top:1px solid var(--color-border-tertiary);
-}
-.offset-pill{
-  background:var(--color-background-warning);color:var(--color-text-warning);
-  font-size:12px;font-weight:600;padding:3px 10px;border-radius:100px;
-}
-.offset-text{font-size:13px;color:var(--color-text-secondary);}
-.empty-state{text-align:center;padding:2rem 0;color:var(--color-text-tertiary);font-size:14px;}
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NexusDrop | Futuristic Crypto Airdrop Hub</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Three.js Core & Addons -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<div class="wrap">
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #05070a;
+            color: #eef5ff;
+            overflow-x: hidden;
+        }
 
-  <div class="flag-row">
-    <div class="flag-box">
-      <div class="flag-circle">
-        <svg width="58" height="58" viewBox="0 0 58 58" xmlns="http://www.w3.org/2000/svg">
-          <rect width="58" height="58" fill="#00247D"/>
-          <line x1="0" y1="0" x2="58" y2="58" stroke="white" stroke-width="7"/>
-          <line x1="58" y1="0" x2="0" y2="58" stroke="white" stroke-width="7"/>
-          <line x1="0" y1="0" x2="58" y2="58" stroke="#CF142B" stroke-width="4"/>
-          <line x1="58" y1="0" x2="0" y2="58" stroke="#CF142B" stroke-width="4"/>
-          <rect x="0" y="22" width="58" height="14" fill="white"/>
-          <rect x="22" y="0" width="14" height="58" fill="white"/>
-          <rect x="0" y="24.5" width="58" height="9" fill="#CF142B"/>
-          <rect x="24.5" y="0" width="9" height="58" fill="#CF142B"/>
-        </svg>
-      </div>
-      <span class="flag-lbl">UTC</span>
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0f1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a6fdb;
+            border-radius: 8px;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .app-wrapper {
+            position: relative;
+            z-index: 2;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 4rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(12px);
+            background: rgba(10, 20, 30, 0.5);
+            border-radius: 2rem;
+            padding: 1rem 2rem;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #aaffff, #3a86ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .logo span {
+            font-size: 0.8rem;
+            color: #6c8eff;
+        }
+
+        .admin-btn {
+            background: rgba(20,30,55,0.8);
+            border: 1px solid #3a6eff;
+            padding: 0.6rem 1.4rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        .admin-btn:hover {
+            background: #2a6fdb;
+            box-shadow: 0 0 12px #2a6fdb;
+            color: white;
+        }
+
+        .filters-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px);
+            padding: 1rem 1.8rem;
+            border-radius: 48px;
+            border: 1px solid rgba(58,110,255,0.3);
+        }
+        .search-box {
+            flex: 2;
+            min-width: 200px;
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.5);
+            border-radius: 40px;
+            padding: 0.5rem 1rem;
+            border: 1px solid #2a6fdb;
+        }
+        .search-box i {
+            color: #3a86ff;
+            margin-right: 10px;
+        }
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: white;
+            width: 100%;
+            outline: none;
+            font-size: 1rem;
+        }
+        .filter-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .filter-group select {
+            background: #0f172ad9;
+            border: 1px solid #3a6eff;
+            border-radius: 32px;
+            padding: 0.5rem 1rem;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+        .notify-bell {
+            position: relative;
+            cursor: pointer;
+            font-size: 1.4rem;
+            transition: 0.2s;
+        }
+        .notify-bell:hover {
+            text-shadow: 0 0 8px cyan;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            margin: 2rem 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 5px solid #2a6fdb;
+            padding-left: 1rem;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.8rem;
+            margin-top: 1rem;
+        }
+
+        .airdrop-card {
+            background: rgba(20, 28, 40, 0.65);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            border: 1px solid rgba(0, 255, 255, 0.25);
+            padding: 1.4rem;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            transform: translateY(0) rotateX(0deg);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .airdrop-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: #3a86ff;
+            box-shadow: 0 20px 35px -10px #2a6fdb80, 0 0 15px rgba(58,134,255,0.4);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1rem;
+        }
+        .card-header img {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #0a0f1a;
+            border: 1px solid cyan;
+            object-fit: cover;
+        }
+        .project-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        .blockchain-badge {
+            background: rgba(0,0,0,0.6);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #6c8eff;
+            display: inline-block;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        .difficulty, .reward {
+            background: rgba(0,0,0,0.4);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .status {
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 30px;
+            text-align: center;
+            display: inline-block;
+        }
+        .status.Live { background: #00c85330; color: #00e676; border: 1px solid #00e676; }
+        .status.Upcoming { background: #ffb74d30; color: #ffb74d; border: 1px solid #ffb74d; }
+        .status.Ended { background: #f4433630; color: #ff8a80; border: 1px solid #f44336; }
+        .card-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.2rem;
+        }
+        .join-btn {
+            background: linear-gradient(90deg, #2a6fdb, #4a3aff);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .join-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 12px #3a86ff;
+        }
+        .bookmark {
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: #aac8ff;
+            transition: 0.2s;
+        }
+        .bookmark.active {
+            color: #ffd966;
+            text-shadow: 0 0 6px gold;
+        }
+        .delete-card-btn {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(255,50,50,0.8);
+            border: none;
+            color: white;
+            border-radius: 30px;
+            width: 28px;
+            height: 28px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: 0.2s;
+            z-index: 10;
+        }
+        .airdrop-card:hover .delete-card-btn {
+            opacity: 1;
+        }
+        .delete-card-btn:hover {
+            background: red;
+            transform: scale(1.1);
+        }
+        .edit-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #2a6fdbcc;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+        }
+        .airdrop-card:hover .edit-badge {
+            opacity: 1;
+        }
+        .featured-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #ffaa33cc;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #0b1120e6;
+            border-radius: 2rem;
+            width: 90%;
+            max-width: 520px;
+            padding: 2rem;
+            border: 1px solid cyan;
+            box-shadow: 0 0 40px rgba(0,255,255,0.2);
+        }
+        .modal-content input, .modal-content select, .modal-content textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: #1a2332;
+            border: 1px solid #3a6eff;
+            border-radius: 28px;
+            color: white;
+            font-family: inherit;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        .toast-msg {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #0f212ecc;
+            backdrop-filter: blur(12px);
+            border-left: 5px solid #2a6fdb;
+            padding: 12px 24px;
+            border-radius: 40px;
+            z-index: 1200;
+            font-weight: 500;
+            animation: fadeInOut 3s forwards;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(50px); }
+            15% { opacity: 1; transform: translateX(0); }
+            85% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        @media (max-width: 780px) {
+            .app-wrapper { padding: 1rem; }
+            .header { flex-direction: column; align-items: stretch; text-align: center; }
+            .filters-section { flex-direction: column; align-items: stretch; border-radius: 28px; }
+        }
+        button { background: none; border: none; }
+        .password-prompt {
+            text-align: center;
+        }
+        .danger-btn {
+            background: #dc2626;
+        }
+        .danger-btn:hover {
+            background: #b91c1c;
+        }
+    </style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<div class="app-wrapper">
+    <div class="header">
+        <div class="logo">
+            <h1>NEXUSDROP <i class="fas fa-cube"></i></h1>
+            <span>curated airdrop intelligence</span>
+        </div>
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <div class="notify-bell" id="notifyBell"><i class="fas fa-bell"></i> <span id="newNotifCount" style="font-size: 0.7rem;">0</span></div>
+            <button class="admin-btn" id="openAdminBtn"><i class="fas fa-user-secret"></i> Admin Panel</button>
+        </div>
     </div>
 
-    <div class="arrow-wrap">
-      <svg width="48" height="14" viewBox="0 0 48 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <line x1="0" y1="7" x2="40" y2="7" stroke="var(--color-border-secondary)" stroke-width="1.5"/>
-        <polyline points="33,2 42,7 33,12" fill="none" stroke="var(--color-border-secondary)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-      </svg>
+    <div class="filters-section">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search airdrop by name...">
+        </div>
+        <div class="filter-group">
+            <select id="blockchainFilter">
+                <option value="all">All Chains</option>
+                <option value="Ethereum">Ethereum</option>
+                <option value="Solana">Solana</option>
+                <option value="BNB Chain">BNB Chain</option>
+                <option value="Polygon">Polygon</option>
+                <option value="Avalanche">Avalanche</option>
+            </select>
+            <select id="difficultyFilter">
+                <option value="all">Difficulty</option>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+            </select>
+        </div>
     </div>
 
-    <div class="flag-box">
-      <div class="flag-circle" style="border:none;">
-        <svg width="58" height="58" viewBox="0 0 58 58" xmlns="http://www.w3.org/2000/svg">
-          <rect width="58" height="58" fill="#006A4E"/>
-          <circle cx="27" cy="29" r="14" fill="#F42A41"/>
-        </svg>
-      </div>
-      <span class="flag-lbl">Bangladesh</span>
+    <div class="flex-row" style="justify-content: space-between; flex-wrap: wrap;">
+        <div style="flex:1; min-width: 250px;">
+            <div class="section-title"><i class="fas fa-fire-flame-curved"></i> Trending Airdrops</div>
+            <div id="trendingContainer" class="cards-grid" style="grid-template-columns: 1fr;"></div>
+        </div>
+        <div style="flex:2; min-width: 300px;">
+            <div class="section-title"><i class="fas fa-gem"></i> Featured Airdrops</div>
+            <div id="featuredContainer" class="cards-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px,1fr));"></div>
+        </div>
     </div>
-  </div>
-
-  <div class="current-row">
-    <span class="current-label"><span class="live-dot"></span>Current UTC</span>
-    <span class="current-val" id="liveUtc">—</span>
-  </div>
-  <div class="current-row">
-    <span class="current-label"><span class="live-dot"></span>Current BD Time</span>
-    <span class="current-val" id="liveBd">—</span>
-  </div>
-
-  <div class="input-area">
-    <div class="input-row">
-      <span class="utc-tag">UTC</span>
-      <input class="utc-field" id="utcIn" type="text" placeholder="00:00" maxlength="5" spellcheck="false" autocomplete="off" inputmode="numeric"/>
-      <button class="now-btn" id="nowBtn">Use now</button>
-    </div>
-  </div>
-
-  <div id="resultArea">
-    <div class="empty-state">উপরে UTC সময় লিখুন</div>
-  </div>
-
+    
+    <div class="section-title"><i class="fas fa-clock"></i> Latest Airdrops</div>
+    <div id="latestContainer" class="cards-grid"></div>
+    
+    <div class="section-title"><i class="fas fa-list-ul"></i> All Airdrops</div>
+    <div id="allAirdropsContainer" class="cards-grid"></div>
 </div>
 
-<script>
-function parseT(v){
-  v=v.trim();
-  const m=v.match(/^(\d{1,2}):?(\d{2})$/);
-  if(!m)return null;
-  const h=+m[1],mn=+m[2];
-  if(h>23||mn>59)return null;
-  return{h,mn};
-}
-function convert(h,mn){
-  const now=new Date();
-  const base=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate(),h,mn,0));
-  const fmt=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Dhaka',hour:'numeric',minute:'2-digit',hour12:true});
-  const dateFmt=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Dhaka',weekday:'long',month:'long',day:'numeric'});
-  const parts=fmt.format(base).split(' ');
-  return{time:parts[0],ampm:parts[1]||'',date:dateFmt.format(base)};
-}
-function render(h,mn){
-  const r=convert(h,mn);
-  const utcStr=h.toString().padStart(2,'0')+':'+mn.toString().padStart(2,'0');
-  const copyText=r.time+' '+r.ampm+' BST (Bangladesh) = '+utcStr+' UTC';
-  document.getElementById('resultArea').innerHTML=`
-    <div class="result-card">
-      <div class="result-top">
-        <span class="bd-badge">BST · GMT+6</span>
-        <button class="copy-btn" id="copyBtn">Copy</button>
-      </div>
-      <div class="time-row">
-        <svg width="34" height="23" viewBox="0 0 34 23" xmlns="http://www.w3.org/2000/svg" style="border-radius:3px;flex-shrink:0;">
-          <rect width="34" height="23" fill="#006A4E"/>
-          <circle cx="16" cy="11.5" r="7.5" fill="#F42A41"/>
-        </svg>
-        <div>
-          <div class="bd-time">${r.time}<span class="bd-ampm">${r.ampm}</span></div>
+<!-- Admin Password Modal -->
+<div id="adminPasswordModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <h2><i class="fas fa-lock"></i> Admin Verification</h2>
+        <p>Enter password to access admin panel</p>
+        <input type="password" id="adminPasswordInput" placeholder="Password">
+        <div class="modal-buttons">
+            <button id="verifyPasswordBtn" class="join-btn">Verify</button>
+            <button id="closePasswordModalBtn" class="admin-btn">Cancel</button>
         </div>
-      </div>
-      <div class="bd-meta">${r.date} &nbsp;·&nbsp; Bangladesh Standard Time</div>
-      <div class="offset-row">
-        <span class="offset-pill">+6 hours</span>
-        <span class="offset-text">UTC ${utcStr} → BD ${r.time} ${r.ampm}</span>
-      </div>
-    </div>`;
-  document.getElementById('copyBtn').addEventListener('click',function(){
-    navigator.clipboard.writeText(copyText).catch(()=>{});
-    this.textContent='Copied!';this.classList.add('ok');
-    setTimeout(()=>{this.textContent='Copy';this.classList.remove('ok');},1800);
-  });
-}
-document.getElementById('utcIn').addEventListener('input',function(){
-  let v=this.value.replace(/[^0-9:]/g,'');
-  if(v.length===2&&!v.includes(':')&&this._prev&&this._prev.length<2){v=v+':';}
-  this._prev=v;this.value=v;
-  const p=parseT(v);
-  if(p){render(p.h,p.mn);}
-  else{document.getElementById('resultArea').innerHTML='<div class="empty-state">সঠিক সময় দিন (HH:MM)</div>';}
-});
-document.getElementById('nowBtn').addEventListener('click',function(){
-  const now=new Date();
-  const h=now.getUTCHours(),mn=now.getUTCMinutes();
-  document.getElementById('utcIn').value=h.toString().padStart(2,'0')+':'+mn.toString().padStart(2,'0');
-  render(h,mn);
-});
-function liveClock(){
-  const now=new Date();
-  document.getElementById('liveUtc').textContent=
-    now.getUTCHours().toString().padStart(2,'0')+':'+
-    now.getUTCMinutes().toString().padStart(2,'0')+':'+
-    now.getUTCSeconds().toString().padStart(2,'0')+' UTC';
-  document.getElementById('liveBd').textContent=
-    new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Dhaka',hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true}).format(now)+' BST';
-}
-liveClock();
-setInterval(liveClock,1000);
+    </div>
+</div>
+
+<!-- Admin Edit/Create Modal -->
+<div id="adminModal" class="modal">
+    <div class="modal-content">
+        <h2><i class="fas fa-dragon"></i> Admin Control <span id="adminModeText">Add Airdrop</span></h2>
+        <input type="text" id="adminProjectName" placeholder="Project Name *">
+        <input type="text" id="adminLogoUrl" placeholder="Logo URL (direct image link)" value="https://picsum.photos/id/100/100/100">
+        <select id="adminBlockchain">
+            <option value="Ethereum">Ethereum</option>
+            <option value="Solana">Solana</option>
+            <option value="BNB Chain">BNB Chain</option>
+            <option value="Polygon">Polygon</option>
+            <option value="Avalanche">Avalanche</option>
+        </select>
+        <select id="adminDifficulty">
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
+        </select>
+        <input type="text" id="adminReward" placeholder="Reward Potential (e.g. $500 - $5000)">
+        <select id="adminStatus">
+            <option value="Upcoming">Upcoming</option>
+            <option value="Live">Live</option>
+            <option value="Ended">Ended</option>
+        </select>
+        <div style="display: flex; gap: 12px; margin: 10px 0;">
+            <label><input type="checkbox" id="adminFeatured"> Featured</label>
+            <label><input type="checkbox" id="adminTrending"> Trending</label>
+        </div>
+        <div class="modal-buttons">
+            <button id="saveAirdropBtn" class="join-btn">Save Airdrop</button>
+            <button id="closeModalBtn" class="admin-btn">Cancel</button>
+        </div>
+        <p style="margin-top: 10px; font-size:12px;">💡 Tip: Double-click any card to edit | Hover & click 🗑️ to delete</p>
+    </div>
+</div>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    
+    // --- 3D animated background ---
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x05070a);
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 2, 12);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+    
+    const ambientLight = new THREE.AmbientLight(0x111122);
+    scene.add(ambientLight);
+    const pointLight = new THREE.PointLight(0x2a6fdb, 1, 20);
+    pointLight.position.set(2, 3, 4);
+    scene.add(pointLight);
+    const backLight = new THREE.PointLight(0xff44aa, 0.5);
+    backLight.position.set(-2, 1, -5);
+    scene.add(backLight);
+    
+    const group = new THREE.Group();
+    const geometry = new THREE.IcosahedronGeometry(0.6, 0);
+    const material = new THREE.MeshStandardMaterial({ color: 0x3a86ff, emissive: 0x1a44aa, emissiveIntensity: 0.6, metalness: 0.8, roughness: 0.2 });
+    const coreMesh = new THREE.Mesh(geometry, material);
+    group.add(coreMesh);
+    const ringGeo = new THREE.TorusGeometry(0.9, 0.08, 32, 100);
+    const ringMat = new THREE.MeshStandardMaterial({ color: 0x00ccff, emissive: 0x0088aa });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI / 2;
+    group.add(ring);
+    scene.add(group);
+    
+    const cubes = [];
+    for(let i=0;i<45;i++) {
+        const size = 0.08 + Math.random()*0.1;
+        const cubeMat = new THREE.MeshStandardMaterial({ color: 0x2a6fdb, emissive: 0x114477, emissiveIntensity: 0.3 });
+        const cube = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), cubeMat);
+        cube.position.set((Math.random() - 0.5) * 12, (Math.random() - 0.5) * 6, (Math.random() - 0.5) * 10 - 5);
+        cube.userData = { speed: 0.005 + Math.random() * 0.01, rotSpeed: 0.01 };
+        scene.add(cube);
+        cubes.push(cube);
+    }
+    
+    let time = 0;
+    function animate3D() {
+        requestAnimationFrame(animate3D);
+        time += 0.01;
+        group.rotation.y = time * 0.5;
+        group.rotation.x = Math.sin(time * 0.3) * 0.2;
+        group.position.y = Math.sin(time) * 0.1;
+        cubes.forEach(cube => {
+            cube.rotation.x += cube.userData.rotSpeed;
+            cube.rotation.y += cube.userData.rotSpeed;
+            cube.position.y += Math.sin(time + cube.position.x) * 0.002;
+        });
+        renderer.render(scene, camera);
+    }
+    animate3D();
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    
+    // ---------- AIRDROP DATA ----------
+    let airdrops = [
+        { id: "1", name: "StellarNet", logo: "https://picsum.photos/id/104/100/100", blockchain: "Solana", difficulty: "Medium", reward: "$1,200+", status: "Live", featured: true, trending: true, createdAt: Date.now() - 86400000 },
+        { id: "2", name: "QuantumFi", logo: "https://picsum.photos/id/106/100/100", blockchain: "Ethereum", difficulty: "Hard", reward: "$5,000+", status: "Upcoming", featured: true, trending: false, createdAt: Date.now() - 172800000 },
+        { id: "3", name: "Avalanche Peak", logo: "https://picsum.photos/id/95/100/100", blockchain: "Avalanche", difficulty: "Easy", reward: "$300+", status: "Live", featured: false, trending: true, createdAt: Date.now() - 3600000 },
+        { id: "4", name: "PolyZen", logo: "https://picsum.photos/id/26/100/100", blockchain: "Polygon", difficulty: "Medium", reward: "$800+", status: "Live", featured: false, trending: false, createdAt: Date.now() - 200000 },
+        { id: "5", name: "BNB Galaxy", logo: "https://picsum.photos/id/20/100/100", blockchain: "BNB Chain", difficulty: "Easy", reward: "$450+", status: "Ended", featured: false, trending: false, createdAt: Date.now() - 5000000 },
+        { id: "6", name: "SolanaPrime", logo: "https://picsum.photos/id/29/100/100", blockchain: "Solana", difficulty: "Medium", reward: "$2k+", status: "Upcoming", featured: true, trending: false, createdAt: Date.now() - 100000 }
+    ];
+    
+    let bookmarkedIds = new Set(JSON.parse(localStorage.getItem("bookmarks") || "[]"));
+    let editingId = null;
+    let newAirdropCount = 0;
+    let isAdminAuthenticated = false;
+    
+    function saveBookmarks() { localStorage.setItem("bookmarks", JSON.stringify([...bookmarkedIds])); }
+    function showToast(msg, isError = false) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-msg';
+        toast.style.borderLeftColor = isError ? '#f44336' : '#2a6fdb';
+        toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-bolt'}"></i> ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
+    function renderAll() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const chainVal = document.getElementById('blockchainFilter').value;
+        const diffVal = document.getElementById('difficultyFilter').value;
+        let filtered = airdrops.filter(a => 
+            (chainVal === 'all' || a.blockchain === chainVal) &&
+            (diffVal === 'all' || a.difficulty === diffVal) &&
+            (a.name.toLowerCase().includes(searchTerm) || searchTerm === "")
+        );
+        const sortedByDate = [...filtered].sort((a,b)=>b.createdAt - a.createdAt);
+        const latest = sortedByDate.slice(0, 3);
+        const trending = filtered.filter(a=>a.trending===true).slice(0,2);
+        const featured = filtered.filter(a=>a.featured===true).slice(0,3);
+        renderCards('latestContainer', latest);
+        renderCards('trendingContainer', trending);
+        renderCards('featuredContainer', featured);
+        renderCards('allAirdropsContainer', filtered);
+    }
+    
+    function renderCards(containerId, items) {
+        const container = document.getElementById(containerId);
+        if(!container) return;
+        if(items.length===0) { container.innerHTML = `<div style="padding:2rem; text-align:center;">✨ No airdrops found ✨</div>`; return; }
+        container.innerHTML = items.map(airdrop => `
+            <div class="airdrop-card" data-id="${airdrop.id}">
+                ${isAdminAuthenticated ? `<button class="delete-card-btn" data-id="${airdrop.id}" title="Delete Airdrop"><i class="fas fa-trash-alt"></i></button>` : ''}
+                ${airdrop.featured ? '<div class="featured-badge"><i class="fas fa-star"></i> Featured</div>' : ''}
+                ${isAdminAuthenticated ? '<div class="edit-badge"><i class="fas fa-pen"></i> Edit</div>' : ''}
+                <div class="card-header">
+                    <img src="${airdrop.logo}" onerror="this.src='https://picsum.photos/id/1/100/100'">
+                    <div><div class="project-name">${escapeHtml(airdrop.name)}</div><span class="blockchain-badge"><i class="fas fa-link"></i> ${airdrop.blockchain}</span></div>
+                </div>
+                <div class="info-row"><span class="difficulty"><i class="fas fa-chart-simple"></i> ${airdrop.difficulty}</span><span class="reward"><i class="fas fa-coins"></i> ${airdrop.reward}</span></div>
+                <div><span class="status ${airdrop.status}">${airdrop.status}</span></div>
+                <div class="card-actions">
+                    <button class="join-btn" data-id="${airdrop.id}" data-link="#">Join Airdrop</button>
+                    <div class="bookmark ${bookmarkedIds.has(airdrop.id) ? 'active' : ''}" data-id="${airdrop.id}"><i class="fa-${bookmarkedIds.has(airdrop.id) ? 'solid' : 'regular'} fa-bookmark"></i></div>
+                </div>
+            </div>
+        `).join('');
+        
+        document.querySelectorAll(`#${containerId} .join-btn`).forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); showToast("🚀 Redirect to official airdrop page (demo)"); });
+        });
+        document.querySelectorAll(`#${containerId} .bookmark`).forEach(bm => {
+            bm.addEventListener('click', (e) => { e.stopPropagation(); const id = bm.dataset.id; if(bookmarkedIds.has(id)) bookmarkedIds.delete(id); else bookmarkedIds.add(id); saveBookmarks(); renderAll(); showToast(bookmarkedIds.has(id) ? "Bookmarked ✓" : "Removed bookmark"); });
+        });
+        if(isAdminAuthenticated) {
+            document.querySelectorAll(`#${containerId} .delete-card-btn`).forEach(btn => {
+                btn.addEventListener('click', (e) => { e.stopPropagation(); const id = btn.dataset.id; deleteAirdropById(id); });
+            });
+        }
+    }
+    
+    function deleteAirdropById(id) {
+        if(confirm("⚠️ Delete this airdrop permanently?")) {
+            airdrops = airdrops.filter(a => a.id !== id);
+            if(bookmarkedIds.has(id)) bookmarkedIds.delete(id);
+            saveBookmarks();
+            renderAll();
+            showToast("🗑️ Airdrop deleted successfully");
+        }
+    }
+    
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    
+    function openAdminInterface(editData = null) {
+        if(!isAdminAuthenticated) { showToast("Access denied! Please login via Admin Panel", true); return; }
+        const modal = document.getElementById('adminModal');
+        if(editData) {
+            editingId = editData.id;
+            document.getElementById('adminModeText').innerText = "Edit Airdrop";
+            document.getElementById('adminProjectName').value = editData.name;
+            document.getElementById('adminLogoUrl').value = editData.logo;
+            document.getElementById('adminBlockchain').value = editData.blockchain;
+            document.getElementById('adminDifficulty').value = editData.difficulty;
+            document.getElementById('adminReward').value = editData.reward;
+            document.getElementById('adminStatus').value = editData.status;
+            document.getElementById('adminFeatured').checked = editData.featured || false;
+            document.getElementById('adminTrending').checked = editData.trending || false;
+        } else {
+            editingId = null;
+            document.getElementById('adminModeText').innerText = "Add New Airdrop";
+            document.getElementById('adminProjectName').value = '';
+            document.getElementById('adminLogoUrl').value = 'https://picsum.photos/id/42/100/100';
+            document.getElementById('adminReward').value = '';
+            document.getElementById('adminFeatured').checked = false;
+            document.getElementById('adminTrending').checked = false;
+            document.getElementById('adminStatus').value = 'Upcoming';
+        }
+        modal.style.display = 'flex';
+    }
+    
+    // Save logic
+    document.getElementById('saveAirdropBtn').onclick = () => {
+        if(!isAdminAuthenticated) { showToast("Session expired, re-login", true); return; }
+        const name = document.getElementById('adminProjectName').value.trim();
+        const logo = document.getElementById('adminLogoUrl').value.trim() || "https://picsum.photos/id/42/100/100";
+        const blockchain = document.getElementById('adminBlockchain').value;
+        const difficulty = document.getElementById('adminDifficulty').value;
+        const reward = document.getElementById('adminReward').value.trim() || "TBA";
+        const status = document.getElementById('adminStatus').value;
+        const featured = document.getElementById('adminFeatured').checked;
+        const trending = document.getElementById('adminTrending').checked;
+        if(!name) { showToast("Project name required", true); return; }
+        if(editingId) {
+            const index = airdrops.findIndex(a=>a.id === editingId);
+            if(index!==-1) {
+                airdrops[index] = {...airdrops[index], name, logo, blockchain, difficulty, reward, status, featured, trending };
+                showToast(`✏️ Updated ${name}`);
+            }
+        } else {
+            const newId = Date.now().toString();
+            airdrops.push({ id: newId, name, logo, blockchain, difficulty, reward, status, featured, trending, createdAt: Date.now() });
+            newAirdropCount++;
+            document.getElementById('newNotifCount').innerText = newAirdropCount;
+            showToast(`➕ New airdrop: ${name} added!`);
+        }
+        document.getElementById('adminModal').style.display = 'none';
+        renderAll();
+    };
+    
+    // Password modal handling (9923)
+    const passwordModal = document.getElementById('adminPasswordModal');
+    const adminModalElem = document.getElementById('adminModal');
+    document.getElementById('openAdminBtn').onclick = () => { passwordModal.style.display = 'flex'; };
+    document.getElementById('verifyPasswordBtn').onclick = () => {
+        const pwd = document.getElementById('adminPasswordInput').value;
+        if(pwd === "9923") {
+            isAdminAuthenticated = true;
+            passwordModal.style.display = 'none';
+            openAdminInterface(null);
+            showToast("✅ Admin access granted");
+        } else {
+            showToast("❌ Wrong password! Access denied.", true);
+        }
+    };
+    document.getElementById('closePasswordModalBtn').onclick = () => { passwordModal.style.display = 'none'; };
+    document.getElementById('closeModalBtn').onclick = () => { adminModalElem.style.display = 'none'; };
+    
+    // Double-click edit on cards (admin only)
+    function attachGlobalEditListener() {
+        document.querySelectorAll('.airdrop-card').forEach(card => {
+            card.removeEventListener('dblclick', card._dblHandler);
+            const handler = () => {
+                if(!isAdminAuthenticated) { showToast("Admin login required to edit", true); return; }
+                const id = card.dataset.id;
+                const a = airdrops.find(x=>x.id===id);
+                if(a) openAdminInterface(a);
+            };
+            card.addEventListener('dblclick', handler);
+            card._dblHandler = handler;
+        });
+    }
+    
+    const observer = new MutationObserver(() => { renderAll(); attachGlobalEditListener(); });
+    observer.observe(document.getElementById('allAirdropsContainer'), { childList: true, subtree: true });
+    observer.observe(document.getElementById('latestContainer'), { childList: true, subtree: true });
+    observer.observe(document.getElementById('trendingContainer'), { childList: true, subtree: true });
+    observer.observe(document.getElementById('featuredContainer'), { childList: true, subtree: true });
+    
+    document.getElementById('searchInput').addEventListener('input', () => renderAll());
+    document.getElementById('blockchainFilter').addEventListener('change', () => renderAll());
+    document.getElementById('difficultyFilter').addEventListener('change', () => renderAll());
+    document.getElementById('notifyBell').onclick = () => { if(newAirdropCount>0) showToast(`✨ ${newAirdropCount} new airdrops available!`); newAirdropCount=0; document.getElementById('newNotifCount').innerText='0'; };
+    
+    renderAll();
+    attachGlobalEditListener();
 </script>
+</body>
+</html>
