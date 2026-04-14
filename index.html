@@ -30,6 +30,7 @@
             overflow-x: hidden;
         }
 
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -41,6 +42,7 @@
             border-radius: 8px;
         }
 
+        /* Canvas 3D background */
         #canvas-container {
             position: fixed;
             top: 0;
@@ -51,6 +53,7 @@
             pointer-events: none;
         }
 
+        /* Main content wrapper */
         .app-wrapper {
             position: relative;
             z-index: 2;
@@ -59,6 +62,7 @@
             padding: 1.5rem 2rem 4rem;
         }
 
+        /* Glassmorphism header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -104,6 +108,7 @@
             color: white;
         }
 
+        /* Search + Filters */
         .filters-section {
             display: flex;
             flex-wrap: wrap;
@@ -154,6 +159,7 @@
             cursor: pointer;
             backdrop-filter: blur(4px);
         }
+        /* notification badge */
         .notify-bell {
             position: relative;
             cursor: pointer;
@@ -164,6 +170,7 @@
             text-shadow: 0 0 8px cyan;
         }
 
+        /* Section titles */
         .section-title {
             font-size: 1.6rem;
             margin: 2rem 0 1rem;
@@ -174,6 +181,7 @@
             padding-left: 1rem;
         }
 
+        /* Cards grid */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -181,6 +189,7 @@
             margin-top: 1rem;
         }
 
+        /* Glassmorphic 3D card */
         .airdrop-card {
             background: rgba(20, 28, 40, 0.65);
             backdrop-filter: blur(12px);
@@ -190,6 +199,7 @@
             transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
             transform: translateY(0) rotateX(0deg);
             box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            cursor: pointer;
             position: relative;
             overflow: hidden;
         }
@@ -205,8 +215,8 @@
             margin-bottom: 1rem;
         }
         .card-header img {
-            width: 52px;
-            height: 52px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: #0a0f1a;
             border: 1px solid cyan;
@@ -276,68 +286,14 @@
             color: #ffd966;
             text-shadow: 0 0 6px gold;
         }
-        .delete-card-btn {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            background: rgba(255,50,50,0.8);
-            border: none;
-            color: white;
-            border-radius: 30px;
-            width: 28px;
-            height: 28px;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
-            opacity: 0;
-            transition: 0.2s;
-            z-index: 10;
-        }
-        .airdrop-card:hover .delete-card-btn {
-            opacity: 1;
-        }
-        .delete-card-btn:hover {
-            background: red;
-            transform: scale(1.1);
-        }
-        .edit-badge {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: #2a6fdbcc;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            opacity: 0;
-            transition: 0.2s;
-            pointer-events: none;
-        }
-        .airdrop-card:hover .edit-badge {
-            opacity: 1;
-        }
-        .featured-badge {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: #ffaa33cc;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-        
-        /* Modals */
+        /* admin panel modal */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(12px);
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -346,12 +302,12 @@
             background: #0b1120e6;
             border-radius: 2rem;
             width: 90%;
-            max-width: 520px;
+            max-width: 500px;
             padding: 2rem;
             border: 1px solid cyan;
             box-shadow: 0 0 40px rgba(0,255,255,0.2);
         }
-        .modal-content input, .modal-content select, .modal-content textarea {
+        .modal-content input, .modal-content select {
             width: 100%;
             padding: 12px;
             margin: 8px 0;
@@ -359,13 +315,13 @@
             border: 1px solid #3a6eff;
             border-radius: 28px;
             color: white;
-            font-family: inherit;
         }
         .modal-buttons {
             display: flex;
             gap: 1rem;
             margin-top: 1rem;
         }
+        /* trending featured latest */
         .flex-row {
             display: flex;
             flex-wrap: wrap;
@@ -396,14 +352,15 @@
             .filters-section { flex-direction: column; align-items: stretch; border-radius: 28px; }
         }
         button { background: none; border: none; }
-        .password-prompt {
-            text-align: center;
-        }
-        .danger-btn {
-            background: #dc2626;
-        }
-        .danger-btn:hover {
-            background: #b91c1c;
+        .featured-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #ffaa33cc;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -444,6 +401,7 @@
         </div>
     </div>
 
+    <!-- Trending & Featured Section -->
     <div class="flex-row" style="justify-content: space-between; flex-wrap: wrap;">
         <div style="flex:1; min-width: 250px;">
             <div class="section-title"><i class="fas fa-fire-flame-curved"></i> Trending Airdrops</div>
@@ -462,25 +420,12 @@
     <div id="allAirdropsContainer" class="cards-grid"></div>
 </div>
 
-<!-- Admin Password Modal -->
-<div id="adminPasswordModal" class="modal">
-    <div class="modal-content" style="max-width: 400px;">
-        <h2><i class="fas fa-lock"></i> Admin Verification</h2>
-        <p>Enter password to access admin panel</p>
-        <input type="password" id="adminPasswordInput" placeholder="Password">
-        <div class="modal-buttons">
-            <button id="verifyPasswordBtn" class="join-btn">Verify</button>
-            <button id="closePasswordModalBtn" class="admin-btn">Cancel</button>
-        </div>
-    </div>
-</div>
-
-<!-- Admin Edit/Create Modal -->
+<!-- Admin Modal -->
 <div id="adminModal" class="modal">
     <div class="modal-content">
-        <h2><i class="fas fa-dragon"></i> Admin Control <span id="adminModeText">Add Airdrop</span></h2>
-        <input type="text" id="adminProjectName" placeholder="Project Name *">
-        <input type="text" id="adminLogoUrl" placeholder="Logo URL (direct image link)" value="https://picsum.photos/id/100/100/100">
+        <h2><i class="fas fa-dragon"></i> Admin Control</h2>
+        <input type="text" id="adminProjectName" placeholder="Project Name">
+        <input type="text" id="adminLogoUrl" placeholder="Logo URL (icon)">
         <select id="adminBlockchain">
             <option value="Ethereum">Ethereum</option>
             <option value="Solana">Solana</option>
@@ -499,15 +444,11 @@
             <option value="Live">Live</option>
             <option value="Ended">Ended</option>
         </select>
-        <div style="display: flex; gap: 12px; margin: 10px 0;">
-            <label><input type="checkbox" id="adminFeatured"> Featured</label>
-            <label><input type="checkbox" id="adminTrending"> Trending</label>
-        </div>
         <div class="modal-buttons">
-            <button id="saveAirdropBtn" class="join-btn">Save Airdrop</button>
+            <button id="saveAirdropBtn" class="join-btn" style="background: #2a6fdb;">Add / Update</button>
             <button id="closeModalBtn" class="admin-btn">Cancel</button>
         </div>
-        <p style="margin-top: 10px; font-size:12px;">💡 Tip: Double-click any card to edit | Hover & click 🗑️ to delete</p>
+        <p style="margin-top: 10px; font-size:12px;">* Edit: select a card first to edit, or add new.</p>
     </div>
 </div>
 
@@ -515,7 +456,7 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     
-    // --- 3D animated background ---
+    // --- 3D animated hero background (floating glowing cubes) ---
     const container = document.getElementById('canvas-container');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x05070a);
@@ -526,6 +467,7 @@
     renderer.setPixelRatio(window.devicePixelRatio);
     container.appendChild(renderer.domElement);
     
+    // Lights
     const ambientLight = new THREE.AmbientLight(0x111122);
     scene.add(ambientLight);
     const pointLight = new THREE.PointLight(0x2a6fdb, 1, 20);
@@ -535,11 +477,13 @@
     backLight.position.set(-2, 1, -5);
     scene.add(backLight);
     
+    // floating torus knots and cubes
     const group = new THREE.Group();
     const geometry = new THREE.IcosahedronGeometry(0.6, 0);
     const material = new THREE.MeshStandardMaterial({ color: 0x3a86ff, emissive: 0x1a44aa, emissiveIntensity: 0.6, metalness: 0.8, roughness: 0.2 });
     const coreMesh = new THREE.Mesh(geometry, material);
     group.add(coreMesh);
+    
     const ringGeo = new THREE.TorusGeometry(0.9, 0.08, 32, 100);
     const ringMat = new THREE.MeshStandardMaterial({ color: 0x00ccff, emissive: 0x0088aa });
     const ring = new THREE.Mesh(ringGeo, ringMat);
@@ -547,6 +491,7 @@
     group.add(ring);
     scene.add(group);
     
+    // additional floating cubes
     const cubes = [];
     for(let i=0;i<45;i++) {
         const size = 0.08 + Math.random()*0.1;
@@ -579,7 +524,7 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
     
-    // ---------- AIRDROP DATA ----------
+    // ---------- AIRDROP DATA & STATE ----------
     let airdrops = [
         { id: "1", name: "StellarNet", logo: "https://picsum.photos/id/104/100/100", blockchain: "Solana", difficulty: "Medium", reward: "$1,200+", status: "Live", featured: true, trending: true, createdAt: Date.now() - 86400000 },
         { id: "2", name: "QuantumFi", logo: "https://picsum.photos/id/106/100/100", blockchain: "Ethereum", difficulty: "Hard", reward: "$5,000+", status: "Upcoming", featured: true, trending: false, createdAt: Date.now() - 172800000 },
@@ -588,18 +533,15 @@
         { id: "5", name: "BNB Galaxy", logo: "https://picsum.photos/id/20/100/100", blockchain: "BNB Chain", difficulty: "Easy", reward: "$450+", status: "Ended", featured: false, trending: false, createdAt: Date.now() - 5000000 },
         { id: "6", name: "SolanaPrime", logo: "https://picsum.photos/id/29/100/100", blockchain: "Solana", difficulty: "Medium", reward: "$2k+", status: "Upcoming", featured: true, trending: false, createdAt: Date.now() - 100000 }
     ];
-    
     let bookmarkedIds = new Set(JSON.parse(localStorage.getItem("bookmarks") || "[]"));
     let editingId = null;
     let newAirdropCount = 0;
-    let isAdminAuthenticated = false;
     
     function saveBookmarks() { localStorage.setItem("bookmarks", JSON.stringify([...bookmarkedIds])); }
-    function showToast(msg, isError = false) {
+    function showToast(msg) {
         const toast = document.createElement('div');
         toast.className = 'toast-msg';
-        toast.style.borderLeftColor = isError ? '#f44336' : '#2a6fdb';
-        toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-bolt'}"></i> ${msg}`;
+        toast.innerHTML = `<i class="fas fa-bolt"></i> ${msg}`;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
@@ -629,12 +571,10 @@
         if(items.length===0) { container.innerHTML = `<div style="padding:2rem; text-align:center;">✨ No airdrops found ✨</div>`; return; }
         container.innerHTML = items.map(airdrop => `
             <div class="airdrop-card" data-id="${airdrop.id}">
-                ${isAdminAuthenticated ? `<button class="delete-card-btn" data-id="${airdrop.id}" title="Delete Airdrop"><i class="fas fa-trash-alt"></i></button>` : ''}
                 ${airdrop.featured ? '<div class="featured-badge"><i class="fas fa-star"></i> Featured</div>' : ''}
-                ${isAdminAuthenticated ? '<div class="edit-badge"><i class="fas fa-pen"></i> Edit</div>' : ''}
                 <div class="card-header">
                     <img src="${airdrop.logo}" onerror="this.src='https://picsum.photos/id/1/100/100'">
-                    <div><div class="project-name">${escapeHtml(airdrop.name)}</div><span class="blockchain-badge"><i class="fas fa-link"></i> ${airdrop.blockchain}</span></div>
+                    <div><div class="project-name">${airdrop.name}</div><span class="blockchain-badge"><i class="fas fa-link"></i> ${airdrop.blockchain}</span></div>
                 </div>
                 <div class="info-row"><span class="difficulty"><i class="fas fa-chart-simple"></i> ${airdrop.difficulty}</span><span class="reward"><i class="fas fa-coins"></i> ${airdrop.reward}</span></div>
                 <div><span class="status ${airdrop.status}">${airdrop.status}</span></div>
@@ -644,134 +584,85 @@
                 </div>
             </div>
         `).join('');
-        
+        // attach event listeners dynamically
         document.querySelectorAll(`#${containerId} .join-btn`).forEach(btn => {
-            btn.addEventListener('click', (e) => { e.stopPropagation(); showToast("🚀 Redirect to official airdrop page (demo)"); });
+            btn.addEventListener('click', (e) => { e.stopPropagation(); showToast("🚀 Redirect to airdrop page (demo)"); });
         });
         document.querySelectorAll(`#${containerId} .bookmark`).forEach(bm => {
             bm.addEventListener('click', (e) => { e.stopPropagation(); const id = bm.dataset.id; if(bookmarkedIds.has(id)) bookmarkedIds.delete(id); else bookmarkedIds.add(id); saveBookmarks(); renderAll(); showToast(bookmarkedIds.has(id) ? "Bookmarked ✓" : "Removed bookmark"); });
         });
-        if(isAdminAuthenticated) {
-            document.querySelectorAll(`#${containerId} .delete-card-btn`).forEach(btn => {
-                btn.addEventListener('click', (e) => { e.stopPropagation(); const id = btn.dataset.id; deleteAirdropById(id); });
-            });
-        }
     }
     
-    function deleteAirdropById(id) {
-        if(confirm("⚠️ Delete this airdrop permanently?")) {
-            airdrops = airdrops.filter(a => a.id !== id);
-            if(bookmarkedIds.has(id)) bookmarkedIds.delete(id);
-            saveBookmarks();
-            renderAll();
-            showToast("🗑️ Airdrop deleted successfully");
-        }
-    }
-    
-    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
-    
-    function openAdminInterface(editData = null) {
-        if(!isAdminAuthenticated) { showToast("Access denied! Please login via Admin Panel", true); return; }
-        const modal = document.getElementById('adminModal');
-        if(editData) {
-            editingId = editData.id;
-            document.getElementById('adminModeText').innerText = "Edit Airdrop";
-            document.getElementById('adminProjectName').value = editData.name;
-            document.getElementById('adminLogoUrl').value = editData.logo;
-            document.getElementById('adminBlockchain').value = editData.blockchain;
-            document.getElementById('adminDifficulty').value = editData.difficulty;
-            document.getElementById('adminReward').value = editData.reward;
-            document.getElementById('adminStatus').value = editData.status;
-            document.getElementById('adminFeatured').checked = editData.featured || false;
-            document.getElementById('adminTrending').checked = editData.trending || false;
-        } else {
-            editingId = null;
-            document.getElementById('adminModeText').innerText = "Add New Airdrop";
-            document.getElementById('adminProjectName').value = '';
-            document.getElementById('adminLogoUrl').value = 'https://picsum.photos/id/42/100/100';
-            document.getElementById('adminReward').value = '';
-            document.getElementById('adminFeatured').checked = false;
-            document.getElementById('adminTrending').checked = false;
-            document.getElementById('adminStatus').value = 'Upcoming';
-        }
-        modal.style.display = 'flex';
-    }
-    
-    // Save logic
+    // admin open
+    const modal = document.getElementById('adminModal');
+    document.getElementById('openAdminBtn').onclick = () => { editingId = null; document.getElementById('adminProjectName').value = ''; document.getElementById('adminLogoUrl').value = ''; modal.style.display = 'flex'; };
+    document.getElementById('closeModalBtn').onclick = () => modal.style.display = 'none';
     document.getElementById('saveAirdropBtn').onclick = () => {
-        if(!isAdminAuthenticated) { showToast("Session expired, re-login", true); return; }
         const name = document.getElementById('adminProjectName').value.trim();
         const logo = document.getElementById('adminLogoUrl').value.trim() || "https://picsum.photos/id/42/100/100";
         const blockchain = document.getElementById('adminBlockchain').value;
         const difficulty = document.getElementById('adminDifficulty').value;
-        const reward = document.getElementById('adminReward').value.trim() || "TBA";
+        const reward = document.getElementById('adminReward').value.trim() || "$???";
         const status = document.getElementById('adminStatus').value;
-        const featured = document.getElementById('adminFeatured').checked;
-        const trending = document.getElementById('adminTrending').checked;
-        if(!name) { showToast("Project name required", true); return; }
+        if(!name) { showToast("Project name required"); return; }
         if(editingId) {
             const index = airdrops.findIndex(a=>a.id === editingId);
             if(index!==-1) {
-                airdrops[index] = {...airdrops[index], name, logo, blockchain, difficulty, reward, status, featured, trending };
-                showToast(`✏️ Updated ${name}`);
+                airdrops[index] = {...airdrops[index], name, logo, blockchain, difficulty, reward, status };
+                showToast(`Updated ${name}`);
             }
         } else {
             const newId = Date.now().toString();
-            airdrops.push({ id: newId, name, logo, blockchain, difficulty, reward, status, featured, trending, createdAt: Date.now() });
+            airdrops.push({ id: newId, name, logo, blockchain, difficulty, reward, status, featured: false, trending: false, createdAt: Date.now() });
             newAirdropCount++;
             document.getElementById('newNotifCount').innerText = newAirdropCount;
             showToast(`➕ New airdrop: ${name} added!`);
         }
-        document.getElementById('adminModal').style.display = 'none';
+        modal.style.display = 'none';
         renderAll();
     };
-    
-    // Password modal handling (9923)
-    const passwordModal = document.getElementById('adminPasswordModal');
-    const adminModalElem = document.getElementById('adminModal');
-    document.getElementById('openAdminBtn').onclick = () => { passwordModal.style.display = 'flex'; };
-    document.getElementById('verifyPasswordBtn').onclick = () => {
-        const pwd = document.getElementById('adminPasswordInput').value;
-        if(pwd === "9923") {
-            isAdminAuthenticated = true;
-            passwordModal.style.display = 'none';
-            openAdminInterface(null);
-            showToast("✅ Admin access granted");
-        } else {
-            showToast("❌ Wrong password! Access denied.", true);
-        }
-    };
-    document.getElementById('closePasswordModalBtn').onclick = () => { passwordModal.style.display = 'none'; };
-    document.getElementById('closeModalBtn').onclick = () => { adminModalElem.style.display = 'none'; };
-    
-    // Double-click edit on cards (admin only)
-    function attachGlobalEditListener() {
+    // click on card to edit (admin feature)
+    function delegateCardEdit() {
         document.querySelectorAll('.airdrop-card').forEach(card => {
-            card.removeEventListener('dblclick', card._dblHandler);
-            const handler = () => {
-                if(!isAdminAuthenticated) { showToast("Admin login required to edit", true); return; }
+            card.removeEventListener('dblclick', card._dbListener);
+            const listener = () => {
                 const id = card.dataset.id;
                 const a = airdrops.find(x=>x.id===id);
-                if(a) openAdminInterface(a);
+                if(a) {
+                    editingId = id;
+                    document.getElementById('adminProjectName').value = a.name;
+                    document.getElementById('adminLogoUrl').value = a.logo;
+                    document.getElementById('adminBlockchain').value = a.blockchain;
+                    document.getElementById('adminDifficulty').value = a.difficulty;
+                    document.getElementById('adminReward').value = a.reward;
+                    document.getElementById('adminStatus').value = a.status;
+                    modal.style.display = 'flex';
+                }
             };
-            card.addEventListener('dblclick', handler);
-            card._dblHandler = handler;
+            card.addEventListener('dblclick', listener);
+            card._dbListener = listener;
         });
     }
-    
-    const observer = new MutationObserver(() => { renderAll(); attachGlobalEditListener(); });
+    // observe re-renders
+    const observer = new MutationObserver(() => delegateCardEdit());
     observer.observe(document.getElementById('allAirdropsContainer'), { childList: true, subtree: true });
     observer.observe(document.getElementById('latestContainer'), { childList: true, subtree: true });
     observer.observe(document.getElementById('trendingContainer'), { childList: true, subtree: true });
     observer.observe(document.getElementById('featuredContainer'), { childList: true, subtree: true });
     
+    // notify new airdrops
+    document.getElementById('notifyBell').onclick = () => { if(newAirdropCount>0) showToast(`✨ ${newAirdropCount} new airdrops available!`); newAirdropCount=0; document.getElementById('newNotifCount').innerText='0'; };
+    
     document.getElementById('searchInput').addEventListener('input', () => renderAll());
     document.getElementById('blockchainFilter').addEventListener('change', () => renderAll());
     document.getElementById('difficultyFilter').addEventListener('change', () => renderAll());
-    document.getElementById('notifyBell').onclick = () => { if(newAirdropCount>0) showToast(`✨ ${newAirdropCount} new airdrops available!`); newAirdropCount=0; document.getElementById('newNotifCount').innerText='0'; };
     
     renderAll();
-    attachGlobalEditListener();
+    delegateCardEdit();
+    // initial notification count
+    setInterval(() => {
+        // simulate occasional new airdrop hint? not needed, but admin adds new ones.
+    }, 5000);
 </script>
 </body>
 </html>
