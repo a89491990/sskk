@@ -4,404 +4,515 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DAC Studio — Token & NFT Creator</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:ital,wght@0,100..900;1,100..900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  :root {
-    --bg: #0a0a1a; --bg2: #0f0f2a; --surface: #151535; --surface2: #1a1a45;
-    --border: #2a2a60; --accent: #00d4ff; --accent2: #7b5ea7; --accent3: #00ff9d;
-    --text: #e0f0ff; --muted: #6a6a9a; --danger: #ff4466;
-  }
-  body { background: var(--bg); color: var(--text); font-family: 'Space Mono', monospace; }
-  .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
-  header {
-    background: rgba(10,10,26,0.95); backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border); padding: 15px 20px;
-    position: sticky; top: 0; z-index: 100;
-  }
-  .header-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-  .logo { display: flex; align-items: center; gap: 10px; }
-  .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-  .logo-text { font-family: 'Orbitron', monospace; font-weight: 700; }
-  .chain-badge { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 5px 15px; font-size: 12px; }
-  #connectBtn { background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 8px; padding: 10px 20px; color: white; cursor: pointer; font-family: 'Orbitron', monospace; font-weight: bold; }
-  #connectBtn.connected { background: linear-gradient(135deg, var(--accent3), #00b36b); }
-  #walletInfo { display: none; align-items: center; gap: 10px; font-size: 12px; }
-  #walletInfo.show { display: flex; }
-  .hero { text-align: center; padding: 60px 0 40px; }
-  .hero h1 { font-family: 'Orbitron', monospace; font-size: 48px; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .stats { display: flex; justify-content: center; gap: 40px; padding: 30px 0; }
-  .stat { text-align: center; }
-  .stat-val { font-family: 'Orbitron', monospace; font-size: 28px; color: var(--accent); font-weight: bold; }
-  .tabs { display: flex; gap: 5px; background: var(--surface); border-radius: 12px; padding: 5px; margin: 20px auto; max-width: 400px; }
-  .tab-btn { flex: 1; padding: 12px; background: transparent; border: none; color: var(--muted); cursor: pointer; border-radius: 8px; font-family: 'Orbitron', monospace; font-weight: bold; }
-  .tab-btn.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; }
-  .panel { display: none; }
-  .panel.active { display: block; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
-  .card-title { font-family: 'Orbitron', monospace; font-size: 14px; color: var(--accent); margin-bottom: 20px; text-transform: uppercase; }
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .form-group { display: flex; flex-direction: column; gap: 8px; }
-  .form-group.full { grid-column: 1 / -1; }
-  label { font-size: 11px; color: var(--muted); text-transform: uppercase; }
-  input, textarea { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); font-family: 'Space Mono', monospace; outline: none; }
-  input:focus, textarea:focus { border-color: var(--accent); }
-  .deploy-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 10px; color: white; font-family: 'Orbitron', monospace; font-weight: bold; cursor: pointer; margin-top: 20px; }
-  .deploy-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .alert { background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 12px; margin-bottom: 15px; font-size: 12px; color: #ffd700; }
-  .tx-result { background: var(--bg2); border-radius: 10px; padding: 15px; margin-top: 15px; display: none; word-break: break-all; }
-  .tx-result.show { display: block; }
-  .tx-hash { color: var(--accent3); margin-top: 8px; font-size: 11px; }
-  .network-card { background: rgba(0,212,255,0.05); border: 1px solid rgba(0,212,255,0.2); border-radius: 12px; padding: 15px; margin-bottom: 20px; }
-  .network-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .wallet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-  .wallet-option { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.3s; }
-  .wallet-option:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .loader { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  #toast { position: fixed; bottom: 20px; right: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 20px; transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 1000; }
-  #toast.show { transform: translateY(0); opacity: 1; }
-  #toast.success { border-color: var(--accent3); color: var(--accent3); }
-  #toast.error { border-color: var(--danger); color: var(--danger); }
-  footer { text-align: center; padding: 30px; color: var(--muted); font-size: 11px; border-top: 1px solid var(--border); margin-top: 40px; }
-  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .wallet-grid { grid-template-columns: repeat(2, 1fr); } }
+:root{--bg:#020509;--bg2:#040c14;--surface:#071220;--surface2:#0a1a2e;--border:#0d2540;--border2:#1a3a5c;--accent:#00f5ff;--accent2:#0066ff;--accent3:#00ff88;--purple:#8b5cf6;--text:#e8f4ff;--text2:#7090b0;--danger:#ff3366;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
+.bg-scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.grid-floor{position:absolute;bottom:0;left:50%;transform:translateX(-50%) perspective(600px) rotateX(75deg);width:300%;height:600px;background-image:linear-gradient(rgba(0,245,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,.06) 1px,transparent 1px);background-size:60px 60px;animation:grid-move 12s linear infinite;}
+@keyframes grid-move{from{background-position:0 0}to{background-position:0 60px}}
+.scanlines{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);animation:orb-float 8s ease-in-out infinite;}
+.orb1{width:600px;height:600px;background:radial-gradient(circle,rgba(0,102,255,.18),transparent 70%);top:-200px;left:-200px;}
+.orb2{width:400px;height:400px;background:radial-gradient(circle,rgba(0,245,255,.1),transparent 70%);top:50%;right:-100px;animation-delay:-3s;}
+.orb3{width:500px;height:500px;background:radial-gradient(circle,rgba(139,92,246,.08),transparent 70%);bottom:-100px;left:30%;animation-delay:-5s;}
+@keyframes orb-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
+.corner{position:fixed;width:70px;height:70px;z-index:100;pointer-events:none;opacity:.5;}
+.corner-tl{top:0;left:0;border-top:2px solid var(--accent);border-left:2px solid var(--accent);}
+.corner-tr{top:0;right:0;border-top:2px solid var(--accent);border-right:2px solid var(--accent);}
+.corner-bl{bottom:0;left:0;border-bottom:2px solid var(--accent2);border-left:2px solid var(--accent2);}
+.corner-br{bottom:0;right:0;border-bottom:2px solid var(--accent2);border-right:2px solid var(--accent2);}
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 24px;}
+/* HEADER */
+header{position:sticky;top:0;z-index:500;background:rgba(2,5,9,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+header::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),transparent);opacity:.4;}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:14px;flex-wrap:wrap;}
+.logo{display:flex;align-items:center;gap:14px;text-decoration:none;}
+.logo-cube{width:46px;height:46px;background:linear-gradient(135deg,var(--accent2),var(--accent));border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;color:#fff;box-shadow:0 0 25px rgba(0,245,255,.35),4px 4px 0 rgba(0,60,160,.8),8px 8px 0 rgba(0,40,120,.3);transform:perspective(200px) rotateX(5deg) rotateY(-5deg);animation:logo-pulse 3s ease-in-out infinite;}
+@keyframes logo-pulse{0%,100%{box-shadow:0 0 25px rgba(0,245,255,.35),4px 4px 0 rgba(0,60,160,.8),8px 8px 0 rgba(0,40,120,.3)}50%{box-shadow:0 0 45px rgba(0,245,255,.55),4px 4px 0 rgba(0,60,160,.8),8px 8px 0 rgba(0,40,120,.3)}}
+.logo-name{font-family:'Exo 2',sans-serif;font-size:19px;font-weight:800;letter-spacing:3px;background:linear-gradient(90deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logo-sub{font-size:9px;color:var(--text2);letter-spacing:3px;text-transform:uppercase;}
+.chain-status{display:flex;align-items:center;gap:8px;background:rgba(0,245,255,.03);border:1px solid rgba(0,245,255,.1);border-radius:6px;padding:7px 14px;}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--accent3);box-shadow:0 0 8px var(--accent3);animation:blink 2s ease-in-out infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.chain-lbl{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);}
+.chain-id-v{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--accent);}
+.hdr-right{display:flex;align-items:center;gap:10px;}
+#walletInfo{display:none;align-items:center;gap:8px;background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.15);border-radius:6px;padding:7px 12px;}
+#walletAddr{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2);}
+.dv{width:1px;height:14px;background:var(--border2);}
+#walletBal{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--accent3);font-weight:600;}
+#connectBtn{display:flex;align-items:center;gap:8px;font-family:'Exo 2',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;background:transparent;border:1px solid var(--accent);border-radius:6px;padding:10px 20px;color:var(--accent);cursor:pointer;position:relative;overflow:hidden;transition:all .3s;white-space:nowrap;}
+#connectBtn .fill{position:absolute;inset:0;background:linear-gradient(135deg,var(--accent),var(--accent2));opacity:0;transition:opacity .3s;}
+#connectBtn:hover{color:#fff;box-shadow:0 0 22px rgba(0,245,255,.3);}
+#connectBtn:hover .fill{opacity:1;}
+#connectBtn .lbl{position:relative;z-index:1;}
+#connectBtn.connected{border-color:var(--accent3);color:var(--accent3);}
+#connectBtn.connected .fill{display:none;}
+/* HERO */
+.hero{padding:70px 0 44px;text-align:center;}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(0,245,255,.2);background:rgba(0,245,255,.03);color:var(--accent);font-size:9px;letter-spacing:4px;text-transform:uppercase;padding:5px 18px;border-radius:2px;margin-bottom:26px;}
+.hero-title{font-family:'Exo 2',sans-serif;font-size:clamp(34px,6.5vw,72px);font-weight:900;line-height:.95;letter-spacing:-1px;margin-bottom:20px;}
+.hero-title .l1{display:block;color:#fff;}
+.hero-title .l2{display:block;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 50%,var(--purple) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 20px rgba(0,245,255,.25));}
+.hero-desc{font-size:14px;color:var(--text2);max-width:480px;margin:0 auto 36px;line-height:1.7;}
+.stats-row{display:flex;justify-content:center;max-width:580px;margin:0 auto 56px;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.stat-item{flex:1;padding:16px;text-align:center;border-right:1px solid var(--border);background:rgba(7,18,32,.8);transition:background .3s;}
+.stat-item:last-child{border-right:none;}
+.stat-item:hover{background:rgba(0,245,255,.03);}
+.stat-num{font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--accent);display:block;margin-bottom:3px;}
+.stat-lbl{font-size:8px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;}
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;margin-bottom:22px;position:relative;overflow:hidden;transition:transform .4s,box-shadow .4s;}
+.card:hover{transform:perspective(1000px) rotateX(.8deg) translateY(-3px);box-shadow:0 16px 50px rgba(0,0,0,.5),0 0 30px rgba(0,245,255,.06);}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,var(--accent) 30%,var(--accent2) 70%,transparent 100%);opacity:.6;}
+.card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.015) 0%,transparent 60%);pointer-events:none;}
+.card-head{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+.card-icon{width:34px;height:34px;background:linear-gradient(135deg,rgba(0,245,255,.08),rgba(0,102,255,.08));border:1px solid rgba(0,245,255,.18);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.card-title{font-family:'Exo 2',sans-serif;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text);}
+.card-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);}
+/* WALLET GRID */
+.wallet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px;}
+.w-opt{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:18px 12px;cursor:pointer;text-align:center;transition:all .3s;display:flex;flex-direction:column;align-items:center;gap:7px;position:relative;overflow:hidden;}
+.w-opt::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,245,255,.05),rgba(0,102,255,.05));opacity:0;transition:opacity .3s;}
+.w-opt:hover{border-color:var(--accent);transform:translateY(-3px) scale(1.02);box-shadow:0 8px 25px rgba(0,245,255,.12);}
+.w-opt:hover::before{opacity:1;}
+.w-emoji{font-size:26px;line-height:1;transition:transform .4s;}
+.w-opt:hover .w-emoji{transform:scale(1.2) rotateY(10deg);}
+.w-name{font-family:'Exo 2',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text);position:relative;z-index:1;}
+.w-desc{font-size:9px;color:var(--text2);position:relative;z-index:1;}
+.net-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg2);margin-bottom:18px;}
+.net-cell{padding:12px 16px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+.net-cell:nth-child(even){border-right:none;}
+.net-cell:nth-last-child(-n+2){border-bottom:none;}
+.net-k{font-size:9px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.net-v{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--accent);word-break:break-all;}
+.alert-box{display:flex;align-items:flex-start;gap:10px;background:rgba(255,184,0,.04);border:1px solid rgba(255,184,0,.2);border-radius:7px;padding:12px 15px;font-size:12px;color:rgba(255,184,0,.85);line-height:1.6;}
+/* TABS */
+.tabs{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;max-width:480px;margin:0 auto 32px;}
+.tab-btn{flex:1;padding:13px 18px;font-family:'Exo 2',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;background:transparent;border:none;color:var(--text2);cursor:pointer;transition:all .3s;text-transform:uppercase;position:relative;}
+.tab-btn::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transform:scaleX(0);transition:transform .3s;}
+.tab-btn.active{color:#fff;background:linear-gradient(135deg,rgba(0,245,255,.08),rgba(0,102,255,.08));}
+.tab-btn.active::after{transform:scaleX(1);}
+.panel{display:none;}
+.panel.active{display:block;}
+/* FORM */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.fi{display:flex;flex-direction:column;gap:7px;}
+.fi.full{grid-column:1/-1;}
+label{font-size:9px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:6px;}
+label::before{content:'';display:inline-block;width:10px;height:1px;background:var(--accent2);opacity:.5;}
+input,textarea{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:11px 14px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;transition:all .25s;outline:none;width:100%;}
+input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,245,255,.08);background:rgba(4,12,20,.9);}
+input::placeholder,textarea::placeholder{color:rgba(112,144,176,.45);}
+textarea{resize:vertical;min-height:78px;}
+.iu{position:relative;}
+.iu input{padding-right:68px;}
+.unit{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--accent);background:rgba(0,245,255,.07);padding:2px 6px;border-radius:3px;border:1px solid rgba(0,245,255,.13);}
+/* TOGGLE */
+.tog-list{display:flex;flex-direction:column;}
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(13,37,64,.8);}
+.tog-row:last-child{border-bottom:none;}
+.tog-name{font-size:14px;font-weight:600;color:var(--text);}
+.tog-desc{font-size:10px;color:var(--text2);margin-top:2px;}
+.tog-sw{position:relative;width:46px;height:24px;flex-shrink:0;margin-left:14px;}
+.tog-sw input{opacity:0;width:0;height:0;}
+.tog-track{position:absolute;inset:0;background:var(--bg2);border:1px solid var(--border2);border-radius:24px;cursor:pointer;transition:.3s;}
+.tog-track::after{content:'';position:absolute;left:3px;top:50%;transform:translateY(-50%);width:15px;height:15px;border-radius:50%;background:var(--text2);transition:.3s;}
+input:checked+.tog-track{background:rgba(0,245,255,.08);border-color:var(--accent);box-shadow:0 0 10px rgba(0,245,255,.18);}
+input:checked+.tog-track::after{transform:translate(21px,-50%);background:var(--accent);box-shadow:0 0 7px rgba(0,245,255,.5);}
+/* NFT PREVIEW */
+.nft-prev{display:flex;gap:18px;align-items:flex-start;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:22px;}
+.nft-thumb{width:96px;height:96px;flex-shrink:0;background:linear-gradient(135deg,var(--surface2),var(--surface));border:2px dashed var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:10px;text-align:center;overflow:hidden;}
+.nft-thumb img{width:100%;height:100%;object-fit:cover;}
+.nft-pname{font-family:'Exo 2',sans-serif;font-size:17px;font-weight:800;color:var(--text);margin-bottom:3px;}
+.nft-psym{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:3px;margin-bottom:8px;}
+.nft-pdesc{font-size:11px;color:var(--text2);line-height:1.6;}
+/* DEPLOY BTN */
+.deploy-btn{width:100%;padding:17px;font-family:'Exo 2',sans-serif;font-size:13px;font-weight:800;letter-spacing:3px;background:var(--bg2);border:1px solid var(--accent);border-radius:8px;color:var(--accent);cursor:pointer;position:relative;overflow:hidden;transition:all .3s;margin-top:22px;text-transform:uppercase;}
+.deploy-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,245,255,.1),rgba(0,102,255,.1));opacity:0;transition:opacity .3s;}
+.deploy-btn::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,245,255,.12),transparent);transition:left .55s;}
+.deploy-btn:hover{color:#fff;box-shadow:0 0 28px rgba(0,245,255,.25),0 0 55px rgba(0,102,255,.12);transform:translateY(-2px);}
+.deploy-btn:hover::before{opacity:1;}
+.deploy-btn:hover::after{left:100%;}
+.deploy-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-inner{position:relative;z-index:1;}
+/* TX RESULT */
+.tx-result{display:none;background:rgba(0,255,136,.03);border:1px solid rgba(0,255,136,.18);border-radius:8px;padding:22px;margin-top:18px;}
+.tx-result.show{display:block;animation:fadeup .4s ease;}
+@keyframes fadeup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.tx-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.25);border-radius:4px;padding:5px 12px;font-family:'Exo 2',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--accent3);margin-bottom:18px;}
+.tx-field{margin-bottom:14px;}
+.tx-lbl{font-size:9px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;}
+.tx-val{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--accent3);word-break:break-all;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:9px 13px;line-height:1.5;}
+.act-btns{display:flex;flex-wrap:wrap;gap:8px;}
+.act-btn{font-family:'Exo 2',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;padding:7px 14px;border-radius:5px;cursor:pointer;transition:all .2s;border:1px solid;background:transparent;text-transform:uppercase;}
+.act-btn.c{border-color:var(--accent);color:var(--accent);}
+.act-btn.c:hover{background:rgba(0,245,255,.1);}
+.act-btn.g{border-color:var(--accent3);color:var(--accent3);}
+.act-btn.g:hover{background:rgba(0,255,136,.1);}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:7px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#toast{position:fixed;bottom:28px;right:28px;z-index:9999;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:13px 18px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:500;max-width:340px;line-height:1.5;transform:translateY(90px);opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 16px 45px rgba(0,0,0,.6);}
+#toast.show{transform:translateY(0);opacity:1;}
+#toast.success{border-color:rgba(0,255,136,.3);color:var(--accent3);background:rgba(0,255,136,.04);}
+#toast.error{border-color:rgba(255,51,102,.3);color:var(--danger);background:rgba(255,51,102,.04);}
+#toast.info{border-color:rgba(0,245,255,.3);color:var(--accent);background:rgba(0,245,255,.04);}
+footer{border-top:1px solid var(--border);padding:28px 20px;text-align:center;color:var(--text2);font-size:11px;margin-top:56px;position:relative;z-index:1;letter-spacing:1px;}
+footer strong{color:var(--accent);font-weight:400;}
+@media(max-width:640px){.fg{grid-template-columns:1fr}.wallet-grid{grid-template-columns:1fr 1fr}.chain-status{display:none}.nft-prev{flex-direction:column}}
 </style>
 </head>
 <body>
+<div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div><div class="corner corner-br"></div>
+<div class="bg-scene">
+  <div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+  <div class="grid-floor"></div><div class="scanlines"></div>
+</div>
+
 <header>
-  <div class="header-inner">
-    <div class="logo"><div class="logo-icon">DAC</div><div class="logo-text">DAC Studio</div></div>
-    <div class="chain-badge">🔗 DAC Testnet · Chain 21894</div>
-    <div style="display: flex; align-items: center; gap: 15px;">
-      <div id="walletInfo"><span id="walletAddr"></span><span id="walletBal"></span></div>
-      <button id="connectBtn">CONNECT WALLET</button>
+  <div class="wrap">
+    <div class="hdr">
+      <a class="logo" href="#"><div class="logo-cube">DAC</div>
+        <div><div class="logo-name">DAC STUDIO</div><div class="logo-sub">Token & NFT Creator</div></div>
+      </a>
+      <div class="chain-status"><div class="sdot"></div><span class="chain-lbl">DAC TESTNET</span><span style="color:var(--border2);margin:0 4px">|</span><span class="chain-id-v">#21894</span></div>
+      <div class="hdr-right">
+        <div id="walletInfo"><span id="walletAddr">—</span><div class="dv"></div><span id="walletBal">0 DACC</span></div>
+        <button id="connectBtn"><div class="fill"></div><span class="lbl">◈ CONNECT WALLET</span></button>
+      </div>
     </div>
   </div>
 </header>
 
-<div class="container">
-  <div class="hero"><h1>Create Tokens & NFTs<br>on DAC Testnet</h1></div>
-  <div class="stats"><div class="stat"><div class="stat-val">ERC-20</div></div><div class="stat"><div class="stat-val">ERC-721</div></div><div class="stat"><div class="stat-val">DACC</div></div></div>
-
-  <div class="card">
-    <div class="card-title">🔗 CONNECT YOUR WALLET</div>
-    <div class="wallet-grid">
-      <div class="wallet-option" onclick="connectWallet()">🦊 MetaMask</div>
-      <div class="wallet-option" onclick="connectWallet()">💼 Any EVM</div>
-      <div class="wallet-option" onclick="connectWallet()">📱 WalletConnect</div>
+<div class="wrap">
+  <div class="hero">
+    <div class="hero-badge"><div class="sdot"></div>LIVE ON DAC TESTNET · CHAIN 21894</div>
+    <h1 class="hero-title"><span class="l1">Create Tokens</span><span class="l2">&amp; NFT Collections</span></h1>
+    <p class="hero-desc">Deploy ERC-20 tokens and ERC-721 NFT collections on DAC Chain Testnet. No coding required.</p>
+    <div class="stats-row">
+      <div class="stat-item"><span class="stat-num">ERC-20</span><span class="stat-lbl">Token Standard</span></div>
+      <div class="stat-item"><span class="stat-num">ERC-721</span><span class="stat-lbl">NFT Standard</span></div>
+      <div class="stat-item"><span class="stat-num">DACC</span><span class="stat-lbl">Gas Currency</span></div>
+      <div class="stat-item"><span class="stat-num">21894</span><span class="stat-lbl">Chain ID</span></div>
     </div>
-    <div class="network-card">
-      <div class="card-title">DAC TESTNET INFO</div>
-      <div class="network-grid">
-        <div>Network Name</div><div>DAC Testnet</div>
-        <div>Chain ID</div><div>21894 (0x5586)</div>
-        <div>RPC URL</div><div>https://rpctest.dachain.tech</div>
-        <div>Currency</div><div>DACC</div>
-      </div>
-    </div>
-    <div class="alert">⚠️ Make sure your wallet is connected to DAC Testnet (Chain ID: 21894). Get test DACC from faucet if needed.</div>
   </div>
 
-  <div class="tabs"><button class="tab-btn active" onclick="switchTab('token')">🪙 TOKEN</button><button class="tab-btn" onclick="switchTab('nft')">🎨 NFT</button></div>
+  <div class="card">
+    <div class="card-head"><div class="card-icon">◈</div><span class="card-title">Connect Wallet</span><div class="card-line"></div></div>
+    <div class="wallet-grid">
+      <div class="w-opt" id="wo1"><div class="w-emoji">🦊</div><div class="w-name">MetaMask</div><div class="w-desc">Browser Extension</div></div>
+      <div class="w-opt" id="wo2"><div class="w-emoji">📱</div><div class="w-name">WalletConnect</div><div class="w-desc">QR / Mobile</div></div>
+      <div class="w-opt" id="wo3"><div class="w-emoji">🔵</div><div class="w-name">Coinbase</div><div class="w-desc">Coinbase Wallet</div></div>
+      <div class="w-opt" id="wo4"><div class="w-emoji">🛡️</div><div class="w-name">Trust Wallet</div><div class="w-desc">Mobile App</div></div>
+      <div class="w-opt" id="wo5"><div class="w-emoji">⭕</div><div class="w-name">OKX Wallet</div><div class="w-desc">OKX Exchange</div></div>
+      <div class="w-opt" id="wo6"><div class="w-emoji">💼</div><div class="w-name">Other Wallet</div><div class="w-desc">All EVM Wallets</div></div>
+    </div>
+    <div class="net-grid">
+      <div class="net-cell"><div class="net-k">Network Name</div><div class="net-v">DAC Testnet</div></div>
+      <div class="net-cell"><div class="net-k">Chain ID</div><div class="net-v">21894 (0x5586)</div></div>
+      <div class="net-cell"><div class="net-k">Currency</div><div class="net-v">DACC</div></div>
+      <div class="net-cell"><div class="net-k">RPC URL</div><div class="net-v">rpctest.dachain.tech</div></div>
+    </div>
+    <div class="alert-box">⚡&nbsp; Connect your wallet and switch to <strong>DAC Testnet (Chain 21894)</strong>. DACC is needed for gas fees.</div>
+  </div>
 
-  <!-- Token Panel -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tabToken">🪙 ERC-20 TOKEN</button>
+    <button class="tab-btn" id="tabNFT">🎨 NFT COLLECTION</button>
+  </div>
+
+  <!-- TOKEN PANEL -->
   <div class="panel active" id="panel-token">
     <div class="card">
-      <div class="card-title">💰 ERC-20 TOKEN</div>
-      <div class="form-grid">
-        <div class="form-group"><label>Token Name</label><input type="text" id="tokenName" placeholder="My Token"></div>
-        <div class="form-group"><label>Token Symbol</label><input type="text" id="tokenSymbol" placeholder="MTK"></div>
-        <div class="form-group"><label>Decimals</label><input type="number" id="tokenDecimals" value="18"></div>
-        <div class="form-group"><label>Total Supply</label><input type="text" id="tokenSupply" placeholder="1000000"></div>
+      <div class="card-head"><div class="card-icon">🪙</div><span class="card-title">Token Configuration</span><div class="card-line"></div></div>
+      <div class="fg">
+        <div class="fi"><label>Token Name *</label><input type="text" id="tokenName" placeholder="e.g. My DAC Token"></div>
+        <div class="fi"><label>Symbol *</label><input type="text" id="tokenSymbol" placeholder="e.g. MDT" maxlength="10"></div>
+        <div class="fi"><label>Decimals</label><input type="number" id="tokenDecimals" value="18" min="0" max="18"></div>
+        <div class="fi"><label>Total Supply *</label><div class="iu"><input type="number" id="tokenSupply" placeholder="1000000"><span class="unit" id="sUnit">TOKEN</span></div></div>
+        <div class="fi full"><label>Description (Optional)</label><textarea id="tokenDesc" placeholder="Describe your token..."></textarea></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-icon">🛡️</div><span class="card-title">Token Features</span><div class="card-line"></div></div>
+      <div class="tog-list">
+        <div class="tog-row"><div><div class="tog-name">Mintable</div><div class="tog-desc">Owner can mint additional tokens after deployment</div></div><label class="tog-sw"><input type="checkbox" id="ftMint"><div class="tog-track"></div></label></div>
+        <div class="tog-row"><div><div class="tog-name">Burnable</div><div class="tog-desc">Token holders can permanently burn their tokens</div></div><label class="tog-sw"><input type="checkbox" id="ftBurn" checked><div class="tog-track"></div></label></div>
+        <div class="tog-row"><div><div class="tog-name">Pausable</div><div class="tog-desc">Owner can pause all transfers in emergencies</div></div><label class="tog-sw"><input type="checkbox" id="ftPause"><div class="tog-track"></div></label></div>
       </div>
     </div>
     <div id="tokenResult" class="tx-result"></div>
-    <button class="deploy-btn" id="deployTokenBtn" onclick="deployToken()">⚡ DEPLOY ERC-20 TOKEN</button>
+    <button class="deploy-btn" id="deployTokenBtn"><span class="btn-inner">⚡ DEPLOY ERC-20 TOKEN ON DAC TESTNET</span></button>
   </div>
 
-  <!-- NFT Panel -->
+  <!-- NFT PANEL -->
   <div class="panel" id="panel-nft">
     <div class="card">
-      <div class="card-title">🎨 NFT COLLECTION</div>
-      <div class="form-grid">
-        <div class="form-group"><label>Collection Name</label><input type="text" id="nftName" placeholder="My NFTs"></div>
-        <div class="form-group"><label>Symbol</label><input type="text" id="nftSymbol" placeholder="MNFT"></div>
-        <div class="form-group"><label>Max Supply</label><input type="number" id="nftMaxSupply" value="10000"></div>
-        <div class="form-group"><label>Base URI</label><input type="text" id="nftBaseURI" placeholder="ipfs://.../"></div>
+      <div class="card-head"><div class="card-icon">🎨</div><span class="card-title">NFT Collection Details</span><div class="card-line"></div></div>
+      <div class="nft-prev">
+        <div class="nft-thumb" id="nftThumb"><span>No Image</span></div>
+        <div><div class="nft-pname" id="pvName">Collection Name</div><div class="nft-psym" id="pvSym">SYMBOL</div><div class="nft-pdesc" id="pvDesc">Your collection description...</div></div>
+      </div>
+      <div class="fg">
+        <div class="fi"><label>Collection Name *</label><input type="text" id="nftName" placeholder="e.g. DAC Punks"></div>
+        <div class="fi"><label>Symbol *</label><input type="text" id="nftSymbol" placeholder="e.g. DKPK" maxlength="10"></div>
+        <div class="fi"><label>Max Supply</label><input type="number" id="nftMax" value="10000"></div>
+        <div class="fi"><label>Mint Price (DACC)</label><div class="iu"><input type="number" id="nftPrice" value="0" step="0.001"><span class="unit">DACC</span></div></div>
+        <div class="fi full"><label>Description</label><textarea id="nftDesc" placeholder="Describe your NFT collection..."></textarea></div>
+        <div class="fi full"><label>Base URI (Metadata)</label><input type="url" id="nftBaseURI" placeholder="ipfs://Qm.../  or  https://api.example.com/nft/"></div>
+        <div class="fi full"><label>Cover Image URL (preview only)</label><input type="url" id="nftImgUrl" placeholder="https://..."></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-icon">⚙️</div><span class="card-title">NFT Features</span><div class="card-line"></div></div>
+      <div class="tog-list">
+        <div class="tog-row"><div><div class="tog-name">Enumerable</div><div class="tog-desc">Query all token IDs in the collection</div></div><label class="tog-sw"><input type="checkbox" id="nftEnum" checked><div class="tog-track"></div></label></div>
+        <div class="tog-row"><div><div class="tog-name">Burnable NFTs</div><div class="tog-desc">NFT owners can permanently destroy tokens</div></div><label class="tog-sw"><input type="checkbox" id="nftBurn"><div class="tog-track"></div></label></div>
+        <div class="tog-row"><div><div class="tog-name">Royalties (ERC-2981)</div><div class="tog-desc">Collect royalties on secondary sales</div></div><label class="tog-sw"><input type="checkbox" id="nftRoy"><div class="tog-track"></div></label></div>
+      </div>
+      <div id="royCfg" style="display:none;padding-top:16px;border-top:1px solid var(--border);margin-top:4px;">
+        <div class="fg">
+          <div class="fi"><label>Royalty Recipient</label><input type="text" id="royAddr" placeholder="0x... (defaults to deployer)"></div>
+          <div class="fi"><label>Royalty %</label><div class="iu"><input type="number" id="royPct" value="5" min="1" max="20"><span class="unit">%</span></div></div>
+        </div>
       </div>
     </div>
     <div id="nftResult" class="tx-result"></div>
-    <button class="deploy-btn" id="deployNFTBtn" onclick="deployNFT()">🎨 DEPLOY NFT COLLECTION</button>
+    <button class="deploy-btn" id="deployNFTBtn"><span class="btn-inner">🎨 DEPLOY NFT COLLECTION ON DAC TESTNET</span></button>
   </div>
 </div>
-<footer>DAC Testnet · Built for Chain ID 21894</footer>
+
+<footer>
+  <div>Built on <strong>DAC Chain Testnet</strong> · Chain ID 21894 · rpctest.dachain.tech</div>
+  <div style="margin-top:5px;">Gas paid in <strong style="color:var(--accent3)">DACC</strong> · Powered by WalletConnect (Reown) &amp; Ethers.js v6</div>
+</footer>
 <div id="toast"></div>
 
+<!-- ══ CONTRACT DATA (regular script, globally accessible) ══ -->
 <script>
-  // DAC Testnet configuration
-  const DAC_CHAIN = {
-    chainId: '0x5586',
-    chainName: 'DAC Testnet',
-    rpcUrls: ['https://rpctest.dachain.tech'],
-    nativeCurrency: { name: 'DAC Coin', symbol: 'DACC', decimals: 18 },
-    blockExplorerUrls: []
-  };
+const ERC20_ABI=[{"inputs":[{"internalType":"string","name":"_name","type":"string"},{"internalType":"string","name":"_symbol","type":"string"},{"internalType":"uint8","name":"_decimals","type":"uint8"},{"internalType":"uint256","name":"_totalSupply","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner_","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"value","type":"uint256"}],"name":"burn","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}];
+const ERC20_BIN='0x608060405234801562000010575f80fd5b5060405162000be538038062000be5833981016040819052620000339162000184565b5f62000040858262000295565b5060016200004f848262000295565b506002805460ff191660ff8416179055600381905560048054336001600160a01b031990911681179091555f818152600560209081526040808320859055518481527fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef910160405180910390a3505050506200035d565b634e487b7160e01b5f52604160045260245ffd5b5f82601f830112620000ea575f80fd5b81516001600160401b0380821115620001075762000107620000c6565b604051601f8301601f19908116603f01168101908282118183101715620001325762000132620000c6565b816040528381526020925086838588010111156200014e575f80fd5b5f91505b8382101562000171578582018301518183018401529082019062000152565b5f93810190920192909252949350505050565b5f805f806080858703121562000198575f80fd5b84516001600160401b0380821115620001af575f80fd5b620001bd88838901620000da565b95506020870151915080821115620001d3575f80fd5b50620001e287828801620000da565b935050604085015160ff81168114620001f9575f80fd5b6060959095015193969295505050565b600181811c908216806200021e57607f821691505b6020821081036200023d57634e487b7160e01b5f52602260045260245ffd5b50919050565b601f82111562000290575f81815260208120601f850160051c810160208610156200026b5750805b601f850160051c820191505b818110156200028c5782815560010162000277565b5050505b505050565b81516001600160401b03811115620002b157620002b1620000c6565b620002c981620002c2845462000209565b8462000243565b602080601f831160018114620002ff575f8415620002e75750858301515b5f19600386901b1c1916600185901b1785556200028c565b5f85815260208120601f198616915b828110156200032f578886015182559484019460019091019084016200030e565b50858210156200034d57878501515f19600388901b60f8161c191681555b5050505050600190811b01905550565b61087a806200036b5f395ff3fe608060405234801561000f575f80fd5b50600436106100b1575f3560e01c806342966c681161006e57806342966c681461015457806370a08231146101675780638da5cb5b1461018657806395d89b41146101b1578063a9059cbb146101b9578063dd62ed3e146101cc575f80fd5b806306fdde03146100b5578063095ea7b3146100d357806318160ddd146100f657806323b872dd1461010d578063313ce5671461012057806340c10f191461013f575b5f80fd5b6100bd6101f6565b6040516100ca919061065d565b60405180910390f35b6100e66100e13660046106c3565b610281565b60405190151581526020016100ca565b6100ff60035481565b6040519081526020016100ca565b6100e661011b3660046106eb565b6102ed565b60025461012d9060ff1681565b60405160ff90911681526020016100ca565b61015261014d3660046106c3565b610462565b005b610152610162366004610724565b61051b565b6100ff61017536600461073b565b60056020525f908152604090205481565b600454610199906001600160a01b031681565b6040516001600160a01b0390911681526020016100ca565b6100bd6105a9565b6100e66101c73660046106c3565b6105b6565b6100ff6101da36600461075b565b600660209081525f928352604080842090915290825290205481565b5f80546102029061078c565b80601f016020809104026020016040519081016040528092919081815260200182805461022e9061078c565b80156102795780601f1061025057610100808354040283529160200191610279565b820191905f5260205f20905b81548152906001019060200180831161025c57829003601f168201915b505050505081565b335f8181526006602090815260408083206001600160a01b038716808552925280832085905551919290917f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925906102db9086815260200190565b60405180910390a35060015b92915050565b6001600160a01b0383165f9081526005602052604081205482111561032d5760405162461bcd60e51b8152600401610324906107c4565b60405180910390fd5b6001600160a01b0384165f90815260066020908152604080832033845290915290205482111561038d5760405162461bcd60e51b815260206004820152600b60248201526a139bdd08185b1b1bddd95960aa1b6044820152606401610324565b6001600160a01b0384165f908152600660209081526040808320338452909152812080548492906103bf9084906107fe565b90915550506001600160a01b0384165f90815260056020526040812080548492906103eb9084906107fe565b90915550506001600160a01b0383165f9081526005602052604081208054849290610417908490610811565b92505081905550826001600160a01b0316846001600160a01b03165f805160206108258339815191528460405161045091815260200190565b60405180910390a35060019392505050565b6004546001600160a01b031633146104a85760405162461bcd60e51b81526020600482015260096024820152682737ba1037bbb732b960b91b6044820152606401610324565b8060035f8282546104b99190610811565b90915550506001600160a01b0382165f90815260056020526040812080548392906104e5908490610811565b90915550506040518181526001600160a01b038316905f905f805160206108258339815191529060200160405180910390a35050565b335f908152600560205260409020548111156105495760405162461bcd60e51b8152600401610324906107c4565b8060035f82825461055a91906107fe565b9091555050335f908152600560205260408120805483929061057d9084906107fe565b90915550506040518181525f9033905f805160206108258339815191529060200160405180910390a350565b600180546102029061078c565b335f908152600560205260408120548211156105e45760405162461bcd60e51b8152600401610324906107c4565b335f90815260056020526040812080548492906106029084906107fe565b90915550506001600160a01b0383165f908152600560205260408120805484929061062e908490610811565b90915550506040518281526001600160a01b0384169033905f80516020610825833981519152906020016102db565b5f6020808352835180828501525f5b818110156106885785810183015185820160400152820161066c565b505f604082860101526040601f19601f8301168501019250505092915050565b80356001600160a01b03811681146106be575f80fd5b919050565b5f80604083850312156106d4575f80fd5b6106dd836106a8565b946020939093013593505050565b5f805f606084860312156106fd575f80fd5b610706846106a8565b9250610714602085016106a8565b9150604084013590509250925092565b5f60208284031215610734575f80fd5b5035919050565b5f6020828403121561074b575f80fd5b610754826106a8565b9392505050565b5f806040838503121561076c575f80fd5b610775836106a8565b9150610783602084016106a8565b90509250929050565b600181811c908216806107a057607f821691505b6020821081036107be57634e487b7160e01b5f52602260045260245ffd5b50919050565b6020808252600c908201526b125b9cdd59999a58da595b9d60a21b604082015260600190565b634e487b7160e01b5f52601160045260245ffd5b818103818111156102e7576102e76107ea565b808201808211156102e7576102e76107ea56feddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3efa26469706673582212201529bce98810b6e7eaf797805e2b596716eb5bdb11a5b339ea670648e075803a64736f6c63430008140033';
+const ERC721_ABI=[{"inputs":[{"internalType":"string","name":"_name","type":"string"},{"internalType":"string","name":"_symbol","type":"string"},{"internalType":"uint256","name":"_maxSupply","type":"uint256"},{"internalType":"uint256","name":"_mintPrice","type":"uint256"},{"internalType":"string","name":"_baseURI","type":"string"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner_","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner_","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"baseURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"}],"name":"mint","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"mintPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"}],"name":"ownerMint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"_baseURI","type":"string"}],"name":"setBaseURI","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+const ERC721_BIN='0x608060405234801562000010575f80fd5b50604051620013da380380620013da833981016040819052620000339162000145565b5f6200004086826200026f565b5060016200004f85826200026f565b506002839055600382905560056200006882826200026f565b5050600680546001600160a01b03191633179055506200033792505050565b634e487b7160e01b5f52604160045260245ffd5b5f82601f830112620000ab575f80fd5b81516001600160401b0380821115620000c857620000c862000087565b604051601f8301601f19908116603f01168101908282118183101715620000f357620000f362000087565b816040528381526020925086838588010111156200010f575f80fd5b5f91505b8382101562000132578582018301518183018401529082019062000113565b5f93810190920192909252949350505050565b5f805f805f60a086880312156200015a575f80fd5b85516001600160401b038082111562000171575f80fd5b6200017f89838a016200009b565b9650602088015191508082111562000195575f80fd5b620001a389838a016200009b565b955060408801519450606088015193506080880151915080821115620001c7575f80fd5b50620001d6888289016200009b565b9150509295509295909350565b600181811c90821680620001f857607f821691505b6020821081036200021757634e487b7160e01b5f52602260045260245ffd5b50919050565b601f8211156200026a575f81815260208120601f850160051c81016020861015620002455750805b601f850160051c820191505b81811015620002665782815560010162000251565b5050505b505050565b81516001600160401b038111156200028b576200028b62000087565b620002a3816200029c8454620001e3565b846200021d565b602080601f831160018114620002d9575f8415620002c15750858301515b5f19600386901b1c1916600185901b17855562000266565b5f85815260208120601f198616915b828110156200030957888601518255948401946001909101908401620002e8565b50858210156200032757878501515f19600388901b60f8161c191681555b5050505050600190811b01905550565b61109580620003455f395ff3fe608060405260043610610105575f3560e01c80636a6278421161009257806395d89b411161006257806395d89b4114610299578063a22cb465146102ad578063c87b56dd146102cc578063d5abeb01146102eb578063e985e9c514610300575f80fd5b80636a627842146102345780636c0360eb1461024757806370a082311461025b5780638da5cb5b1461027a575f80fd5b806323b872dd116100d857806323b872dd146101965780633ccfd60b146101b557806355f804b3146101c95780636352211e146101e85780636817c76c1461021f575f80fd5b806306fdde0314610109578063095ea7b31461013357806318160ddd146101545780631e3bcc8e14610177575b5f80fd5b348015610114575f80fd5b5061011d610357565b60405161012a9190610bc7565b60405180910390f35b34801561013e575f80fd5b5061015261014d366004610c14565b6103e2565b005b34801561015f575f80fd5b5061016960045481565b60405190815260200161012a565b348015610182575f80fd5b50610152610191366004610c3c565b6104c4565b3480156101a1575f80fd5b506101526101b0366004610c5c565b6105dd565b3480156101c0575f80fd5b506101526107af565b3480156101d4575f80fd5b506101526101e3366004610ca9565b610812565b3480156101f3575f80fd5b50610207610202366004610d54565b61084c565b6040516001600160a01b03909116815260200161012a565b34801561022a575f80fd5b5061016960035481565b610152610242366004610c3c565b6108a3565b348015610252575f80fd5b5061011d610934565b348015610266575f80fd5b50610169610275366004610c3c565b610941565b348015610285575f80fd5b50600654610207906001600160a01b031681565b3480156102a4575f80fd5b5061011d6109a2565b3480156102b8575f80fd5b506101526102c7366004610d6b565b6109af565b3480156102d7575f80fd5b5061011d6102e6366004610d54565b610a1a565b3480156102f6575f80fd5b5061016960025481565b34801561030b575f80fd5b5061034761031a366004610da4565b6001600160a01b039182165f908152600a6020908152604080832093909416825291909152205460ff1690565b604051901515815260200161012a565b5f805461036390610dd5565b80601f016020809104026020016040519081016040528092919081815260200182805461038f90610dd5565b80156103da5780601f106103b1576101008083540402835291602001916103da565b820191905f5260205f20905b8154815290600101906020018083116103bd57829003601f168201915b505050505081565b5f6103ec8261084c565b9050336001600160a01b038216148061042757506001600160a01b0381165f908152600a6020908152604080832033845290915290205460ff165b6104695760405162461bcd60e51b815260206004820152600e60248201526d139bdd08185d5d1a1bdc9a5e995960921b60448201526064015b60405180910390fd5b5f8281526009602052604080822080546001600160a01b0319166001600160a01b0387811691821790925591518593918516917f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b92591a4505050565b6006546001600160a01b031633146104ee5760405162461bcd60e51b815260040161046090610e0d565b600254600454106105365760405162461bcd60e51b815260206004820152601260248201527113585e081cdd5c1c1b1e481c995858da195960721b6044820152606401610460565b5f60045460016105469190610e44565b600480549192505f61055783610e57565b90915550505f81815260076020908152604080832080546001600160a01b0319166001600160a01b03871690811790915583526008909152812080549161059d83610e57565b909155505060405181906001600160a01b038416905f907fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef908290a45050565b826001600160a01b03166105f08261084c565b6001600160a01b0316146106165760405162461bcd60e51b815260040161046090610e0d565b6001600160a01b03821661065b5760405162461bcd60e51b815260206004820152600c60248201526b5a65726f206164647265737360a01b6044820152606401610460565b336001600160a01b038416148061068757505f818152600960205260409020546001600160a01b031633145b806106b457506001600160a01b0383165f908152600a6020908152604080832033845290915290205460ff165b6106f15760405162461bcd60e51b815260206004820152600e60248201526d139bdd08185d5d1a1bdc9a5e995960921b6044820152606401610460565b6001600160a01b0383165f90815260086020526040812080549161071483610e6f565b90915550506001600160a01b0382165f90815260086020526040812080549161073c83610e57565b90915550505f81815260076020908152604080832080546001600160a01b038088166001600160a01b031992831681179093556009909452828520805490911690559051849391928716917fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef91a4505050565b6006546001600160a01b031633146107d95760405162461bcd60e51b815260040161046090610e0d565b6006546040516001600160a01b03909116904780156108fc02915f818181858888f1935050505015801561080f573d5f803e3d5ffd5b50565b6006546001600160a01b0316331461083c5760405162461bcd60e51b815260040161046090610e0d565b60056108488282610ed2565b5050565b5f818152600760205260408120546001600160a01b03168061089d5760405162461bcd60e51b815260206004820152600a602482015269139bdd081b5a5b9d195960b21b6044820152606401610460565b92915050565b600254600454106108eb5760405162461bcd60e51b815260206004820152601260248201527113585e081cdd5c1c1b1e481c995858da195960721b6044820152606401610460565b6003543410156105365760405162461bcd60e51b8152602060048201526014602482015273125b9cdd59999a58da595b9d081c185e5b595b9d60621b6044820152606401610460565b6005805461036390610dd5565b5f6001600160a01b0382166109875760405162461bcd60e51b815260206004820152600c60248201526b5a65726f206164647265737360a01b6044820152606401610460565b506001600160a01b03165f9081526008602052604090205490565b6001805461036390610dd5565b335f818152600a602090815260408083206001600160a01b03871680855290835292819020805460ff191686151590811790915590519081529192917f17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31910160405180910390a35050565b5f818152600760205260409020546060906001600160a01b0316610a6d5760405162461bcd60e51b815260206004820152600a602482015269139bdd081b5a5b9d195960b21b6044820152606401610460565b6005610a7883610a9f565b604051602001610a89929190610f8e565b6040516020818303038152906040529050919050565b6060815f03610ac55750506040805180820190915260018152600360fc1b602082015290565b815f5b8115610aee5780610ad881610e57565b9150610ae79050600a83611025565b9150610ac8565b5f8167ffffffffffffffff811115610b0857610b08610c95565b6040519080825280601f01601f191660200182016040528015610b32576020820181803683370190505b5090505b8415610b9d5781610b4681610e6f565b9250610b559050600a86611038565b610b60906030610e44565b60f81b818381518110610b7557610b7561104b565b60200101906001600160f81b03191690815f1a905350610b96600a86611025565b9450610b36565b949350505050565b5f5b83811015610bbf578181015183820152602001610ba7565b50505f910152565b602081525f8251806020840152610be5816040850160208701610ba5565b601f01601f19169190910160400192915050565b80356001600160a01b0381168114610c0f575f80fd5b919050565b5f8060408385031215610c25575f80fd5b610c2e83610bf9565b946020939093013593505050565b5f60208284031215610c4c575f80fd5b610c5582610bf9565b9392505050565b5f805f60608486031215610c6e575f80fd5b610c7784610bf9565b9250610c8560208501610bf9565b9150604084013590509250925092565b634e487b7160e01b5f52604160045260245ffd5b5f60208284031215610cb9575f80fd5b813567ffffffffffffffff80821115610cd0575f80fd5b818401915084601f830112610ce3575f80fd5b813581811115610cf557610cf5610c95565b604051601f8201601f19908116603f01168101908382118183101715610d1d57610d1d610c95565b81604052828152876020848701011115610d35575f80fd5b826020860160208301375f928101602001929092525095945050505050565b5f60208284031215610d64575f80fd5b5035919050565b5f8060408385031215610d7c575f80fd5b610d8583610bf9565b915060208301358015158114610d99575f80fd5b809150509250929050565b5f8060408385031215610db5575f80fd5b610dbe83610bf9565b9150610dcc60208401610bf9565b90509250929050565b600181811c90821680610de957607f821691505b602082108103610e0757634e487b7160e01b5f52602260045260245ffd5b50919050565b6020808252600990820152682737ba1037bbb732b960b91b604082015260600190565b634e487b7160e01b5f52601160045260245ffd5b8082018082111561089d5761089d610e30565b5f60018201610e6857610e68610e30565b5060010190565b5f81610e7d57610e7d610e30565b505f190190565b601f821115610ecd575f81815260208120601f850160051c81016020861015610eaa5750805b601f850160051c820191505b81811015610ec957828155600101610eb6565b5050505b505050565b815167ffffffffffffffff811115610eec57610eec610c95565b610f0081610efa8454610dd5565b84610e84565b602080601f831160018114610f33575f8415610f1c5750858301515b5f19600386901b1c1916600185901b178555610ec9565b5f85815260208120601f198616915b82811015610f6157888601518255948401946001909101908401610f42565b5085821015610f7e57878501515f19600388901b60f8161c191681555b5050505050600190811b01905550565b5f808454610f9b81610dd5565b60018281168015610fb35760018114610fc857610ff4565b60ff1984168752821515830287019450610ff4565b885f526020805f205f5b85811015610feb5781548a820152908401908201610fd2565b50505082870194505b505050508351611008818360208801610ba5565b01949350505050565b634e487b7160e01b5f52601260045260245ffd5b5f8261103357611033611011565b500490565b5f8261104657611046611011565b500690565b634e487b7160e01b5f52603260045260245ffdfea2646970667358221220bd7ea62a681799e2de7306390d75c210a0f6382edf2bd92dd966096b5488d4fc64736f6c63430008140033';
 
-  let provider, signer, walletAddress;
+// ── UI helpers
+let toastTimer;
+function showToast(msg,type='info'){const t=document.getElementById('toast');t.textContent=msg;t.className='show '+type;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.className='';},4200);}
+function showResult(id,addr,hash,type,symbol,decimals){
+  const el=document.getElementById(id);el.classList.add('show');
+  el.innerHTML=`<div class="tx-badge">✓ ${type} DEPLOYED ON DAC TESTNET</div>
+    <div class="tx-field"><div class="tx-lbl">Contract Address</div><div class="tx-val">${addr}</div></div>
+    <div class="tx-field"><div class="tx-lbl">Transaction Hash</div><div class="tx-val">${hash}</div></div>
+    <div class="act-btns">
+      <button class="act-btn c" onclick="navigator.clipboard.writeText('${addr}').then(()=>showToast('Address copied!','success'))">📋 Copy Address</button>
+      <button class="act-btn c" onclick="navigator.clipboard.writeText('${hash}').then(()=>showToast('TX Hash copied!','success'))">📋 Copy TX Hash</button>
+      ${type==='ERC-20'?`<button class="act-btn g" onclick="addToken('${addr}','${symbol}',${decimals})">🦊 Add to MetaMask</button>`:''}
+    </div>`;
+}
+</script>
 
-  // Connect Wallet Function
-  async function connectWallet() {
-    if (!window.ethereum) {
-      showToast('Please install MetaMask or another EVM wallet!', 'error');
-      return;
-    }
-    
-    try {
-      showToast('Connecting to wallet...', 'info');
-      
-      // Request account access
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      if (!accounts || accounts.length === 0) {
-        throw new Error('No accounts found');
-      }
-      
-      walletAddress = accounts[0];
-      provider = new ethers.BrowserProvider(window.ethereum);
-      signer = await provider.getSigner();
-      
-      // Switch to DAC network
-      await switchToDACNetwork();
-      
-      // Update UI
-      await updateWalletUI();
-      
-      showToast('Wallet connected successfully!', 'success');
-      
-      // Listen for account changes
-      window.ethereum.on('accountsChanged', (accounts) => {
-        if (accounts.length > 0) {
-          walletAddress = accounts[0];
-          updateWalletUI();
-        } else {
-          walletAddress = null;
-          document.getElementById('walletInfo').classList.remove('show');
-          document.getElementById('connectBtn').textContent = 'CONNECT WALLET';
-          document.getElementById('connectBtn').classList.remove('connected');
-        }
-      });
-      
-      window.ethereum.on('chainChanged', () => {
-        window.location.reload();
-      });
-      
-    } catch (error) {
-      console.error('Connection error:', error);
-      showToast('Failed to connect: ' + error.message, 'error');
-    }
-  }
-  
-  // Switch to DAC Testnet
-  async function switchToDACNetwork() {
-    try {
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: DAC_CHAIN.chainId }]
-      });
-    } catch (switchError) {
-      if (switchError.code === 4902) {
-        try {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [DAC_CHAIN]
-          });
-        } catch (addError) {
-          console.error('Failed to add network:', addError);
-          showToast('Please add DAC Testnet manually', 'error');
-          throw addError;
-        }
-      } else {
-        throw switchError;
-      }
-    }
-  }
-  
-  // Update UI after connection
-  async function updateWalletUI() {
-    if (!provider || !walletAddress) return;
-    
-    try {
-      const balance = await provider.getBalance(walletAddress);
-      const balFormatted = parseFloat(ethers.formatEther(balance)).toFixed(4);
-      
-      document.getElementById('walletAddr').textContent = walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4);
-      document.getElementById('walletBal').textContent = ' | ' + balFormatted + ' DACC';
-      document.getElementById('walletInfo').classList.add('show');
-      
-      const btn = document.getElementById('connectBtn');
-      btn.textContent = '✓ CONNECTED';
-      btn.classList.add('connected');
-    } catch (err) {
-      console.error('Update UI error:', err);
-    }
-  }
-  
-  // Tab switching
-  function switchTab(tab) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('panel-' + tab).classList.add('active');
-    event.target.classList.add('active');
-  }
-  
-  // ============== ERC-20 DEPLOYMENT ==============
-  // Complete working ERC-20 bytecode (OpenZeppelin based)
-  const ERC20_BYTECODE = "0x60806040523480156200001157600080fd5b5060405162001e2b38038062001e2b83398101604081905262000034916200038e565b8260039081620000459190620005b0565b508160049081620000579190620005b0565b5080600560006101000a81548160ff021916908360ff1602179055508060068190555050505062000691565b6000604051905090565b600080fd5b600080fd5b600080fd5b600080fd5b6000601f19601f8301169050919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b620000ea826200009f565b810181811067ffffffffffffffff821117156200010c576200010b620000b0565b5b80604052505050565b6000620001216200007f565b90506200012f8282620000df565b919050565b600067ffffffffffffffff821115620001525762000151620000b0565b5b6200015d826200009f565b9050602081019050919050565b60005b838110156200018a5780820151818401526020810190506200016d565b60008484015250505050565b6000620001ad620001a78462000134565b62000115565b905082815260208101848484011115620001cc57620001cb6200009a565b5b620001d98482856200016a565b509392505050565b600082601f830112620001f957620001f862000095565b5b81516200020b84826020860162000196565b91505092915050565b600060ff82169050919050565b6200022c8162000214565b81146200023857600080fd5b50565b6000815190506200024c8162000221565b92915050565b6000819050919050565b620002678162000252565b81146200027357600080fd5b50565b60008151905062000287816200025c565b92915050565b60008060008060808587031215620002aa57620002a96200008b565b5b600085015167ffffffffffffffff811115620002cb57620002ca62000090565b5b620002d987828801620001e1565b945050602085015167ffffffffffffffff811115620002fd57620002fc62000090565b5b6200030b87828801620001e1565b93505060406200031e878288016200023b565b9250506060620003318782880162000276565b91505092959194509250565b600081519050919050565b600082825260208201905092915050565b600062000366826200033d565b62000372818562000348565b9350620003848185602086016200016a565b6200038f816200009f565b840191505092915050565b60008060008060808587031215620003ab57620003aa6200008b565b5b600085015167ffffffffffffffff811115620003cc57620003cb62000090565b5b620003da87828801620001e1565b945050602085015167ffffffffffffffff811115620003fe57620003fd62000090565b5b6200040c87828801620001e1565b93505060406200041f878288016200023b565b9250506060620004328782880162000276565b91505092959194509250565b60008190508160005260206000209050919050565b60006020601f8301049050919050565b600082821b905092915050565b600060088302620004a07fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8262000463565b620004ac868362000463565b95508019841693508086168417925050509392505050565b6000819050919050565b6000620004ef620004e9620004e38462000252565b620004c4565b62000252565b9050919050565b6000819050919050565b6200050b83620004ce565b620005236200051a82620004f6565b84845462000470565b825550505050565b600090565b6200053a6200052b565b6200054781848462000500565b505050565b5b818110156200056f576200056360008262000530565b6001810190506200054d565b5050565b601f821115620005be5762000588816200043e565b620005938462000453565b81016020851015620005a3578190505b620005bb620005b28562000453565b8301826200054c565b50505b505050565b600082821c905092915050565b6000620005dc60001984600802620005b5565b1980831691505092915050565b6000620005f78383620005c2565b9150826002028217905092915050565b62000612826200033d565b67ffffffffffffffff8111156200062e576200062d620000b0565b5b6200063a825462000359565b6200064782828562000573565b600060209050601f8311600181146200067f57600084156200066a578287015190505b620006768582620005e9565b865550620006e6565b601f1984166200068f866200043e565b60005b82811015620006b95784890151825560018201915060208501945060208101905062000692565b86831015620006d95784890151620006d5601f891682620005c2565b8355505b6001600288020188555050505b505050505050565b61178a80620006a16000396000f3fe608060405234801561001057600080fd5b506004361061009e5760003560e01c806370a082311161006657806370a082311461015d57806395d89b411461018d578063a9059cbb146101ab578063dd62ed3e146101db578063f2fde38b1461020b5761009e565b806306fdde03146100a3578063095ea7b3146100c157806318160ddd146100f157806323b872dd1461010f578063313ce5671461013f575b600080fd5b6100ab610227565b6040516100b891906111d4565b60405180910390f35b6100db60048036038101906100d6919061128f565b6102b9565b6040516100e891906112ea565b60405180910390f35b6100f96102d7565b6040516101069190611314565b60405180910390f35b6101296004803603810190610124919061132f565b6102e1565b60405161013691906112ea565b60405180910390f35b610147610311565b604051610154919061139e565b60405180910390f35b610177600480360381019061017291906113b9565b610325565b6040516101849190611314565b60405180910390f35b61019561036d565b6040516101a291906111d4565b60405180910390f35b6101c560048036038101906101c0919061128f565b6103ff565b6040516101d291906112ea565b60405180910390f35b6101f560048036038101906101f091906113e6565b61041d565b6040516102029190611314565b60405180910390f35b610225600480360381019061022091906113b9565b6104a4565b005b60606003805461023690611455565b80601f016020809104026020016040519081016040528092919081815260200182805461026290611455565b80156102af5780601f10610284576101008083540402835291602001916102af565b820191906000526020600020905b81548152906001019060200180831161029257829003601f168201915b5050505050905090565b60006102cd6102c66105fb565b8484610603565b6001905092915050565b6000600654905090565b60006102ee8484846107ce565b6103066102f96105fb565b6103038585610a05565b610603565b600190509392505050565b6000600560009054906101000a900460ff16905090565b6000600160008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020549050919050565b60606004805461037c90611455565b80601f01602080910402602001604051908101604052809291908181526020018280546103a890611455565b80156103f55780601f106103ca576101008083540402835291602001916103f5565b820191906000526020600020905b8154815290600101906020018083116103d857829003601f168201915b5050505050905090565b600061041361040c6105fb565b84846107ce565b6001905092915050565b60006002600061042b6105fb565b73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054905092915050565b600760009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614610534576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161052b906114d2565b60405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff16036105a3576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161059a90611564565b60405180910390fd5b80600760006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055508073ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a350565b600033905090565b600073ffffffffffffffffffffffffffffffffffffffff168373ffffffffffffffffffffffffffffffffffffffff1603610672576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610669906115f6565b60405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff16036106e1576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016106d890611688565b60405180910390fd5b80600260006106ee6105fb565b73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055508173ffffffffffffffffffffffffffffffffffffffff166107876105fb565b73ffffffffffffffffffffffffffffffffffffffff167f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925836040516107c19190611314565b60405180910390a3505050565b600073ffffffffffffffffffffffffffffffffffffffff168373ffffffffffffffffffffffffffffffffffffffff160361083d576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016108349061171a565b60405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff16036108ac576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016108a3906117ac565b60405180910390fd5b6108b7838383610c79565b6000600160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000205490508181101561093e576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016109359061183e565b60405180910390fd5b818103600160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000208190555081600160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008282546109d3919061188e565b9250508190555082600160008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000828254610a2991906118c2565b9250508190555050505050565b6000600160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020549050600081118015610aa9575080610a9e84610a66610325565b610ab091906118f6565b610aa89190611963565b8311155b15610c7357600081600103905080600160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000828254610b05919061188e565b9250508190555080600160008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000828254610b5b91906118c2565b9250508190555081600160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000828254610bb191906118c2565b92505081905550808273ffffffffffffffffffffffffffffffffffffffff168573ffffffffffffffffffffffffffffffffffffffff167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef60405160405180910390a4610c7181600160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054610c7e90919061188e565b90505b92915050565b505050565b600081831015610c8e57600080fd5b600082840390508091505092915050565b600081519050919050565b600082825260208201905092915050565b60005b83811015610cd9578082015181840152602081019050610cbe565b60008484015250505050565b6000601f19601f8301169050919050565b6000610d0182610c9f565b610d0b8185610caa565b9350610d1b818560208601610cbb565b610d2481610ce5565b840191505092915050565b600081519050919050565b600082825260208201905092915050565b6000819050602082019050919050565b6000819050919050565b610d6e81610d5b565b82525050565b6000610d7f82610d2f565b610d898185610d3a565b9350610d99818560208601610cbb565b610da281610ce5565b840191505092915050565b60006020820190508181036000830152610dc78184610cf6565b905092915050565b60006020820190508181036000830152610de88184610d74565b905092915050565b600080fd5b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b6000610e2082610df5565b9050919050565b610e3081610e15565b8114610e3b57600080fd5b50565b600081359050610e4d81610e27565b92915050565b610e5c81610d5b565b8114610e6757600080fd5b50565b600081359050610e7981610e53565b92915050565b600080fd5b600080fd5b60008083601f840112610e9f57610e9e610e7f565b5b8235905067ffffffffffffffff811115610ebc57610ebb610e84565b5b602083019150836001820283011115610ed857610ed7610e89565b5b9250929050565b600080fd5b600060608284031215610efa57610ef9610ee4565b5b81905092915050565b600080fd5b600060408284031215610f1e57610f1d610f03565b5b81905092915050565b600080fd5b600060808284031215610f4257610f41610f2d565b5b81905092915050565b600080fd5b60008083601f840112610f6657610f65610e7f565b5b8235905067ffffffffffffffff811115610f8357610f82610e84565b5b602083019150836001820283011115610f9f57610f9e610e89565b5b9250929050565b600080fd5b600060208284031215610fc157610fc0610fa6565b5b610fcb6020610d4b565b9050600082013567ffffffffffffffff811115610feb57610fea610f2d565b5b610ff784828501610e89565b60008301525092915050565b600080fd5b60006040828403121561101e5761101d611003565b5b6110286040610d4b565b9050600082013567ffffffffffffffff81111561104857611047610f2d565b5b61105484828501610e89565b600083015250602082013561106881610e53565b60208201525092915050565b60006080828403121561108a57611089611003565b5b6110946080610d4b565b9050600082013567ffffffffffffffff8111156110b4576110b3610f2d565b5b6110c084828501610e89565b600083015250602082013567ffffffffffffffff8111156110e4576110e3610f2d565b5b6110f084828501610e89565b602083015250604082013561110481610e53565b604082015250606082013561111881610e53565b60608201525092915050565b60006020828403121561113a57611139610fa6565b5b6111446020610d4b565b9050600082013567ffffffffffffffff81111561116457611163610f2d565b5b61117084828501610e89565b60008301525092915050565b60006020828403121561119257611191610fa6565b5b61119c6020610d4b565b9050600082013567ffffffffffffffff8111156111bc576111bb610f2d565b5b6111c884828501610e89565b60008301525092915050565b600060208201905081810360008301526111ee8184610cf6565b905092915050565b60006040828403121561120c5761120b610f03565b5b6112166040610d4b565b9050600082013567ffffffffffffffff81111561123657611235610f2d565b5b61124284828501610e89565b600083015250602082013561125681610e53565b60208201525092915050565b60006060828403121561127857611277610ee4565b5b6112826060610d4b565b9050600082013567ffffffffffffffff8111156112a2576112a1610f2d565b5b6112ae84828501610e89565b60008301525060208201356112c281610e53565b60208201525060408201356112d681610e53565b60408201525092915050565b6112e281610e15565b82525050565b60006020820190506112ff60008301846112d9565b92915050565b61130e81610d5b565b82525050565b60006020820190506113296000830184611305565b92915050565b60008060006060848603121561134857611347610df0565b5b600061135686828701610e3e565b935050602061136786828701610e3e565b925050604061137886828701610e6a565b9150509250925092565b600060ff82169050919050565b61139881611382565b82525050565b60006020820190506113b3600083018461138f565b92915050565b6000602082840312156113cf576113ce610df0565b5b60006113dd84828501610e3e565b91505092915050565b600080604083850312156113fd576113fc610df0565b5b600061140b85828601610e3e565b925050602061141c85828601610e3e565b9150509250929050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052602260045260246000fd5b6000600282049050600182168061146d57607f821691505b6020821081036114805761147f611426565b5b50919050565b7f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572600082015250565b60006114bc602083610d3a565b91506114c782611486565b602082019050919050565b600060208201905081810360008301526114eb816114af565b9050919050565b7f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160008201527f6464726573730000000000000000000000000000000000000000000000000000602082015250565b600061154e602683610d3a565b9150611559826114f2565b604082019050919050565b6000602082019050818103600083015261157d81611541565b9050919050565b7f45524332303a20617070726f76652066726f6d20746865207a65726f2061646460008201527f7265737300000000000000000000000000000000000000000000000000000000602082015250565b60006115e0602483610d3a565b91506115eb82611584565b604082019050919050565b6000602082019050818103600083015261160f816115d3565b9050919050565b7f45524332303a20617070726f766520746f20746865207a65726f20616464726560008201527f7373000000000000000000000000000000000000000000000000000000000000602082015250565b6000611672602283610d3a565b915061167d82611616565b604082019050919050565b600060208201905081810360008301526116a181611665565b9050919050565b7f45524332303a207472616e736665722066726f6d20746865207a65726f20616460008201527f6472657373000000000000000000000000000000000000000000000000000000602082015250565b6000611704602583610d3a565b915061170f826116a8565b604082019050919050565b60006020820190508181036000830152611733816116f7565b9050919050565b7f45524332303a207472616e7366657220746f20746865207a65726f206164647260008201527f6573730000000000000000000000000000000000000000000000000000000000602082015250565b6000611796602383610d3a565b91506117a18261173a565b604082019050919050565b600060208201905081810360008301526117c581611789565b9050919050565b7f45524332303a207472616e7366657220616d6f756e742065786365656473206260008201527f616c616e63650000000000000000000000000000000000000000000000000000602082015250565b6000611828602683610d3a565b9150611833826117cc565b604082019050919050565b600060208201905081810360008301526118578161181b565b9050919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b600061189982610d5b565b91506118a483610d5b565b92508282039050818111156118bc576118bb61185e565b5b92915050565b60006118cd82610d5b565b91506118d883610d5b565b92508282019050808211156118f0576118ef61185e565b5b92915050565b600061190182610d5b565b915061190c83610d5b565b925082820261191a81610d5b565b915082820484148315176119315761193061185e565b5b5092915050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601260045260246000fd5b600061196e82610d5b565b915061197983610d5b565b92508261198957611988611938565b5b82820490509291505056fea2646970667358221220b9cfcd2f5b1d2a2c0f56d6268cc953acdd2c650b1ae0cb291332edfbb6ec0e5064736f6c63430008170033";
-  
-  const ERC20_ABI = [
-    "constructor(string name, string symbol, uint8 decimals, uint256 totalSupply)",
-    "function name() view returns (string)",
-    "function symbol() view returns (string)",
-    "function decimals() view returns (uint8)",
-    "function totalSupply() view returns (uint256)",
-    "function balanceOf(address) view returns (uint256)",
-    "function transfer(address to, uint256 amount) returns (bool)",
-    "event Transfer(address indexed from, address indexed to, uint256 value)"
-  ];
-  
-  async function deployToken() {
-    const name = document.getElementById('tokenName').value.trim();
-    const symbol = document.getElementById('tokenSymbol').value.trim();
-    const decimals = parseInt(document.getElementById('tokenDecimals').value) || 18;
-    const supplyRaw = document.getElementById('tokenSupply').value.trim();
-    
-    if (!name || !symbol || !supplyRaw) {
-      showToast('Please fill all fields', 'error');
-      return;
-    }
-    
-    if (!walletAddress) {
-      showToast('Please connect wallet first', 'error');
-      return;
-    }
-    
-    const btn = document.getElementById('deployTokenBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="loader"></span> DEPLOYING...';
-    
-    try {
-      await switchToDACNetwork();
-      provider = new ethers.BrowserProvider(window.ethereum);
-      signer = await provider.getSigner();
-      
-      const supplyWei = ethers.parseUnits(supplyRaw, decimals);
-      
-      const factory = new ethers.ContractFactory(ERC20_ABI, ERC20_BYTECODE, signer);
-      const contract = await factory.deploy(name, symbol, decimals, supplyWei);
-      
-      showToast('Transaction submitted. Waiting for confirmation...', 'info');
-      const receipt = await contract.deploymentTransaction().wait();
-      const contractAddress = await contract.getAddress();
-      
-      const resultDiv = document.getElementById('tokenResult');
-      resultDiv.classList.add('show');
-      resultDiv.innerHTML = `
-        <div style="color: var(--accent3);">✅ TOKEN DEPLOYED SUCCESSFULLY!</div>
-        <div class="tx-hash">📄 Contract Address: ${contractAddress}</div>
-        <div class="tx-hash">🔗 Transaction: ${receipt.hash}</div>
-        <button onclick="navigator.clipboard.writeText('${contractAddress}')" style="margin-top: 10px; padding: 8px 15px; background: var(--accent); border: none; border-radius: 6px; cursor: pointer;">📋 Copy Address</button>
-      `;
-      
-      showToast('Token deployed successfully!', 'success');
-    } catch (error) {
-      console.error('Deploy error:', error);
-      showToast('Deploy failed: ' + (error.reason || error.message || 'Unknown error'), 'error');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '⚡ DEPLOY ERC-20 TOKEN';
-    }
-  }
-  
-  // ============== ERC-721 DEPLOYMENT ==============
-  const ERC721_BYTECODE = "0x60806040523480156200001157600080fd5b5060405162001bce38038062001bce8339810160408190526200003491620002aa565b83838160009081620000479190620005b0565b508060019081620000599190620005b0565b5050506004819055508060058190555080600690816200007a9190620005b0565b505050505062000691565b6000604051905090565b600080fd5b600080fd5b600080fd5b600080fd5b6000601f19601f8301169050919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b620000ea826200009f565b810181811067ffffffffffffffff821117156200010c576200010b620000b0565b5b80604052505050565b6000620001216200007f565b90506200012f8282620000df565b919050565b600067ffffffffffffffff821115620001525762000151620000b0565b5b6200015d826200009f565b9050602081019050919050565b60005b838110156200018a5780820151818401526020810190506200016d565b60008484015250505050565b6000620001ad620001a78462000134565b62000115565b905082815260208101848484011115620001cc57620001cb6200009a565b5b620001d98482856200016a565b509392505050565b600082601f830112620001f957620001f862000095565b5b81516200020b84826020860162000196565b91505092915050565b6000819050919050565b620002298162000214565b81146200023557600080fd5b50565b60008151905062000249816200021e565b92915050565b6000819050919050565b62000264816200024f565b81146200027057600080fd5b50565b600081519050620002848162000259565b92915050565b6000815190506200029b8162000259565b92915050565b600080600080600060a08688031215620002c957620002c86200008b565b5b600086015167ffffffffffffffff811115620002ea57620002e962000090565b5b620002f888828901620001e1565b955050602086015167ffffffffffffffff8111156200031c576200031b62000090565b5b6200032a88828901620001e1565b94505060406200033d8882890162000238565b9350506060620003508882890162000273565b925050608086015167ffffffffffffffff81111562000374576200037362000090565b5b6200038288828901620001e1565b9150509295509295909350565b60008190508160005260206000209050919050565b60006020601f8301049050919050565b600082821b905092915050565b600060088302620003f27fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff82620003b3565b620003fe8683620003b3565b95508019841693508086168417925050509392505050565b6000819050919050565b6000620004416200043b620004358462000214565b62000416565b62000214565b9050919050565b6000819050919050565b6200045d8362000420565b620004756200046c8262000448565b848454620003c0565b825550505050565b600090565b6200048c6200047d565b6200049981848462000452565b505050565b5b81811015620004c157620004b560008262000482565b6001810190506200049f565b5050565b601f8211156200051057620004da816200038f565b620004e584620003a4565b81016020851015620004f5578190505b6200050d6200050485620003a4565b8301826200049e565b50505b505050565b600082821c905092915050565b6000620005356000198460080262000515565b1980831691505092915050565b600062000551838362000522565b9150826002028217905092915050565b6200056c8262000214565b600060405160808301905062000586608084018262000561565b62000595604084018362000561565b620005a4606084018362000561565b50505050565b620005ba8262000214565b82525050565b60006002820490506001821680620005c957607f821691505b602082108103620005df57620005de620005aa565b5b50919050565b600082601f830112620005fd57620005fc62000095565b5b81516200060f84826020860162000196565b91505092915050565b60008151905062000629816200021e565b92915050565b600060a082840312156200064757620006466200008b565b5b6200065360a062000115565b9050600082015167ffffffffffffffff81111562000676576200067562000090565b5b6200068484828501620005e5565b825250602082015160208201525092915050565b61152d80620006a16000396000f3fe608060405234801561001057600080fd5b50600436106100a95760003560e01c80636352211e116100715780636352211e1461014657806370a082311461017657806395d89b41146101a6578063a22cb465146101c4578063b88d4fde146101e0578063c87b56dd146101fc576100a9565b806301ffc9a7146100ae57806306fdde03146100de578063081812fc146100fc578063095ea7b31461012c57806318160ddd14610148575b600080fd5b6100c860048036038101906100c39190611136565b61022c565b6040516100d5919061117e565b60405180910390f35b6100e661036e565b6040516100f39190611229565b60405180910390f35b61011660048036038101906101119190611281565b610400565b60405161012391906112ef565b60405180910390f35b61014660048036038101906101419190611336565b61044c565b005b610150610463565b60405161015d9190611385565b60405180910390f35b610190600480360381019061018b91906113a0565b61046d565b60405161019d9190611385565b60405180910390f35b6101ae6104b5565b6040516101bb9190611229565b60405180910390f35b6101de60048036038101906101d991906113f9565b610543565b005b6101fa60048036038101906101f5919061156e565b610559565b005b61021660048036038101906102119190611281565b61057b565b6040516102239190611229565b60405180910390f35b60007f80ac58cd000000000000000000000000000000000000000000000000000000007bffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916827bffffffffffffffffffffffffffffffffffffffffffffffffffffffff191614806102f757507f5b5e139f000000000000000000000000000000000000000000000000000000007bffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916827bffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916145b8061035f57507f780e9d63000000000000000000000000000000000000000000000000000000007bffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916827bffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916145b80610367575060015b9050919050565b60606000805461037d906115fd565b80601f01602080910402602001604051908101604052809291908181526020018280546103a9906115fd565b80156103f65780601f106103cb576101008083540402835291602001916103f6565b820191906000526020600020905b8154815290600101906020018083116103d957829003601f168201915b5050505050905090565b600061040b82610605565b61044a576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016104419061167a565b60405180910390fd5b61045382610644565b9050919050565b610459610653565b6104638282610c7e565b5050565b6000600754905090565b6000600860008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600101549050919050565b6060600180546104c4906115fd565b80601f01602080910402602001604051908101604052809291908181526020018280546104f0906115fd565b801561053d5780601f106105125761010080835404028352916020019161053d565b820191906000526020600020905b81548152906001019060200180831161052057829003601f168201915b5050505050905090565b61055561054e610653565b838361065b565b5050565b61056383836107c8565b61057561056e610653565b858585610817565b50505050565b60606000826040516020016105909190611702565b60405160208183030381529060405280519060200120905060006040516020016105ba9190611782565b6040516020818303038152906040528051906020012090508082146105fd576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016105f4906117f2565b60405180910390fd5b8192505050919050565b600080600083815260200190815260200160002060000160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16600014159050919050565b600081600001549050919050565b600033905090565b600073ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff16036106ca576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016106c190611884565b60405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1603610739576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161073090611916565b60405180910390fd5b8060096000610746610653565b73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060006101000a81548160ff021916908315150217905550505050565b6107d9826107d4610653565b83610835565b610818576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161080f906119a8565b60405180910390fd5b5050565b61082185856107c8565b61082d61056e610653565b5050505050565b60008061084283856108c5565b905060008111156108bb5760006009600061085b610653565b73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a900460ff1690505b91505092915050565b6000600960006108d3610653565b73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a900460ff16905092915050565b6000604051905090565b600080fd5b600080fd5b60007fffffffff0000000000000000000000000000000000000000000000000000000082169050919050565b6109a28161096d565b81146109ad57600080fd5b50565b6000813590506109bf81610999565b92915050565b600081519050919050565b600082825260208201905092915050565b60005b838110156109ff5780820151818401526020810190506109e4565b60008484015250505050565b6000601f19601f8301169050919050565b6000610a27826109c5565b610a3181856109d0565b9350610a418185602086016109e1565b610a4a81610a0b565b840191505092915050565b610a5e81610a55565b82525050565b6000610a6f826109c5565b610a7981856109d0565b9350610a898185602086016109e1565b610a9281610a0b565b840191505092915050565b600081519050919050565b600082825260208201905092915050565b6000819050602082019050919050565b6000819050919050565b610adc81610ac9565b82525050565b6000610aed82610a9d565b610af78185610aa8565b9350610b078185602086016109e1565b610b1081610a0b565b840191505092915050565b60006020820190508181036000830152610b358184610a1c565b905092915050565b60006020820190508181036000830152610b558184610ae2565b905092915050565b600080fd5b600080fd5b600060408284031215610b7f57610b7e610b64565b5b81905092915050565b600080fd5b600060608284031215610ba357610ba2610b88565b5b81905092915050565b600080fd5b600060808284031215610bc757610bc6610bac565b5b81905092915050565b600080fd5b60008083601f840112610beb57610bea610b5f565b5b8235905067ffffffffffffffff811115610c0857610c07610b64565b5b602083019150836001820283011115610c2457610c23610b69565b5b9250929050565b600080fd5b600060208284031215610c4657610c45610bd0565b5b610c506020610aab565b9050600082013567ffffffffffffffff811115610c7057610c6f610b88565b5b610c7c84828501610bd5565b60008301525092915050565b600080fd5b600060408284031215610ca357610ca2610c88565b5b610cad6040610aab565b9050600082013567ffffffffffffffff811115610ccd57610ccc610b88565b5b610cd984828501610bd5565b6000830152506020820135610ced81610ac9565b60208201525092915050565b600060808284031215610d0f57610d0e610c88565b5b610d196080610aab565b9050600082013567ffffffffffffffff811115610d3957610d38610b88565b5b610d4584828501610bd5565b600083015250602082013567ffffffffffffffff811115610d6957610d68610b88565b5b610d7584828501610bd5565b6020830152506040820135610d8981610ac9565b6040820152506060820135610d9d81610ac9565b60608201525092915050565b600060208284031215610dbf57610dbe610bd0565b5b610dc96020610aab565b9050600082013567ffffffffffffffff811115610de957610de8610b88565b5b610df584828501610bd5565b60008301525092915050565b600060208284031215610e1757610e16610bd0565b5b610e216020610aab565b9050600082013567ffffffffffffffff811115610e4157610e40610b88565b5b610e4d84828501610bd5565b60008301525092915050565b600060208284031215610e6f57610e6e610bd0565b5b610e796020610aab565b9050600082013567ffffffffffffffff811115610e9957610e98610b88565b5b610ea584828501610bd5565b60008301525092915050565b600060608284031215610ec757610ec6610bac565b5b610ed16060610aab565b9050600082013567ffffffffffffffff811115610ef157610ef0610b88565b5b610efd84828501610bd5565b6000830152506020820135610f1181610ac9565b6020820152506040820135610f2581610ac9565b60408201525092915050565b600080fd5b600060a08284031215610f4c57610f4b610f31565b5b610f5660a0610aab565b9050600082015167ffffffffffffffff811115610f7657610f75610b88565b5b610f8284828501610bd5565b600083015250602082015160208201526040820151604082015260608201516060820152608082015160808201525092915050565b600060208284031215610fcc57610fcb610bd0565b5b610fd66020610aab565b9050600082013567ffffffffffffffff811115610ff657610ff5610b88565b5b61100284828501610bd5565b60008301525092915050565b60006020828403121561102457611023610bd0565b5b61102e6020610aab565b9050600082013567ffffffffffffffff81111561104e5761104d610b88565b5b61105a84828501610bd5565b60008301525092915050565b60006020828403121561107c5761107b610bd0565b5b6110866020610aab565b9050600082013567ffffffffffffffff8111156110a6576110a5610b88565b5b6110b284828501610bd5565b60008301525092915050565b6000602082840312156110d4576110d3610bd0565b5b6110de6020610aab565b9050600082013567ffffffffffffffff8111156110fe576110fd610b88565b5b61110a84828501610bd5565b60008301525092915050565b60008135905061112581610ac9565b92915050565b60008151905061113a81610ac9565b92915050565b60006020828403121561114c5761114b610963565b5b600061115a848285016109b0565b91505092915050565b60008115159050919050565b61117881611163565b82525050565b6000602082019050611193600083018461116f565b92915050565b600081519050919050565b60006111af82611199565b6111b981856109d0565b93506111c98185602086016109e1565b6111d281610a0b565b840191505092915050565b60006111e882611199565b6111f281856109d0565b93506112028185602086016109e1565b61120b81610a0b565b840191505092915050565b61121f81610ac9565b82525050565b6000602082019050818103600083015261124381846111a4565b905092915050565b6000819050919050565b61125e8161124b565b811461126957600080fd5b50565b60008135905061127b81611255565b92915050565b60006020828403121561129757611296610963565b5b60006112a58482850161126c565b91505092915050565b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b60006112d9826112ae565b9050919050565b6112e9816112ce565b82525050565b600060208201905061130460008301846112e0565b92915050565b611313816112ce565b811461131e57600080fd5b50565b6000813590506113308161130a565b92915050565b6000806040838503121561134d5761134c610963565b5b600061135b85828601611321565b925050602061136c8582860161126c565b9150509250929050565b61137f81610ac9565b82525050565b600060208201905061139a6000830184611376565b92915050565b6000602082840312156113b6576113b5610963565b5b60006113c484828501611321565b91505092915050565b6113d681611163565b81146113e157600080fd5b50565b6000813590506113f3816113cd565b92915050565b600080604083850312156114105761140f610963565b5b600061141e85828601611321565b925050602061142f858286016113e4565b9150509250929050565b600080fd5b600080fd5b600080fd5b60008083601f84011261145e5761145d610b5f565b5b8235905067ffffffffffffffff81111561147b5761147a610b64565b5b60208301915083600182028301111561149757611496610b69565b5b9250929050565b6000608082840312156114b4576114b3610bac565b5b6114be6080610aab565b9050600082013567ffffffffffffffff8111156114de576114dd610b88565b5b6114ea84828501611448565b600083015250602082013567ffffffffffffffff81111561150e5761150d610b88565b5b61151a84828501611448565b602083015250604082013561152e8161130a565b6040820152506060820135611542816113cd565b60608201525092915050565b600060a0828403121561156457611563610f31565b5b81905092915050565b60008060008060006080868803121561158a57611589610963565b5b600061159888828901611321565b95505060206115a988828901611321565b94505060406115ba8882890161126c565b935050606086013567ffffffffffffffff8111156115db576115da610968565b5b6115e78882890161149e565b925050509295509295909350565b6000600282049050600182168061161557607f821691505b6020821081036116285761162761162e565b5b50919050565b7f4552433732313a20746f6b656e20646f6573206e6f7420657869737400000000600082015250565b6000611664601c836109d0565b915061166f8261162e565b602082019050919050565b6000602082019050818103600083015261169381611657565b9050919050565b600081905092915050565b7f6c6f676f00000000000000000000000000000000000000000000000000000000600082015250565b60006116dc60048361169a565b91506116e7826116a5565b600482019050919050565b6116fc8161124b565b82525050565b600061170e82846116f3565b60208201915061171d826116cf565b915081905092915050565b7f6e616d6500000000000000000000000000000000000000000000000000000000600082015250565b600061175e60048361169a565b915061176982611728565b600482019050919050565b6000819050919050565b61177c81611774565b82525050565b600061178e8284611773565b60208201915061179d82611751565b915081905092915050565b7f4e6f742061206c696e6b20746f20746f6b656e00000000000000000000000000600082015250565b60006117dc6014836109d0565b91506117e7826117a8565b602082019050919050565b6000602082019050818103600083015261180b816117cf565b9050919050565b7f4552433732313a20617070726f766520746f20746865207a65726f206164647260008201527f6573730000000000000000000000000000000000000000000000000000000000602082015250565b600061186e6022836109d0565b915061187982611812565b604082019050919050565b6000602082019050818103600083015261189d81611861565b9050919050565b7f4552433732313a20617070726f766520746f20746865207a65726f206164647260008201527f6573730000000000000000000000000000000000000000000000000000000000602082015250565b60006119006022836109d0565b915061190b826118a4565b604082019050919050565b6000602082019050818103600083015261192f816118f3565b9050919050565b7f4552433732313a20617070726f76616c20746f2063616c6c6572000000000000600082015250565b600061196c601b836109d0565b915061197782611936565b602082019050919050565b600061198f601b836109d0565b915061199a8261195f565b602082019050919050565b600060208201905081810360008301526119c181611982565b905091905056fea26469706673582212202b5a6e8c373f2a1f2e9f1e6d0ebff8c7b8b5e5e5f0e0e0e0e0e0e0e0e0e0e0e0e64736f6c63430008170033";
-  
-  const ERC721_ABI = [
-    "constructor(string name, string symbol, uint256 maxSupply, uint256 mintPrice, string baseURI)",
-    "function name() view returns (string)",
-    "function symbol() view returns (string)",
-    "function totalSupply() view returns (uint256)",
-    "function maxSupply() view returns (uint256)"
-  ];
-  
-  async function deployNFT() {
-    const name = document.getElementById('nftName').value.trim();
-    const symbol = document.getElementById('nftSymbol').value.trim();
-    const maxSupply = parseInt(document.getElementById('nftMaxSupply').value) || 10000;
-    const baseURI = document.getElementById('nftBaseURI').value.trim() || "https://api.example.com/metadata/";
-    
-    if (!name || !symbol) {
-      showToast('Please fill collection name and symbol', 'error');
-      return;
-    }
-    
-    if (!walletAddress) {
-      showToast('Please connect wallet first', 'error');
-      return;
-    }
-    
-    const btn = document.getElementById('deployNFTBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="loader"></span> DEPLOYING NFT...';
-    
-    try {
-      await switchToDACNetwork();
-      provider = new ethers.BrowserProvider(window.ethereum);
-      signer = await provider.getSigner();
-      
-      const mintPrice = ethers.parseEther("0");
-      
-      const factory = new ethers.ContractFactory(ERC721_ABI, ERC721_BYTECODE, signer);
-      const contract = await factory.deploy(name, symbol, maxSupply, mintPrice, baseURI);
-      
-      showToast('Transaction submitted. Waiting for confirmation...', 'info');
-      const receipt = await contract.deploymentTransaction().wait();
-      const contractAddress = await contract.getAddress();
-      
-      const resultDiv = document.getElementById('nftResult');
-      resultDiv.classList.add('show');
-      resultDiv.innerHTML = `
-        <div style="color: var(--accent3);">✅ NFT COLLECTION DEPLOYED SUCCESSFULLY!</div>
-        <div class="tx-hash">📄 Contract Address: ${contractAddress}</div>
-        <div class="tx-hash">🔗 Transaction: ${receipt.hash}</div>
-        <button onclick="navigator.clipboard.writeText('${contractAddress}')" style="margin-top: 10px; padding: 8px 15px; background: var(--accent); border: none; border-radius: 6px; cursor: pointer;">📋 Copy Address</button>
-      `;
-      
-      showToast('NFT Collection deployed successfully!', 'success');
-    } catch (error) {
-      console.error('Deploy error:', error);
-      showToast('Deploy failed: ' + (error.reason || error.message || 'Unknown error'), 'error');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '🎨 DEPLOY NFT COLLECTION';
-    }
-  }
-  
-  function showToast(message, type) {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.className = 'show ' + type;
-    setTimeout(() => {
-      toast.className = '';
-    }, 4000);
-  }
-  
-  // Set connect button handler
-  document.getElementById('connectBtn').onclick = connectWallet;
-  
-  // Update supply unit display
-  document.getElementById('tokenSymbol').addEventListener('input', function() {
-    // Just for visual feedback
+<!-- ══ MODULE: Wallet + Deploy logic ══ -->
+<script type="module">
+import { createAppKit } from 'https://esm.sh/@reown/appkit@1.6.8';
+import { EthersAdapter } from 'https://esm.sh/@reown/appkit-adapter-ethers@1.6.8';
+import { defineChain } from 'https://esm.sh/@reown/appkit/networks';
+import { ethers } from 'https://esm.sh/ethers@6.7.0';
+
+const dacTestnet = defineChain({
+  id:21894, caipNetworkId:'eip155:21894', chainNamespace:'eip155',
+  name:'DAC Testnet',
+  nativeCurrency:{name:'DAC Coin',symbol:'DACC',decimals:18},
+  rpcUrls:{default:{http:['https://rpctest.dachain.tech']}},
+  blockExplorers:{default:{name:'DAC Explorer',url:'https://rpctest.dachain.tech'}},
+  testnet:true
+});
+
+const modal = createAppKit({
+  adapters:[new EthersAdapter()],
+  networks:[dacTestnet],
+  metadata:{name:'DAC Studio',description:'Token & NFT Creator on DAC Chain',url:window.location.origin,icons:['https://avatars.githubusercontent.com/u/37784886']},
+  projectId:'471209f4ff066c4bd7fc2a53c48df2d2',
+  features:{analytics:false},
+  themeMode:'dark',
+  themeVariables:{'--w3m-accent':'#00f5ff','--w3m-border-radius-master':'6px'}
+});
+
+// ── Wire up ALL button/option click handlers (runs after DOM is ready)
+function wireClicks() {
+  // Connect button
+  document.getElementById('connectBtn').addEventListener('click', () => modal.open());
+  // Wallet option cards
+  ['wo1','wo2','wo3','wo4','wo5','wo6'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', () => modal.open());
   });
+  // Tabs
+  document.getElementById('tabToken').addEventListener('click', function(){ switchTab('token', this); });
+  document.getElementById('tabNFT').addEventListener('click', function(){ switchTab('nft', this); });
+  // Deploy buttons
+  document.getElementById('deployTokenBtn').addEventListener('click', deployToken);
+  document.getElementById('deployNFTBtn').addEventListener('click', deployNFT);
+  // Token symbol → unit display
+  document.getElementById('tokenSymbol').addEventListener('input', function(){ document.getElementById('sUnit').textContent = this.value || 'TOKEN'; });
+  // NFT live preview
+  document.getElementById('nftName').addEventListener('input', updatePrev);
+  document.getElementById('nftSymbol').addEventListener('input', updatePrev);
+  document.getElementById('nftDesc').addEventListener('input', updatePrev);
+  document.getElementById('nftImgUrl').addEventListener('input', updateImg);
+  // Royalty toggle
+  document.getElementById('nftRoy').addEventListener('change', function(){ document.getElementById('royCfg').style.display = this.checked ? 'block' : 'none'; });
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+  el.classList.add('active');
+}
+function updatePrev(){
+  document.getElementById('pvName').textContent = document.getElementById('nftName').value || 'Collection Name';
+  document.getElementById('pvSym').textContent  = document.getElementById('nftSymbol').value || 'SYMBOL';
+  document.getElementById('pvDesc').textContent = document.getElementById('nftDesc').value || 'Your collection description...';
+}
+function updateImg(){
+  const url = document.getElementById('nftImgUrl').value;
+  const box = document.getElementById('nftThumb');
+  box.innerHTML = url ? `<img src="${url}" alt="NFT" onerror="this.parentNode.innerHTML='<span>Bad URL</span>'">` : '<span>No Image</span>';
+}
+
+// ── Account subscription
+modal.subscribeAccount(async ({address, isConnected}) => {
+  const btn = document.getElementById('connectBtn');
+  if (isConnected && address) {
+    window.__wcAddress = address;
+    btn.querySelector('.lbl').textContent = '✓ CONNECTED';
+    btn.classList.add('connected');
+    document.getElementById('walletAddr').textContent = address.slice(0,6)+'...'+address.slice(-4);
+    document.getElementById('walletInfo').style.display = 'flex';
+    try {
+      const prov = modal.getWalletProvider();
+      if (prov) {
+        const ep = new ethers.BrowserProvider(prov);
+        const bal = await ep.getBalance(address);
+        document.getElementById('walletBal').textContent = parseFloat(ethers.formatEther(bal)).toFixed(4)+' DACC';
+      }
+    } catch(e){ console.warn('bal error',e); }
+    showToast('Wallet connected!', 'success');
+  } else {
+    window.__wcAddress = null;
+    btn.querySelector('.lbl').textContent = '◈ CONNECT WALLET';
+    btn.classList.remove('connected');
+    document.getElementById('walletInfo').style.display = 'none';
+  }
+});
+
+// ── Get signer, switch chain if needed
+async function getSigner() {
+  const raw = modal.getWalletProvider();
+  if (!raw) throw new Error('No provider. Please connect wallet.');
+  let ep = new ethers.BrowserProvider(raw);
+  const net = await ep.getNetwork();
+  if (Number(net.chainId) !== 21894) {
+    showToast('Switching to DAC Testnet...', 'info');
+    try {
+      await raw.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x5586'}]});
+    } catch(e) {
+      if (e.code===4902||e.code===-32603) {
+        await raw.request({method:'wallet_addEthereumChain',params:[{
+          chainId:'0x5586',chainName:'DAC Testnet',
+          rpcUrls:['https://rpctest.dachain.tech'],
+          nativeCurrency:{name:'DAC Coin',symbol:'DACC',decimals:18}
+        }]});
+      } else throw e;
+    }
+    ep = new ethers.BrowserProvider(raw);
+  }
+  return await ep.getSigner();
+}
+
+// ── Deploy ERC-20
+async function deployToken() {
+  const name   = document.getElementById('tokenName').value.trim();
+  const symbol = document.getElementById('tokenSymbol').value.trim();
+  const dec    = parseInt(document.getElementById('tokenDecimals').value)||18;
+  const sup    = document.getElementById('tokenSupply').value.trim();
+  if (!name)   return showToast('Token Name is required','error');
+  if (!symbol) return showToast('Token Symbol is required','error');
+  if (!sup||isNaN(Number(sup))||Number(sup)<=0) return showToast('Enter a valid Total Supply','error');
+  if (!window.__wcAddress) { showToast('Connect wallet first!','error'); modal.open(); return; }
+  const btn = document.getElementById('deployTokenBtn');
+  const inner = btn.querySelector('.btn-inner');
+  btn.disabled=true; inner.innerHTML='<span class="spin"></span>DEPLOYING...';
+  try {
+    const signer = await getSigner();
+    const totalSupply = ethers.parseUnits(sup, dec);
+    showToast('Confirm in your wallet...','info');
+    const factory = new ethers.ContractFactory(ERC20_ABI, ERC20_BIN, signer);
+    const contract = await factory.deploy(name, symbol, dec, totalSupply);
+    showToast('Waiting for confirmation...','info');
+    const receipt = await contract.deploymentTransaction().wait(1);
+    const addr = await contract.getAddress();
+    showResult('tokenResult', addr, receipt.hash, 'ERC-20', symbol, dec);
+    showToast('🎉 Token deployed!','success');
+  } catch(e) {
+    console.error(e);
+    showToast('Error: '+(e.reason||e.shortMessage||e.message||'Failed').slice(0,120),'error');
+  } finally {
+    btn.disabled=false; inner.textContent='⚡ DEPLOY ERC-20 TOKEN ON DAC TESTNET';
+  }
+}
+
+// ── Deploy ERC-721
+async function deployNFT() {
+  const name    = document.getElementById('nftName').value.trim();
+  const symbol  = document.getElementById('nftSymbol').value.trim();
+  const maxSup  = document.getElementById('nftMax').value||'10000';
+  const priceEt = document.getElementById('nftPrice').value||'0';
+  const baseURI = document.getElementById('nftBaseURI').value.trim();
+  if (!name)   return showToast('Collection Name is required','error');
+  if (!symbol) return showToast('Symbol is required','error');
+  if (!window.__wcAddress) { showToast('Connect wallet first!','error'); modal.open(); return; }
+  const btn = document.getElementById('deployNFTBtn');
+  const inner = btn.querySelector('.btn-inner');
+  btn.disabled=true; inner.innerHTML='<span class="spin"></span>DEPLOYING NFT...';
+  try {
+    const signer = await getSigner();
+    const priceWei = ethers.parseEther(String(parseFloat(priceEt)||0));
+    showToast('Confirm in your wallet...','info');
+    const factory = new ethers.ContractFactory(ERC721_ABI, ERC721_BIN, signer);
+    const contract = await factory.deploy(name, symbol, BigInt(maxSup), priceWei, baseURI);
+    showToast('Waiting for confirmation...','info');
+    const receipt = await contract.deploymentTransaction().wait(1);
+    const addr = await contract.getAddress();
+    showResult('nftResult', addr, receipt.hash, 'ERC-721', symbol, null);
+    showToast('🎉 NFT Collection deployed!','success');
+  } catch(e) {
+    console.error(e);
+    showToast('Error: '+(e.reason||e.shortMessage||e.message||'Failed').slice(0,120),'error');
+  } finally {
+    btn.disabled=false; inner.textContent='🎨 DEPLOY NFT COLLECTION ON DAC TESTNET';
+  }
+}
+
+// ── Add token to MetaMask (exposed globally)
+window.addToken = async function(address, symbol, decimals) {
+  try {
+    const prov = modal.getWalletProvider();
+    if (!prov) return showToast('Wallet not connected','error');
+    await prov.request({method:'wallet_watchAsset',params:{type:'ERC20',options:{address,symbol,decimals}}});
+  } catch(e){ showToast(e.message,'error'); }
+};
+
+// ── Init after DOM ready
+if (document.readyState==='loading') {
+  document.addEventListener('DOMContentLoaded', wireClicks);
+} else {
+  wireClicks();
+}
 </script>
 </body>
 </html>
